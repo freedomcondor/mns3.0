@@ -10,20 +10,27 @@ api = require("droneAPI")
 logger.enable()
 
 function init()
-	for index, camera in pairs(robot.cameras_system) do
-		camera.enable()
-	end
+	api.init()
 	api.debug.show_all = true
+
+	if robot.id == "drone1" then
+		api.parameters.droneDefaultStartHeight = 3
+	end
 end
 
 function step()
-	if robot.id == "drone1" then
-		robot.flight_system.set_target_pose(vector3(0,0,3), 0)
-	end
+	logger(robot.id, api.stepCount, "----------------------------")
+	api.preStep()
 
-	--api.move(vector3(0,0,0), vector3(0.2, 0, 0.2))
+	--[[
 	api.virtualFrame.moveInSpeed(vector3(0.1,0,0))
-	api.virtualFrame.rotateInSpeed(vector3(0.1,0,0.1))
+	api.virtualFrame.rotateInSpeed(vector3(0,0,0.1))
+	--]]
+
+	--api.droneSetSpeed(0.1, 0, 0.1, 0.2)
+	api.move(vector3(0.1, 0, 0.1), vector3(0, 0, 0.2))
+
+	api.postStep()
 	api.debug.showVirtualFrame()
 end
 
@@ -31,7 +38,5 @@ function reset()
 end
 
 function destroy()
-	for index, camera in pairs(robot.cameras_system) do
-		camera.disable()
-	end
+	api.destroy()
 end

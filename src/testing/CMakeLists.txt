@@ -1,1 +1,3 @@
 add_subdirectory(test_00_environment)
+add_subdirectory(test_01_droneapi)
+add_subdirectory(test_02_dronemns)
