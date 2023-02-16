@@ -228,7 +228,7 @@ function api.debug.showChildren(vns, option)
 			),
 			true
 		)
-		if option.drawOrientation == true then
+		if option ~= nil and option.drawOrientation == true then
 			api.debug.drawArrow("blue", 
 				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1),
 				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1) +
@@ -259,7 +259,7 @@ function api.debug.showSeenRobots(vns, option)
 			api.virtualFrame.V3_VtoR(robotR.positionV3),
 			true
 		)
-		if option.drawOrientation == true then
+		if option ~= nil and option.drawOrientation == true then
 			api.debug.drawArrow("red", 
 				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1),
 				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1) +

@@ -20,9 +20,6 @@ function init()
 	reset()
 
 	api.debug.show_all = true
-	if robot.id == "drone1" or robot.id == "drone3" then
-		api.parameters.droneDefaultStartHeight = 3
-	end
 end
 
 function reset()

@@ -5,7 +5,7 @@
 logger.register("DroneConnector")
 
 require("DeepCopy")
---local SensorUpdater = require("SensorUpdater")
+local SensorUpdater = require("SensorUpdater")
 local Transform = require("Transform")
 
 
@@ -91,9 +91,8 @@ function DroneConnector.step(vns)
 	end
 
 	--SensorUpdater.updateObstaclesByRealFrame(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
-	--vns.avoider.obstacles = seenObstaclesInVirtualFrame
 
-	--[[
+	--[[ draw obstacles
 	if vns.parentR == nil then
 	for i, ob in ipairs(vns.avoider.obstacles) do
 		local color = "green"

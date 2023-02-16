@@ -5,16 +5,17 @@ VNS.Msg = require("Message")
 VNS.Parameters = require("Parameters")
 
 VNS.DroneConnector = require("DroneConnector")
---VNS.PipuckConnector = require("PipuckConnector")
+VNS.PipuckConnector = require("PipuckConnector")
 VNS.Connector = require("Connector")
---[[
-
 VNS.ScaleManager = require("ScaleManager")
+--[[
 VNS.Assigner = require("Assigner")
 VNS.Allocator = require("Allocator")
 VNS.Avoider = require("Avoider")
 VNS.Spreader = require("Spreader")
+--]]
 VNS.BrainKeeper = require("BrainKeeper")
+--[[
 VNS.CollectiveSensor = require("CollectiveSensor")
 VNS.IntersectionDetector = require("IntersectionDetector")
 VNS.Neuron = require("Neuron")
@@ -25,12 +26,12 @@ VNS.Driver= require("Driver")
 
 VNS.Modules = {
 	VNS.DroneConnector,
---	VNS.PipuckConnector,
+	VNS.PipuckConnector,
 	VNS.Connector,
---[[
-	VNS.Assigner,
+--	VNS.Assigner,
 
 	VNS.ScaleManager,
+--[[
 	VNS.Stabilizer,
 
 	VNS.Allocator,
@@ -39,12 +40,12 @@ VNS.Modules = {
 	VNS.Avoider,
 	VNS.Spreader,
 	VNS.CollectiveSensor,
+--]]
 	VNS.BrainKeeper,
 
-	VNS.Neuron,
+--	VNS.Neuron,
 
-	VNS.Driver,
---]]
+--	VNS.Driver,
 }
 
 --[[
@@ -378,6 +379,7 @@ function VNS.create_vns_core_node(vns, option)
 				specific_name = option.specific_name,
 				specific_time = option.specific_time,
 			}),
+		--[[
 		vns.Assigner.create_assigner_node(vns),
 		vns.ScaleManager.create_scalemanager_node(vns),
 		vns.Stabilizer.create_stabilizer_node(vns),
@@ -388,6 +390,7 @@ function VNS.create_vns_core_node(vns, option)
 		}),
 		vns.Spreader.create_spreader_node(vns),
 		vns.BrainKeeper.create_brainkeeper_node(vns),
+		--]]
 		--vns.CollectiveSensor.create_collectivesensor_node(vns),
 		--vns.Driver.create_driver_node(vns),
 	}}
@@ -404,7 +407,7 @@ function VNS.create_vns_node(vns, option)
 		type = "sequence", children = {
 		vns.create_preconnector_node(vns),
 		vns.create_vns_core_node(vns, option),
-		vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting}),
+		--vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting}),
 	}}
 end
 

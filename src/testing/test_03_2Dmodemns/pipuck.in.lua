@@ -5,7 +5,7 @@ end
 logger = require("Logger")
 logger.register("main")
 pairs = require("AlphaPairs")
-local api = require("droneAPI")
+local api = require("pipuckAPI")
 local VNS = require("VNS")
 local BT = require("BehaviorTree")
 
@@ -16,13 +16,10 @@ local bt
 function init()
 	api.linkRobotInterface(VNS)
 	api.init() 
-	vns = VNS.create("drone")
+	vns = VNS.create("pipuck")
 	reset()
 
 	api.debug.show_all = true
-	if robot.id == "drone1" or robot.id == "drone3" then
-		api.parameters.droneDefaultStartHeight = 3
-	end
 end
 
 function reset()
