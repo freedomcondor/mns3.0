@@ -99,7 +99,7 @@ function PipuckConnector.step(vns)
 		}
 	end
 
-	--SensorUpdater.updateObstacles(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
+	SensorUpdater.updateObstacles(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
 
 	--[[ draw obstacles
 	for i, ob in ipairs(vns.avoider.obstacles) do

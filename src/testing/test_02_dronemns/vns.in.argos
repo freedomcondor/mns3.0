@@ -41,7 +41,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="40, 40, 6.0" positional_index="grid" center="0, 0, 1">
+  <arena size="40, 40, 40.0" positional_index="grid" center="0, 0, 20">
     <floor id="floor" source="loop_functions" pixels_per_meter="1" />
 
     <!-- add drones -->

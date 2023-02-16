@@ -11,9 +11,9 @@ VNS.ScaleManager = require("ScaleManager")
 --[[
 VNS.Assigner = require("Assigner")
 VNS.Allocator = require("Allocator")
-VNS.Avoider = require("Avoider")
-VNS.Spreader = require("Spreader")
 --]]
+VNS.Avoider = require("Avoider")
+--VNS.Spreader = require("Spreader")
 VNS.BrainKeeper = require("BrainKeeper")
 --[[
 VNS.CollectiveSensor = require("CollectiveSensor")
@@ -21,8 +21,8 @@ VNS.IntersectionDetector = require("IntersectionDetector")
 VNS.Neuron = require("Neuron")
 VNS.Stabilizer = require("Stabilizer")
 
-VNS.Driver= require("Driver")
 --]]
+VNS.Driver= require("Driver")
 
 VNS.Modules = {
 	VNS.DroneConnector,
@@ -36,8 +36,10 @@ VNS.Modules = {
 
 	VNS.Allocator,
 	VNS.IntersectionDetector,
+--]]
 
 	VNS.Avoider,
+--[[
 	VNS.Spreader,
 	VNS.CollectiveSensor,
 --]]
@@ -45,7 +47,7 @@ VNS.Modules = {
 
 --	VNS.Neuron,
 
---	VNS.Driver,
+	VNS.Driver,
 }
 
 --[[
@@ -385,9 +387,11 @@ function VNS.create_vns_core_node(vns, option)
 		vns.Stabilizer.create_stabilizer_node(vns),
 		vns.Allocator.create_allocator_node(vns),
 		vns.IntersectionDetector.create_intersectiondetector_node(vns),
+		--]]
 		vns.Avoider.create_avoider_node(vns, {
 			drone_pipuck_avoidance = option.drone_pipuck_avoidance
 		}),
+		--[[
 		vns.Spreader.create_spreader_node(vns),
 		vns.BrainKeeper.create_brainkeeper_node(vns),
 		--]]
@@ -407,7 +411,7 @@ function VNS.create_vns_node(vns, option)
 		type = "sequence", children = {
 		vns.create_preconnector_node(vns),
 		vns.create_vns_core_node(vns, option),
-		--vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting}),
+		vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting}),
 	}}
 end
 

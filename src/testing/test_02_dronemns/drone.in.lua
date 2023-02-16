@@ -20,8 +20,11 @@ function init()
 	reset()
 
 	api.debug.show_all = true
-	if robot.id == "drone1" or robot.id == "drone3" then
+	if robot.id == "drone1" then
 		api.parameters.droneDefaultStartHeight = 3
+	end
+	if robot.id == "drone3" then
+		api.parameters.droneDefaultStartHeight = 1.2
 	end
 end
 
@@ -41,6 +44,8 @@ function step()
 	api.preStep()
 	vns.preStep(vns)
 
+	vns.goal.positionV3 = vector3(0.1, 0, 0.1)
+	vns.goal.orientationQ = quaternion(math.pi/50, vector3(0, 0, 1))
 	bt()
 
 	vns.postStep(vns)

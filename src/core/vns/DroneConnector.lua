@@ -90,7 +90,7 @@ function DroneConnector.step(vns)
 		}
 	end
 
-	--SensorUpdater.updateObstaclesByRealFrame(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
+	SensorUpdater.updateObstaclesByRealFrame(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
 
 	--[[ draw obstacles
 	if vns.parentR == nil then

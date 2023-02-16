@@ -38,6 +38,8 @@ function step()
 	api.preStep()
 	vns.preStep(vns)
 
+	vns.goal.positionV3 = vector3(0.1, 0, 0.1)
+	vns.goal.orientationQ = quaternion(math.pi/50, vector3(0, 0, 1))
 	bt()
 
 	vns.postStep(vns)

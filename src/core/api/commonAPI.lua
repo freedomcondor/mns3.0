@@ -56,7 +56,7 @@ api.virtualFrame = {
 function api.virtualFrame.moveInSpeed(_speedV3)
 	-- speedV3 in virtual frame
 	local speedV3 = vector3(_speedV3)
-	if api.mode_2D == true then speedV3.z = 0 end
+	if api.parameters.mode_2D == true then speedV3.z = 0 end
 	api.virtualFrame.positionV3 =
 		api.virtualFrame.positionV3 +
 		(speedV3 * api.time.period):rotate(api.virtualFrame.orientationQ)
@@ -301,7 +301,7 @@ function api.linkRobotInterface(VNS)
 		return robot.id
 	end
 
-	--VNS.Driver.move = api.move
+	VNS.Driver.move = api.move
 	VNS.api = api
 end
 
