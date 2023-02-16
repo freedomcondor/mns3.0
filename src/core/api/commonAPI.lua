@@ -153,7 +153,7 @@ end
 function api.debug.showVirtualFrame(essential)
 	local upOffset = vector3(0,0,0.1)
 	local offset = api.virtualFrame.positionV3 + upOffset
-	local length = 0.1
+	local length = 0.15
 	api.debug.drawArrow("green",
 		offset + vector3(-1 * length, 0, 0):rotate(api.virtualFrame.orientationQ),
 		offset + vector3( 3 * length, 0, 0):rotate(api.virtualFrame.orientationQ),

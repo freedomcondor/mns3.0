@@ -76,7 +76,7 @@
       <controller config="drone"/>
     </drone>
 
-    <drone id="drone3" wifi_medium="wifi" tag_medium="tags">
+    <!--drone id="drone3" wifi_medium="wifi" tag_medium="tags">
       <body position="1,1,0" orientation="0,0,0"/>
       <controller config="drone"/>
     </drone>
@@ -84,17 +84,17 @@
     <drone id="drone4" wifi_medium="wifi" tag_medium="tags">
       <body position="0,1,0" orientation="0,0,0"/>
       <controller config="drone"/>
-    </drone>
+    </drone-->
 
     <pipuck_ext id="pipuck1" wifi_medium="wifi" tag_medium="tags">
       <body position="0.5,0.5,0" orientation="0,0,0"/>
       <controller config="pipuck"/>
     </pipuck_ext>
 
-    <pipuck_ext id="pipuck2" wifi_medium="wifi" tag_medium="tags">
+    <!--pipuck_ext id="pipuck2" wifi_medium="wifi" tag_medium="tags">
       <body position="1.0,0,0" orientation="0,0,0"/>
       <controller config="pipuck"/>
-    </pipuck_ext>
+    </pipuck_ext-->
 
 	  <prototype id="obstacle1" movable="false" friction="10">
 		  <body position="0,0,0" orientation="0,0,0" />

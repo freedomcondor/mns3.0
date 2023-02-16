@@ -22,8 +22,7 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 
 	-- avoid seen robots
 	-- the brain is not influenced by other robots
-	--if vns.parentR ~= nil and vns.stabilizer.referencing_me ~= true then
-	if vns.parentR ~= nil then
+	if vns.parentR ~= nil and vns.stabilizer.referencing_me ~= true then
 		for idS, robotR in pairs(vns.connector.seenRobots) do
 			-- avoid drone
 			if robotR.robotTypeS == vns.robotTypeS and
@@ -57,14 +56,11 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				local dangerzone = vns.Parameters.dangerzone_pipuck
 				local deadzone = vns.Parameters.deadzone_pipuck
 				-- avoid referenced pipuck 10 times harder
-				--[[
 				if idS == vns.stabilizer.referencing_pipuck_neighbour then
 					vns.Parameters.avoid_speed_scalar = vns.Parameters.avoid_speed_scalar * 15
 					dangerzone = dangerzone * vns.Parameters.dangerzone_reference_pipuck_scalar
 					deadzone = deadzone * vns.Parameters.deadzone_reference_pipuck_scalar
 				end
-				--]]
-				-- TODO two stabilizer places commented
 				-- check vortex
 				local pipuck_vortex = vns.Parameters.avoid_pipuck_vortex
 				if pipuck_vortex == "goal" then

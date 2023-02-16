@@ -16,7 +16,7 @@ Parameters = {
     pipuckRotationScalar = tonumber(robot.params.pipuck_rotation_scalar or 0.3),
 
     ---- Obstacles ------------------------
-    obstacle_match_distance = tonumber(robot.params.obstacle_match_distance or 0.10),
+    obstacle_match_distance = tonumber(robot.params.obstacle_match_distance or 0.15),
     obstacle_unseen_count = tonumber(robot.params.obstacle_unseen_count or 3),
 }
 

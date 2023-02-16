@@ -13,6 +13,8 @@ local BT = require("BehaviorTree")
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
+local structure = require("morphology")
+
 function init()
 	api.linkRobotInterface(VNS)
 	api.init() 
@@ -21,15 +23,20 @@ function init()
 
 	api.debug.show_all = true
 	if robot.id == "drone1" then
-		api.parameters.droneDefaultStartHeight = 3
+		api.parameters.droneDefaultStartHeight = 0.5
 	end
 	if robot.id == "drone3" then
 		api.parameters.droneDefaultStartHeight = 1.2
+	end
+	if robot.id == "drone4" then
+		api.parameters.droneDefaultStartHeight = 2.2
 	end
 end
 
 function reset()
 	vns.reset(vns)
+	if vns.idS == "drone1" then vns.idN = 1 end
+	vns.setGene(vns, structure)
 	--[[
 	bt = BT.create
 		{type = "sequence", children = {
@@ -44,8 +51,6 @@ function step()
 	api.preStep()
 	vns.preStep(vns)
 
-	vns.goal.positionV3 = vector3(0.1, 0, 0.1)
-	vns.goal.orientationQ = quaternion(math.pi/50, vector3(0, 0, 1))
 	bt()
 
 	vns.postStep(vns)
