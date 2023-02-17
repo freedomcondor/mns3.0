@@ -2,7 +2,7 @@ local api = {}
 
 -------------------------------------------------------------
 ---- parameters --------------------------
-api.parameters = require("APIParameters")
+api.parameters = require("apiParameters")
 
 ---- hardware or simulation ------------------------
 if robot.params.hardware == "true" then robot.params.hardware = true end

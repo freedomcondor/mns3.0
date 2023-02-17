@@ -5,7 +5,7 @@ logger.register("droneAPI")
 logger.disable("droneAPI")
 
 local api = require("commonAPI")
-if robot.params.simulation == true then local DroneRealistSimulator = require("DroneRealistSimulator") end
+if robot.params.simulation == true then local DroneRealistSimulator = require("droneRealistSimulator") end
 local Transform = require("Transform")
 
 ---- actuator --------------------------
@@ -105,7 +105,7 @@ function api.droneTiltVirtualFrame()
 	api.virtualFrame.positionV3 = api.virtualFrame.positionV3:rotate(tilt)
 end
 
----- overload Step Function ---------------------
+---- overwrite Step Function ---------------------
 -- 5 step functions :
 -- init, reset, destroy, preStep, postStep
 api.commonInit = api.init
