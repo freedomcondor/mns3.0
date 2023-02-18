@@ -25,7 +25,7 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 	if vns.parentR ~= nil and vns.stabilizer.referencing_me ~= true then
 		for idS, robotR in pairs(vns.connector.seenRobots) do
 			-- avoid drone
-			if robotR.robotTypeS == vns.robotTypeS and
+			if vns.robotTypeS == "drone" and
 			   robotR.robotTypeS == "drone" then
 				if robot.params.hardware == true then
 					vns.Parameters.avoid_speed_scalar = vns.Parameters.avoid_speed_scalar * 15
@@ -51,8 +51,8 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				end
 			end
 			-- avoid pipuck
-			if robotR.robotTypeS == vns.robotTypeS and
-			   robotR.robotTypeS == "pipuck" then
+			if (robotR.robotTypeS == "builderbot" or robotR.robotTypeS == "pipuck") and
+			   (vns.robotTypeS == "builderbot" or vns.robotTypeS == "pipuck") then
 				local dangerzone = vns.Parameters.dangerzone_pipuck
 				local deadzone = vns.Parameters.deadzone_pipuck
 				-- avoid referenced pipuck 10 times harder
@@ -83,7 +83,8 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 			end
 			-- avoidance between drone and pipuck
 			if drone_pipuck_avoidance == true and
-			   robotR.robotTypeS ~= vns.robotTypeS then
+			   robotR.robotTypeS ~= vns.robotTypeS and
+			   (robotR.robotTypeS == "drone" or vns.robotTypeS == "drone") then
 				local dangerzone = vns.Parameters.dangerzone_pipuck
 				local deadzone = vns.Parameters.deadzone_pipuck
 				-- check vortex

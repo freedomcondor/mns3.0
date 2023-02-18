@@ -11,15 +11,19 @@ end
 
 logger = require("Logger")
 logger.register("main")
+logger.enable()
 pairs = require("AlphaPairs")
 
 local api = require("builderbotAPI")
 robot.vns_api = api
+local VNS = require("VNS")
 local BT = require("BehaviorTree")
 
 ----- data
 local bt
-data = api.builderbot_utils_data -- for data editor
+local structure = require("morphology")
+
+data = api.builderbot_utils_data -- for data editor check
 
 local rules = {
 	selection_method = 'nearest_win',
@@ -60,33 +64,41 @@ local rules = {
  } -- end of rules
 
 function init()
-	--api.linkRobotInterface(VNS)
+	api.linkRobotInterface(VNS)
 	api.init() 
-	robot.logger:set_verbosity(2)
-	api.debug.show_all = true
-
+	vns = VNS.create("builderbot")
 	reset()
+
+	api.debug.show_all = true
 end
 
 function reset()
+	vns.reset(vns)
+	if vns.idS == "builderbot21" then vns.idN = 1 end
+	vns.setGene(vns, structure)
+
 	bt = BT.create
-	{
-		type = "sequence*",
-		children = {
+	{type = "sequence", children = {
+		vns.create_preconnector_node(vns),
+		vns.create_vns_core_node(vns),
+		{type = "sequence*", children = {
 			robot.nodes.create_pick_up_behavior_node(data, rules),
 			robot.nodes.create_place_behavior_node(data, rules),
-		}
-	 }
+		}},
+	}}
 end
 
 function step()
 	logger(robot.id, api.stepCount, "----------------------------")
 	api.preStep()
+	vns.preStep(vns)
 
 	bt()
 
+	vns.postStep(vns)
 	api.postStep()
 	api.debug.showVirtualFrame()
+	api.debug.showChildren(vns, {drawOrientation = true})
 end
 
 function destroy()

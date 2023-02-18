@@ -66,7 +66,7 @@ function PipuckConnector.step(vns)
 					if flag == true then
 						seenObstacles[#seenObstacles + 1] = {
 							type = obstacle.type,
-							robotTypeS = "block",
+							robotTypeS = obstacle.robotTypeS,
 							positionV3 = positionV3,
 							orientationQ = orientationQ,
 						}

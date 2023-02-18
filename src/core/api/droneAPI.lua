@@ -391,13 +391,19 @@ function api.droneDetectTags()
 end
 
 api.tagLabelIndex = {
-	block = {},
 	pipuck = {},
 	builderbot = {},
 	drone = {},
+
+	block = {},
+	obstacle = {},
 }
 
-local from, to = (robot.params.block_label or "0,0"):match("([^,]+),([^,]+)")
+local from, to = (robot.params.obstacle_label or "0,0"):match("([^,]+),([^,]+)")
+api.tagLabelIndex.obstacle.from = tonumber(from)
+api.tagLabelIndex.obstacle.to   = tonumber(to)
+
+local from, to = (robot.params.block_label or "-1,-1"):match("([^,]+),([^,]+)")
 api.tagLabelIndex.block.from = tonumber(from)
 api.tagLabelIndex.block.to   = tonumber(to)
 
@@ -416,7 +422,7 @@ api.tagLabelIndex.builderbot.to   = tonumber(to)
 tagOffset = {
 	pipuck = vector3(0, 0, 0.08),
 	drone = vector3(0, 0, 0.25),
-	builderbot = vector3(0, 0, 0.10),
+	builderbot = vector3(0, 0, 0.38),
 	block = vector3(0, 0, 0.08),
 }
 
@@ -432,7 +438,7 @@ function api.droneAddSeenRobots(tags, seenRobotsInRealFrame)
 		end
 		if robotTypeS == nil then robotTypeS = "unknown" end
 
-		if robotTypeS ~= "unknown" and robotTypeS ~= "block" then
+		if robotTypeS ~= "unknown" and robotTypeS ~= "block" and robotTypeS ~= "obstacle" then
 			local idS = robotTypeS .. math.floor(tag.id)
 			seenRobotsInRealFrame[idS] = {
 				idS = idS,
@@ -446,9 +452,23 @@ end
 
 function api.droneAddObstacles(tags, obstaclesInRealFrame) -- tags is an array of R
 	for i, tag in ipairs(tags) do
+		if api.tagLabelIndex.obstacle.from <= tag.id and
+		   api.tagLabelIndex.obstacle.to >= tag.id then
+			obstaclesInRealFrame[#obstaclesInRealFrame + 1] = {
+				type = tag.id,
+				robotTypeS = "obstacle",
+				positionV3 = tag.positionV3 + vector3(0,0,-0.1):rotate(tag.orientationQ),
+				orientationQ = tag.orientationQ,
+			}
+		end
+	end
+end
+
+function api.droneAddBlocks(tags, blocksInRealFrame) -- tags is an array of R
+	for i, tag in ipairs(tags) do
 		if api.tagLabelIndex.block.from <= tag.id and
 		   api.tagLabelIndex.block.to >= tag.id then
-			obstaclesInRealFrame[#obstaclesInRealFrame + 1] = {
+			blocksInRealFrame[#blocksInRealFrame + 1] = {
 				type = tag.id,
 				robotTypeS = "block",
 				positionV3 = tag.positionV3 + vector3(0,0,-0.1):rotate(tag.orientationQ),

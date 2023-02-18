@@ -28,6 +28,12 @@ function DroneConnector.step(vns)
 		seenObstacles
 	)
 
+	seenBlocks = {}
+	vns.api.droneAddBlocks(
+		vns.api.droneDetectTags(),
+		seenBlocks
+	)
+
 	-- report my sight to all seen pipucks, and drones in parent and children
 	--[[
 	if vns.parentR ~= nil and vns.parentR.robotTypeS == "drone" then
@@ -47,7 +53,7 @@ function DroneConnector.step(vns)
 
 	-- broadcast my sight so other drones would see me
 	local myRobotRT = DeepCopy(vns.connector.seenRobots)
-	vns.Msg.send("ALLMSG", "reportSight", {mySight = myRobotRT, myObstacles = seenObstacles})
+	vns.Msg.send("ALLMSG", "reportSight", {mySight = myRobotRT, myObstacles = seenObstacles, myBlocks = seenBlocks})
 
 	-- receive sight report, generate quadcopters
 	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
