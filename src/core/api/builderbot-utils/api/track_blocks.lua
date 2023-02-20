@@ -196,10 +196,14 @@ local function check_tag_direction(block)
 end
 
 return function(_blocks, _tags)
+   local block_label_from, block_label_to = (robot.params.block_label or "-1,-1"):match("([^,]+),([^,]+)")
+   block_label_from = tonumber(block_label_from)
+   block_label_to = tonumber(block_label_to)
+
    local blocks = {}
    -- cluster tags into blocks
    local p = vector3(0, 0, robot.api.constants.block_side_length/2)
-   for i, tag in ipairs(_tags) do
+   for i, tag in ipairs(_tags) do if tag.id >= block_label_from and tag.id <= block_label_to then
       local middle_point_v3 = vector3(p):rotate(tag.orientation) + tag.position
       -- find which block it belongs
       local flag = 0
@@ -221,7 +225,7 @@ return function(_blocks, _tags)
             },
          }
       end
-   end
+   end end
    -- average block position
    for i, block in ipairs(blocks) do
       block.position = block.positionSum * (1/#block.tags)

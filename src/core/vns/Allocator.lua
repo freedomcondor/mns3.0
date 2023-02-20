@@ -589,6 +589,9 @@ function Allocator.multi_branch_allocate(vns, branches)
 
 	Allocator.GraphMatch(sourceList, targetList, originCost, "pipuck")
 	Allocator.GraphMatch(sourceList, targetList, originCost, "drone")
+	if vns.api.parameters.mode_builderbot == true then
+		Allocator.GraphMatch(sourceList, targetList, originCost, "builderbot")
+	end
 	-- Stabilizer hack ----
 	Allocator.GraphMatch(sourceList, targetList, originCost, "reference_pipuck")
 
@@ -826,6 +829,9 @@ function Allocator.allocate(vns, branches)
 
 	Allocator.GraphMatch(sourceList, targetList, originCost, "pipuck")
 	Allocator.GraphMatch(sourceList, targetList, originCost, "drone")
+	if vns.api.parameters.mode_builderbot == true then
+		Allocator.GraphMatch(sourceList, targetList, originCost, "builderbot")
+	end
 	-- Stabilizer hack ----
 	Allocator.GraphMatch(sourceList, targetList, originCost, "reference_pipuck")
 

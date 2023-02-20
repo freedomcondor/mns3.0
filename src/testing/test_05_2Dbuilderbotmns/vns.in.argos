@@ -23,7 +23,7 @@
       </actuators>
       <sensors>
         <drone_system implementation="default" />
-        <drone_cameras_system implementation="default" show_frustum="false" show_tag_rays="true" />
+        <drone_cameras_system implementation="default" show_frustum="false" show_tag_rays="false" />
         <drone_flight_system implementation="default" />
         <radios implementation="default" />
       </sensors>
@@ -60,6 +60,7 @@
       <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/pipuck.lua"
               simulation="true"
               mode_2D="true"
+              mode_builderbot="true"
       />
     </lua_controller>
 
@@ -85,6 +86,9 @@
       <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/builderbot.lua"
               simulation="true"
               mode_2D="true"
+              mode_builderbot="true"
+
+              block_label="0, 0"
       />
     </lua_controller>
 
@@ -120,21 +124,31 @@
 
     <!-- add builderbots -->
     <builderbot id="builderbot21">
-      <body position="-0.5,1,0" orientation="0,0,0"/>
+      <body position="0.5,0,0" orientation="0,0,0"/>
       <controller config="builderbot"/>
     </builderbot>
 
     <block id="block">
-      <body position="0.45,0,0" orientation="0,0,0" />
+      <body position="1.0,0,0" orientation="0,0,0" />
       <controller config="block_controller"/>
     </block>
 
     <pipuck_ext id="pipuck1" wifi_medium="wifi" tag_medium="tags">
-      <body position="1.0,0,0" orientation="0,0,0"/>
+      <body position="0.5,0.3,0" orientation="0,0,0"/>
       <controller config="pipuck"/>
     </pipuck_ext>
 
-	  <prototype id="obstacle1" movable="false" friction="10">
+    <pipuck_ext id="pipuck2" wifi_medium="wifi" tag_medium="tags">
+      <body position="0.5,-0.3,0" orientation="0,0,0"/>
+      <controller config="pipuck"/>
+    </pipuck_ext>
+
+    <pipuck_ext id="pipuck3" wifi_medium="wifi" tag_medium="tags">
+      <body position="0.5,0.6,0" orientation="0,0,0"/>
+      <controller config="pipuck"/>
+    </pipuck_ext>
+
+	  <!--prototype id="obstacle1" movable="false" friction="10">
 		  <body position="0,0,0" orientation="0,0,0" />
 		    <links ref="base">
 			    <link id="base" geometry="box" size="0.12, 0.12, 0.1" mass="0.01"
@@ -146,7 +160,7 @@
 				       position="0,0,0.101" orientation="0,0,0" />
 			  </tags>
 		  </devices>
-	  </prototype>
+	  </prototype-->
   </arena>
 
   <!-- ******************* -->

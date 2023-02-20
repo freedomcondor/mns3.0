@@ -69,22 +69,37 @@ function init()
 	vns = VNS.create("builderbot")
 	reset()
 
-	api.debug.show_all = true
+--	api.debug.show_all = true
 end
 
 function reset()
 	vns.reset(vns)
-	if vns.idS == "builderbot21" then vns.idN = 1 end
+	--if vns.idS == "builderbot21" then vns.idN = 1 end
+	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, structure)
+
+	robot.lift_system.set_position(robot.api.constants.lift_system_upper_limit)
 
 	bt = BT.create
 	{type = "sequence", children = {
 		vns.create_preconnector_node(vns),
 		vns.create_vns_core_node(vns),
-		{type = "sequence*", children = {
-			robot.nodes.create_pick_up_behavior_node(data, rules),
-			robot.nodes.create_place_behavior_node(data, rules),
-		}},
+		{type = "selector*", children = {
+			{type = "sequence", children = {
+				function() 
+					--return false, false
+					if #api.builderbot_utils_data.blocks ~= 0 then
+						return false, false
+					end
+					return false, true 
+				end,
+				vns.Driver.create_driver_node(vns),
+			}},
+			{type = "sequence*", children = {
+				robot.nodes.create_pick_up_behavior_node(data, rules),
+				--robot.nodes.create_place_behavior_node(data, rules),
+			}},
+		}}
 	}}
 end
 
@@ -98,7 +113,7 @@ function step()
 	vns.postStep(vns)
 	api.postStep()
 	api.debug.showVirtualFrame()
-	api.debug.showChildren(vns, {drawOrientation = true})
+	api.debug.showChildren(vns, {drawOrientation = false})
 end
 
 function destroy()

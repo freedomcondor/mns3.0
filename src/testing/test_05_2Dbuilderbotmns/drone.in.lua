@@ -21,12 +21,13 @@ function init()
 	vns = VNS.create("drone")
 	reset()
 
-	api.debug.show_all = true
+--	api.debug.show_all = true
 end
 
 function reset()
 	vns.reset(vns)
-	if vns.idS == "builderbot21" then vns.idN = 1 end
+	--if vns.idS == "builderbot21" then vns.idN = 1 end
+	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, structure)
 	--[[
 	bt = BT.create
@@ -47,7 +48,7 @@ function step()
 	vns.postStep(vns)
 	api.postStep()
 	api.debug.showVirtualFrame()
-	api.debug.showChildren(vns, {drawOrientation = true})
+	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 end
 
