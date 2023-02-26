@@ -29,7 +29,11 @@
 
 	After removed old version argos, and cloned our version of argos, you may want to apply some patch for argos3 from folder `argos3-patch`, depends on what do you need. For our mns experiments, two essential patches are applied, which are the first two described below:
 
-	* `babydrone.patch` is for hardware, to compile argos on a "virtual drone" on a PC. WARNING: also may be outdated.
+	* `Drone_Tags_far_Camera_Sight.patch` is for 3D drone experiments. It contains two changes: 1, it adds a tag on top of the drone. 2, it makes drone sees farther.
+
+	* `Builderbot-tag-detection-number.patch` is for builderbot experiments. It fixes bugs when builderbot cameras sees a pipuck tag.
+
+	* `Normalize_drone_orientation_error.patch` is for fixing a small bug of the drone in argos. It is useful when you need to rotate the drone acrossing the edge of Pi.
 
 3. To compile and install argos, follow the instructions of argos. Here is a guideline, you may need to change some details based on your platform and system setup.
 	```bash
