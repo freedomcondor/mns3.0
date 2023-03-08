@@ -23,14 +23,12 @@ function init()
 
 	api.debug.show_all = true
 	if robot.id == "drone1" then
-		api.parameters.droneDefaultStartHeight = 0.5
+		api.parameters.droneDefaultStartHeight = 1
 	end
-	if robot.id == "drone3" then
-		api.parameters.droneDefaultStartHeight = 1.2
+	if robot.id == "drone2" then
+		api.parameters.droneDefaultStartHeight = 4.0
 	end
-	if robot.id == "drone4" then
-		api.parameters.droneDefaultStartHeight = 2.2
-	end
+	api.debug.show_all = true
 end
 
 function reset()
@@ -47,7 +45,7 @@ function reset()
 end
 
 function step()
-	logger(robot.id, api.stepCount, "----------------------------")
+	--logger(robot.id, api.stepCount, "----------------------------")
 	api.preStep()
 	vns.preStep(vns)
 
