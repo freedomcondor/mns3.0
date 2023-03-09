@@ -69,6 +69,29 @@ function DroneConnector.step(vns)
 		end
 	end
 
+	if vns.api.parameters.second_report_sight == true then
+		-- run a second round of sight report, generate quadcopters
+		local myRobotRT = DeepCopy(vns.connector.seenRobots)
+		vns.Msg.send("ALLMSG", "reportSight_second", {mySight = myRobotRT})
+		for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight_second")) do
+			if vns.connector.seenRobots[msgM.fromS] ~= nil then
+				local quad = vns.connector.seenRobots[msgM.fromS]
+				-- add what it can see
+				for idS, R in pairs(msgM.dataT.mySight) do
+					if idS ~= vns.Msg.myIDS() and vns.connector.seenRobots[idS] == nil then
+						vns.connector.seenRobots[idS] = {
+							idS = idS,
+							positionV3 = quad.positionV3 + 
+										 vector3(R.positionV3):rotate(quad.orientationQ),
+							orientationQ = quad.orientationQ * R.orientationQ,
+							robotTypeS = R.robotTypeS,
+						}
+					end
+				end
+			end
+		end
+	end
+
 	-- convert vns.connector.seenRobots from real frame into virtual frame
 	local seenRobotinR = vns.connector.seenRobots
 	vns.connector.seenRobots = {}

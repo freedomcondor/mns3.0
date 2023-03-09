@@ -37,6 +37,7 @@
               safezone_drone_drone="3"
               drone_default_start_height="2.0"
               dangerzone_drone="1"
+              second_report_sight="false"
       />
     </lua_controller>
   </controllers>
@@ -76,7 +77,7 @@
     <distribute>
       <position method="uniform" min="-1.0,-1.0,0" max="1.0,1.0,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
-      <entity quantity="7" base_num="2" max_trials="100">
+      <entity quantity="3" base_num="2" max_trials="100">
 
         <drone id="drone" wifi_medium="wifi" tag_medium="tags">
           <controller config="drone"/>

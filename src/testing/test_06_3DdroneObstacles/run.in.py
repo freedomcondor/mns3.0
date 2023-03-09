@@ -28,6 +28,8 @@ parameters = '''
     drone_default_start_height="2.0"
     safezone_drone_drone="3"
     dangerzone_drone="1"
+
+    second_report_sight="true"
 '''
 
 # generate argos file

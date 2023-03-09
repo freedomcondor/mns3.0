@@ -4,6 +4,7 @@ Parameters = {
 	---- Drones ------------------------
 	droneRealNoise = robot.params.drone_real_noise or "false",
 	droneTiltSensor = robot.params.drone_tilt_sensor or "false",
+	second_report_sight = robot.params.second_report_sight or "un_set",
 	-- tag detection rate
 	droneTagDetectionRate = tonumber(robot.params.drone_tag_detection_rate or 0.9),
 	-- altitude control -------
@@ -25,6 +26,14 @@ if Parameters.mode_2D == "true" then
 	Parameters.mode_2D = true
 else
 	Parameters.mode_2D = false
+end
+
+if Parameters.second_report_sight == "true" then
+	Parameters.second_report_sight = true
+elseif Parameters.second_report_sight == "false" then
+	Parameters.second_report_sight = false
+else
+	Parameters.second_report_sight = not Parameters.mode_2D
 end
 
 if Parameters.mode_builderbot == "true" then
