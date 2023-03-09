@@ -21,27 +21,26 @@ function init()
 	vns = VNS.create("drone")
 	reset()
 
-	api.debug.show_all = true
 	if robot.id == "drone1" then
 		api.parameters.droneDefaultStartHeight = 1
 	end
 	if robot.id == "drone2" then
 		api.parameters.droneDefaultStartHeight = 4.0
 	end
-	api.debug.show_all = true
+
+	--api.debug.show_all = true
 end
 
 function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, structure)
-	--[[
-	bt = BT.create
-		{type = "sequence", children = {
-			vns.create_preconnector_node(vns),
-		}}
-	--]]
-	bt = BT.create(vns.create_vns_node(vns))
+
+	bt = BT.create(
+		vns.create_vns_node(vns,
+			{navigation_node_post_core = create_navigation_node(vns)}
+		)
+	)
 end
 
 function step()
@@ -53,8 +52,8 @@ function step()
 
 	vns.postStep(vns)
 	api.postStep()
-	api.debug.showVirtualFrame()
-	api.debug.showChildren(vns, {drawOrientation = true})
+	api.debug.showVirtualFrame(true)
+	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 end
 
@@ -62,3 +61,21 @@ function destroy()
 	vns.destroy()
 	api.destroy()
 end
+
+function create_navigation_node(vns)
+return function()
+	if vns.parentR == nil then
+		local marker
+		for i, ob in ipairs(vns.avoider.obstacles) do
+			if ob.type == 100 then
+				marker = ob
+			end
+		end
+
+		if marker ~= nil then
+			vns.setGoal(vns, marker.positionV3 + vector3(0,0,1), marker.orientationQ)
+		end
+	end
+
+	return false, true
+end end
