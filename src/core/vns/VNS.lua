@@ -395,12 +395,24 @@ function VNS.create_vns_node(vns, option)
 	--      driver_waiting
 	-- }
 	if option == nil then option = {} end
+
+	local children_node = {
+		vns.create_preconnector_node(vns)
+	}
+	if option.navigation_node_pre_core ~= nil then
+		table.insert(children_node, option.navigation_node_pre_core)
+	end
+	table.insert(children_node, vns.create_vns_core_node(vns, option))
+	if option.navigation_node_post_core ~= nil then
+		table.insert(children_node, option.navigation_node_post_core)
+	end
+	table.insert(children_node,
+		vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting})
+	)
+
 	return { 
-		type = "sequence", children = {
-		vns.create_preconnector_node(vns),
-		vns.create_vns_core_node(vns, option),
-		vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting}),
-	}}
+		type = "sequence", children = children_node
+	}
 end
 
 return VNS
