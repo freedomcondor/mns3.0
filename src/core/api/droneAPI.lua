@@ -334,7 +334,8 @@ function api.droneDetectLeds()
 end
 
 
-function api.droneDetectTags()
+function api.droneDetectTags(option)
+	if option == nil then option = {} end
 	-- droneDetectTags maybe called multiple times by dronePreconnector and adjustheight in postStep
 	if api.droneTags ~= nil then return api.droneTags end
 	-- This function returns a tags table, in real robot coordinate frame
@@ -365,7 +366,8 @@ function api.droneDetectTags()
 			end
 
 			-- check orientation Z up
-			if (vector3(0,0,1):rotate(orientationQ) - vector3(0,0,1)):length() > 0.3 then
+			if option.check_vertical == true and
+			   (vector3(0,0,1):rotate(orientationQ) - vector3(0,0,1)):length() > 0.3 then
 				logger("bad tag orientation, ignore tag", newTag.id)
 				logger("                     positionV3", positionV3)
 				logger("                     orientationQ", orientationQ)
