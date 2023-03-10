@@ -101,7 +101,12 @@ def generate_pipuck_controller(params) :
 
 	return text
 
-def generate_physics_media_loop_visualization(cmake_binary_dir) :
+def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=True) :
+	if lua_editor :
+		lua_editor = "true"
+	else :
+		lua_editor = "false"
+
 	text = '''
   <!-- ******************* -->
   <!-- * Physics engines * -->
@@ -133,7 +138,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir) :
   <!-- * Visualization  * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl lua_editor="true" show_boundary="false">
+    <qt-opengl lua_editor="{}" show_boundary="false">
       <user_functions library="{}/libmy_qtopengl_extensions"
                       label="my_qtopengl_user_functions" />
       <camera>
@@ -151,7 +156,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir) :
       </camera>
     </qt-opengl>
   </visualization>
-    '''.format(cmake_binary_dir, cmake_binary_dir)
+    '''.format(cmake_binary_dir, lua_editor, cmake_binary_dir)
 
 	return text
 
@@ -429,7 +434,7 @@ def generate_target_xml(x, y, th, mark_type, obstacle_type, radius, tag_edge_dis
 	return tag
 
 ########## 3D gate ##############################################################
-def generate_3D_rectangular_gate_xml(x, y, z, rx, ry, rz, payload=0, size_x=5.0, size_y=3.0, thickness = 0.2):
+def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0, size_y=3.0, thickness = 0.2):
 	bottom_position = "{}, {}, {}".format(0,            0,                  -size_y*0.5 - thickness*0.5)
 	bottom_size =     "{}, {}, {}".format(thickness,    size_x + thickness, thickness)
 
@@ -450,7 +455,7 @@ def generate_3D_rectangular_gate_xml(x, y, z, rx, ry, rz, payload=0, size_x=5.0,
 
 	tag = '''
     <!-- add obstacles -->
-    <prototype id="hull" movable="false">
+    <prototype id="3D_rectangular_gate{}" movable="false">
       <body position="{},{},{}" orientation="{},{},{}" />
       <links ref="bottom">
         <link id="bottom" geometry="box" mass="1" position="{}" orientation="0,0,0" size="{}"/>
@@ -479,7 +484,8 @@ def generate_3D_rectangular_gate_xml(x, y, z, rx, ry, rz, payload=0, size_x=5.0,
         </tags>
       </devices>
     </prototype>
-	'''.format(x, y, z, rx, ry, rz, 
+	'''.format(id,
+	           x, y, z, rx, ry, rz,
 	           bottom_position, bottom_size,
 	           up_position,     up_size,
 	           left_position,   left_size,
