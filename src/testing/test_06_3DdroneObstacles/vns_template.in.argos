@@ -20,7 +20,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="40, 40, 50.0" positional_index="grid" center="0, 0, 20">
+  <arena size="40, 40, 50.0" positional_index="grid" center="0, 10, 20">
     <floor id="floor" source="image" path="floor_texture/wood_floor.png" />
     <!-- real scenario -->
     REAL_SCENARIO

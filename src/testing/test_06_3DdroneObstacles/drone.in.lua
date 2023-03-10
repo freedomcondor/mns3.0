@@ -25,7 +25,7 @@ function init()
 		api.parameters.droneDefaultStartHeight = 1
 	end
 	if robot.id == "drone2" then
-		api.parameters.droneDefaultStartHeight = 4.0
+		api.parameters.droneDefaultStartHeight = 5.0
 	end
 
 	--api.debug.show_all = true
@@ -38,7 +38,10 @@ function reset()
 
 	bt = BT.create(
 		vns.create_vns_node(vns,
-			{navigation_node_post_core = create_navigation_node(vns)}
+			{navigation_node_post_core = {type = "sequence", children = {
+				vns.CollectiveSensor.create_collectivesensor_node_reportAll(vns),
+				create_navigation_node(vns),
+			}}}
 		)
 	)
 end
@@ -65,15 +68,39 @@ end
 function create_navigation_node(vns)
 return function()
 	if vns.parentR == nil then
+		-- add vns.avoider.obstacles and vns.collectivesensor.receiveList together
 		local marker
-		for i, ob in ipairs(vns.avoider.obstacles) do
+		local marker_behind
+		local dis = math.huge
+		local dis_behind = -math.huge
+		for i, ob in ipairs(vns.collectivesensor.totalObstaclesList) do
 			if ob.type == 100 then
-				marker = ob
+				local dirVec = vector3(1,0,0):rotate(ob.orientationQ)
+				local horizontal_shadow = ob.positionV3:dot(dirVec)
+				if horizontal_shadow > 0 and horizontal_shadow < dis then
+					marker = ob
+					dis = horizontal_shadow
+				end
+				if horizontal_shadow <= 0 and horizontal_shadow > dis_behind then
+					marker_behind = ob
+					dis_behind = horizontal_shadow
+				end
 			end
 		end
+		if marker == nil then marker = marker_behind end
 
 		if marker ~= nil then
-			vns.setGoal(vns, marker.positionV3 + vector3(0,0,1), marker.orientationQ)
+			--vns.setGoal(vns, marker.positionV3 + vector3(-0.7,-0.7,0.7):rotate(marker.orientationQ), marker.orientationQ)
+			---[[
+			local target_position = marker.positionV3 + vector3(-0.7,-0.7,0.7):rotate(marker.orientationQ)
+			local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
+			local vertical_position = target_position - target_position:dot(dirVec) * dirVec
+			local vertical_speed = vertical_position:normalize() * 0.1
+			local move_speed = vector3(dirVec):rotate(marker.orientationQ) * 0.5
+
+			vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
+			vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
+			--]]
 		end
 	end
 
