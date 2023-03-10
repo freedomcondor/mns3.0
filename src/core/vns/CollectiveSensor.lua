@@ -81,6 +81,15 @@ function CollectiveSensor.step(vns)
 			end
 		end
 	end
+
+	local totalObstaclesList = {}
+	for i, ob in ipairs(vns.avoider.obstacles) do
+		totalObstaclesList[#totalObstaclesList + 1] = ob
+	end
+	for i, ob in ipairs(vns.collectivesensor.receiveList) do
+		totalObstaclesList[#totalObstaclesList + 1] = ob
+	end
+	vns.collectivesensor.totalObstaclesList = totalObstaclesList
 end
 
 function CollectiveSensor.reportAll(vns)
