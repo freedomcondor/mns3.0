@@ -1,4 +1,4 @@
-Parameters = {
+local Parameters = {
 	mode_2D = robot.params.mode_2D or "false",
 	mode_builderbot = robot.params.mode_builderbot or "false",
 	---- Drones ------------------------

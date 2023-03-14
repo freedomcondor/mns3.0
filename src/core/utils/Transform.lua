@@ -49,8 +49,10 @@ end
 --    \  v
 --     \ common
 function Transform.CxBisA(a, b, c)
+	if c == nil then c = {} end
 	Transform.AxCis0(b, c)
 	Transform.AxBisC(a, c, c)
+	return c
 end
 
 -------------------------------------------------------------------
