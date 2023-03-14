@@ -126,6 +126,7 @@ function Connector.update(vns)
 		if vns.connector.waitingRobots[idS] ~= nil then
 			vns.connector.waitingRobots[idS].positionV3 = robotR.positionV3
 			vns.connector.waitingRobots[idS].orientationQ = robotR.orientationQ
+			vns.connector.waitingRobots[idS].seenThrough = robotR.seenThrough
 		end
 	end
 
@@ -134,6 +135,7 @@ function Connector.update(vns)
 		if vns.childrenRT[idS] ~= nil then
 			vns.childrenRT[idS].positionV3 = robotR.positionV3
 			vns.childrenRT[idS].orientationQ = robotR.orientationQ
+			vns.childrenRT[idS].seenThrough = robotR.seenThrough
 			vns.childrenRT[idS].connector.unseen_count = vns.Parameters.connector_unseen_count
 		end
 	end
@@ -142,6 +144,7 @@ function Connector.update(vns)
 	if vns.parentR ~= nil and vns.connector.seenRobots[vns.parentR.idS] ~= nil then
 		vns.parentR.positionV3 = vns.connector.seenRobots[vns.parentR.idS].positionV3
 		vns.parentR.orientationQ = vns.connector.seenRobots[vns.parentR.idS].orientationQ
+		vns.parentR.seenThrough = vns.connector.seenRobots[vns.parentR.idS].seenThrough
 		vns.parentR.connector.unseen_count = vns.Parameters.connector_unseen_count
 	end
 

@@ -110,7 +110,33 @@ function DroneConnector.step(vns)
 		end
 	end
 
-	if vns.api.parameters.second_report_sight == true then
+	--[[
+	-- receive sight report, generate quadcopters
+	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
+		-- Extend vision only if I can't see this drone
+		if vns.connector.seenRobots[msgM.fromS] == nil then
+			if msgM.dataT.mySight[vns.Msg.myIDS()] ~= nil then
+				-- if I'm seen, add what it can see
+				DroneConnector.calcQuadBySightR(msgM.fromS, msgM.dataT.mySight, vns.connector.seenRobots)
+			else
+				-- if I'm not in sight, find common robot and try to add it.
+				vns.connector.seenRobots[msgM.fromS] = DroneConnector.calcQuadByCommonR(msgM.fromS, myRobotRT, msgM.dataT.mySight)
+			end
+		end
+	end
+
+	-- add seenThrough tag
+	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
+		if msgM.dataT.mySight[vns.Msg.myIDS()] ~= nil then
+			-- if I'm seen, add what it can see
+			for idS, robotR in pairs(msgM.dataT.mySight) do
+			end
+		end
+	end
+	--]]
+
+	--[[
+	if vns.api.parameters.second_report_sight == 12345 then
 		-- run a second round of sight report, generate quadcopters
 		local myRobotRT = DeepCopy(vns.connector.seenRobots)
 		vns.Msg.send("ALLMSG", "reportSight_second", {mySight = myRobotRT})
@@ -126,13 +152,13 @@ function DroneConnector.step(vns)
 										 vector3(R.positionV3):rotate(quad.orientationQ),
 							orientationQ = quad.orientationQ * R.orientationQ,
 							robotTypeS = R.robotTypeS,
-							seenThrough = {msgM.fromS}
 						}
 					end
 				end
 			end
 		end
 	end
+	--]]
 
 	-- convert vns.connector.seenRobots from real frame into virtual frame
 	local seenRobotinR = vns.connector.seenRobots

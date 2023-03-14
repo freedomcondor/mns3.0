@@ -7,6 +7,7 @@ VNS.Parameters = require("Parameters")
 VNS.DroneConnector = require("DroneConnector")
 VNS.PipuckConnector = require("PipuckConnector")
 VNS.Connector = require("Connector")
+--VNS.DroneConnectKeeper = require("DroneConnectKeeper")
 VNS.ScaleManager = require("ScaleManager")
 VNS.Assigner = require("Assigner")
 VNS.Allocator = require("Allocator")
@@ -24,6 +25,7 @@ VNS.Modules = {
 	VNS.DroneConnector,
 	VNS.PipuckConnector,
 	VNS.Connector,
+--	VNS.DroneConnectKeeper,
 	VNS.Assigner,
 
 	VNS.ScaleManager,
@@ -373,6 +375,7 @@ function VNS.create_vns_core_node(vns, option)
 				specific_name = option.specific_name,
 				specific_time = option.specific_time,
 			}),
+		--vns.DroneConnectKeeper.create_droneconnectkeeper_node(vns),
 		vns.Assigner.create_assigner_node(vns),
 		vns.ScaleManager.create_scalemanager_node(vns),
 		vns.Stabilizer.create_stabilizer_node(vns),
