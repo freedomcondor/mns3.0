@@ -1,16 +1,3 @@
-diff --git a/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp b/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp
-index 707e423c..ad6d57f0 100644
---- a/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp
-+++ b/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp
-@@ -14,7 +14,7 @@
- #include <argos3/plugins/simulator/media/tag_medium.h>
- 
- #define CAMERA_RANGE_MIN 0.001
--#define CAMERA_RANGE_MAX 1.800
-+#define CAMERA_RANGE_MAX 3.500
- 
- namespace argos {
- 
 diff --git a/src/plugins/robots/drone/simulator/drone_entity.cpp b/src/plugins/robots/drone/simulator/drone_entity.cpp
 index 6bdb1426..7edc2c66 100644
 --- a/src/plugins/robots/drone/simulator/drone_entity.cpp

@@ -1,0 +1,198 @@
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp
+index 8562e1ca..e05af650 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp
+@@ -222,6 +222,32 @@ namespace argos {
+              CRadians(-fRotationSensitivity * c_delta.x()));
+    }
+ 
++   void CQTOpenGLCamera::RotateAroundTarget(const QPoint& c_delta) {
++      /* Disable timeline on rotate */
++      m_bEnableTimeline = false;
++      /* Calculate fRotationSensitivity */
++      Real fRotationSensitivity =
++         ROTATE_GAIN * Exp(-m_sActivePlacement.LensFocalLength);
++      /* Rotate the left and right */
++      CVector3 cPositionToTarget = m_sActivePlacement.Target - m_sActivePlacement.Position;
++      cPositionToTarget.Rotate(CQuaternion(CRadians(-fRotationSensitivity * c_delta.x()), CVector3(0,0,1)));
++
++      /* Rotate up and down*/
++      CVector3 cLeft(m_sActivePlacement.Up);
++      cLeft.CrossProduct(cPositionToTarget).Normalize();
++      CVector3 cNewPositionToTarget = CVector3(cPositionToTarget);
++      cNewPositionToTarget.Rotate(CQuaternion(CRadians(fRotationSensitivity * c_delta.y()), cLeft));
++
++      /* Rotate up and down shouldn't go across Z axis */
++      CVector3 cOldPositionToTargetXY = CVector3(cPositionToTarget);
++      CVector3 cNewPositionToTargetXY = CVector3(cNewPositionToTarget);
++      cOldPositionToTargetXY.SetZ(0);
++      cNewPositionToTargetXY.SetZ(0);
++
++      if (cOldPositionToTargetXY.DotProduct(cNewPositionToTargetXY) >= 0)
++         m_sActivePlacement.Position = m_sActivePlacement.Target - cNewPositionToTarget;
++   }
++
+    /****************************************/
+    /****************************************/
+ 
+@@ -379,6 +405,43 @@ namespace argos {
+       m_sActivePlacement.Target += cForward;
+    }
+ 
++   void CQTOpenGLCamera::MoveByHorizontal(SInt32 n_forwards_backwards,
++                                          SInt32 n_sideways,
++                                          SInt32 n_up_down) {
++      /* disable timeline on move */
++      m_bEnableTimeline = false;
++      /* Get cUp and calculate cForward and cLeft */
++      const CVector3& cUp = m_sActivePlacement.Up;
++      CVector3 cForward(m_sActivePlacement.Target - m_sActivePlacement.Position);
++      cForward.SetZ(0);
++      cForward.Normalize();
++      CVector3 cLeft = m_sActivePlacement.Up;
++      cLeft.CrossProduct(cForward).Normalize();
++      /* Calculate motion sensitivity */
++      Real fMotionSensitivity = MOVE_GAIN * Exp(m_sActivePlacement.LensFocalLength);
++      /* Apply translation */
++      CVector3 cMovement = cForward * (fMotionSensitivity * n_forwards_backwards) +
++                           cLeft * (fMotionSensitivity * n_sideways) +
++                           cUp * (fMotionSensitivity * n_up_down);
++      m_sActivePlacement.Position += cMovement;
++      m_sActivePlacement.Target += cMovement;
++   }
++
++   void CQTOpenGLCamera::ZoomIn(SInt32 n_forwards_backwards) {
++      /* disable timeline on move */
++      m_bEnableTimeline = false;
++      /* Get cUp and calculate cForward and cLeft */
++      CVector3 cForward(m_sActivePlacement.Target - m_sActivePlacement.Position);
++      /* Calculate motion sensitivity */
++      Real fMotionSensitivity = MOVE_GAIN * Exp(m_sActivePlacement.LensFocalLength) * 0.15;
++      /* Apply translation */
++      CVector3 cMovement = cForward * (fMotionSensitivity * n_forwards_backwards);
++      /* Movement shouldn't go beyond target */
++      CVector3 cNewPosition = m_sActivePlacement.Position + cMovement;
++      if ((m_sActivePlacement.Target - cNewPosition).DotProduct(m_sActivePlacement.Target - m_sActivePlacement.Position) > 0)
++         m_sActivePlacement.Position = cNewPosition;
++   }
++
+    /****************************************/
+    /****************************************/
+ 
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.h b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.h
+index 331b2d7d..40a451aa 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.h
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.h
+@@ -99,6 +99,12 @@ namespace argos {
+                 SInt32 n_sideways,
+                 SInt32 n_up_down);
+ 
++      void RotateAroundTarget(const QPoint& c_delta);
++      void MoveByHorizontal(SInt32 n_forwards_backwards,
++                            SInt32 n_sideways,
++                            SInt32 n_up_down);
++      void ZoomIn(SInt32 n_forwards_backwards);
++
+       void Interpolate(UInt32 un_start_placement,
+                        UInt32 un_end_placement,
+                        Real f_time_fraction);
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
+index fe70c6df..b30ad99e 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
+@@ -879,20 +879,23 @@ namespace argos {
+              * Camera movement
+              */
+             if(pc_event->buttons() == Qt::LeftButton) {
+-               if (m_bInvertMouse) m_cCamera.Rotate( pc_event->pos() - m_cMouseGrabPos);
+-               else m_cCamera.Rotate( m_cMouseGrabPos - pc_event->pos());
++               QPoint cMouseMovement = m_cMouseGrabPos - pc_event->pos();
++               cMouseMovement = pc_event->pos() - m_cMouseGrabPos;
++               //m_cCamera.Rotate(cMouseMovement);
++               m_cCamera.RotateAroundTarget(cMouseMovement);
+                m_cMouseGrabPos = pc_event->pos();
++
+                update();
+             }
+             else if(pc_event->buttons() == Qt::RightButton) {
+                QPoint cDelta(pc_event->pos() - m_cMouseGrabPos);
+-               m_cCamera.Move(-cDelta.y(), cDelta.x(), 0);
++               m_cCamera.MoveByHorizontal(cDelta.y(), cDelta.x(), 0);
+                m_cMouseGrabPos = pc_event->pos();
+                update();
+             }
+             else if(pc_event->buttons() == Qt::MiddleButton) {
+                QPoint cDelta(pc_event->pos() - m_cMouseGrabPos);
+-               m_cCamera.Move(0, 0, cDelta.y());
++               m_cCamera.MoveByHorizontal(0, 0, cDelta.y());
+                m_cMouseGrabPos = pc_event->pos();
+                update();
+             }
+@@ -907,7 +910,19 @@ namespace argos {
+    /****************************************/
+ 
+    void CQTOpenGLWidget::wheelEvent(QWheelEvent *pc_event) {
+-      if(m_sSelectionInfo.IsSelected && (pc_event->modifiers() & Qt::ControlModifier)) {
++      Qt::KeyboardModifiers cShift = pc_event->modifiers() & Qt::ShiftModifier;
++      Qt::KeyboardModifiers cControl = pc_event->modifiers() & Qt::ControlModifier;
++      Qt::KeyboardModifiers cAlt = pc_event->modifiers() & Qt::AltModifier;
++
++      bool bMouseRightButton = (pc_event->buttons() == Qt::RightButton);
++      bool bKey1 = (cControl != 0);
++      bool bKey2 = (cShift != 0);
++
++      if(!bKey1 && !bKey2) {
++         m_cCamera.ZoomIn(-pc_event->angleDelta().y());
++         update();
++      }
++      else if(m_sSelectionInfo.IsSelected && (bKey1 || bKey2)) {
+          /* Treat selected entity as an embodied entity */
+          auto* pcEntity = dynamic_cast<CEmbodiedEntity*>(m_sSelectionInfo.Entity);
+          if(pcEntity == nullptr) {
+@@ -922,14 +937,39 @@ namespace argos {
+          }
+          /*
+           * If we get here, pcEntity is set to a non-NULL value
+-          * Rotate the entity
++          * Rotate the entity or Move vertically
++          */
++         /* check how much the mouse has scrolled
++          * Note that in Ubuntu, Alt + scroll is interpreted has horizontal move,
++          * and in MacOS, Shift + scroll is interpreted has horizontal move,
++          * so if y is 0, check x instead
+           */
+-         CDegrees cDegrees(pc_event->angleDelta().y() / 8);
+-         CQuaternion cRotation(ToRadians(cDegrees), CVector3::Z);
+-         CQuaternion cOldOrientation(pcEntity->GetOriginAnchor().Orientation);
+-         CQuaternion cNewOrientation(cOldOrientation * cRotation);
+-         if(pcEntity->MoveTo(pcEntity->GetOriginAnchor().Position, cNewOrientation)) {
+-            m_cUserFunctions.EntityRotated(pcEntity->GetRootEntity(), cOldOrientation, cNewOrientation);
++         qreal fScroll = pc_event->angleDelta().y();
++         if (fScroll == 0 ) fScroll = pc_event->angleDelta().x();
++         if (bKey1 && !bKey2) {
++            CDegrees cDegrees(fScroll / 8);
++            CQuaternion cRotation(ToRadians(cDegrees), CVector3::Z);
++            CQuaternion cOldOrientation(pcEntity->GetOriginAnchor().Orientation);
++            CQuaternion cNewOrientation(cOldOrientation * cRotation);
++            if(pcEntity->MoveTo(pcEntity->GetOriginAnchor().Position, cNewOrientation)) {
++               m_cUserFunctions.EntityRotated(pcEntity->GetRootEntity(), cOldOrientation, cNewOrientation);
++            }
++         }
++         else if (!bKey1 && bKey2) {
++            CDegrees cDegrees(fScroll / 8);
++            CQuaternion cRotation(ToRadians(cDegrees), CVector3::X);
++            CQuaternion cOldOrientation(pcEntity->GetOriginAnchor().Orientation);
++            CQuaternion cNewOrientation(cOldOrientation * cRotation);
++            if(pcEntity->MoveTo(pcEntity->GetOriginAnchor().Position, cNewOrientation)) {
++               m_cUserFunctions.EntityRotated(pcEntity->GetRootEntity(), cOldOrientation, cNewOrientation);
++            }
++         }
++         else if (bKey1 && bKey2) {
++            CVector3 cOldPos(pcEntity->GetOriginAnchor().Position);
++            CVector3 cNewPos = cOldPos + CVector3(0, 0, fScroll * 0.00083333333);  // 1/1200
++            if(pcEntity->MoveTo(cNewPos, pcEntity->GetOriginAnchor().Orientation)) {
++               m_cUserFunctions.EntityMoved(pcEntity->GetRootEntity(), cOldPos, cNewPos);
++            }
+          }
+          /* entity updated, redraw the scene */
+          update();
