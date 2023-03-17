@@ -15,6 +15,8 @@ local bt
 
 local structure8 = require("morphology_8")
 local structure12 = require("morphology_12")
+local structure12_rec = require("morphology_12_rec")
+local structure12_tri = require("morphology_12_tri")
 local structure20 = require("morphology_20")
 local structure_search = require("morphology2")
 
@@ -23,10 +25,12 @@ local gene = {
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
-		structure_search, 
-		structure8, 
-		structure12, 
-		structure20, 
+		structure_search,
+		structure8,
+		structure12,
+		structure12_rec,
+		structure12_tri,
+		structure20,
 	}
 }
 
@@ -100,7 +104,8 @@ return function()
 		if vns.scalemanager.scale["drone"] == 8 then
 			vns.setMorphology(vns, structure8)
 		elseif vns.scalemanager.scale["drone"] == 12 then
-			vns.setMorphology(vns, structure12)
+			vns.setMorphology(vns, structure12_tri)
+			--vns.setMorphology(vns, structure12)
 		elseif vns.scalemanager.scale["drone"] == 20 then
 			vns.setMorphology(vns, structure20)
 		end

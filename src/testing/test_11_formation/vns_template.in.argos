@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="TOTALLENGTH" ticks_per_second="5" random_seed="RANDOMSEED" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    PIPUCK_CONTROLLER
+    DRONE_CONTROLLER
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="40, 40, 50.0" positional_index="grid" center="0, 10, 20">
+    <floor id="floor" source="image" path="floor_texture/wood_floor.png" />
+    <!-- real scenario -->
+    REAL_SCENARIO
+
+    <!-- drones -->
+    DRONES
+    <!-- pipucks -->
+    PIPUCKS
+    <!-- walls -->
+    WALL 
+    <!-- target -->
+    TARGET
+    <!-- random obstacles-->
+    OBSTACLES
+  </arena>
+
+  <!-- Physics engines, Media, Loop functions and visualization -->
+  SIMULATION_SETUP
+
+</argos-configuration>

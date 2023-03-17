@@ -4,6 +4,8 @@ configure_file( morphology2.lua    simu_code/morphology2.lua)
 configure_file( morphology_4.lua    simu_code/morphology_4.lua)
 configure_file( morphology_8.lua    simu_code/morphology_8.lua)
 configure_file( morphology_12.lua    simu_code/morphology_12.lua)
+configure_file( morphology_12_rec.lua    simu_code/morphology_12_rec.lua)
+configure_file( morphology_12_tri.lua    simu_code/morphology_12_tri.lua)
 configure_file( morphology_20.lua    simu_code/morphology_20.lua)
 
 configure_file( vns_template.in.argos      simu_code/vns_template.argos)
