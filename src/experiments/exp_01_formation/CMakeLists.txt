@@ -1,4 +1,3 @@
-configure_file( vns.in.argos            simu_code/vns.argos)
 configure_file( drone.in.lua            simu_code/drone.lua)
 configure_file( morphology_2.lua        simu_code/morphology_2.lua)
 configure_file( morphology_4.lua        simu_code/morphology_4.lua)
