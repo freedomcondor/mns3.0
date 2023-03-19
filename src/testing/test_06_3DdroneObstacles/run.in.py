@@ -29,13 +29,25 @@ gate_locations = [
     [3.7,       24,        8.0,    180, 20, 0],
 ]
 
-obstacle_xml = ""
+#obstacle_xml = ""
+obstacle_xml = generate_3D_triangle_gate_xml(1,
+                                             -5,0,3,                  # position
+                                             0,0,0,                  # orientation
+                                             100,                    # payload
+                                             5, 0.1)                 # size x, thickness
+
+obstacle_xml += generate_3D_circle_gate_xml(1,
+                                            -7,0,3,                  # position
+                                            0,0,0,                  # orientation
+                                            100,                    # payload
+                                            5, 10, 0.1)                 # size x, knots, thickness
+
 id = 0
 for loc in gate_locations :
     id = id + 1
     obstacle_xml += generate_3D_rectangular_gate_xml(id,                     # id
                                                      loc[0], loc[1], loc[2], # position
-                                                     loc[3], loc[4], loc[5], # orientation 
+                                                     loc[3], loc[4], loc[5], # orientation
                                                      100,                    # payload
                                                      3, 4, 0.1)              # size x, y, thickness
 
@@ -59,13 +71,13 @@ parameters = '''
 '''
 
 # generate argos file
-generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 
+generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
                     "vns.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
-        ["DRONES",            drone_xml], 
-        ["OBSTACLES",         obstacle_xml], 
+        ["DRONES",            drone_xml],
+        ["OBSTACLES",         obstacle_xml],
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, True)],

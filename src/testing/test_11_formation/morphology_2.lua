@@ -17,7 +17,7 @@ return
 	children = {
 	{	robotTypeS = "drone",
 		--positionV3 = vector3(L/(2*sin(36)), 0, L*3), 
-		positionV3 = vector3(0, 0, L*4), 
+		positionV3 = vector3(0, 0, L*3), 
 		orientationQ = quaternion(),
 	},
 }}

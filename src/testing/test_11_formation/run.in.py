@@ -5,15 +5,23 @@ exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'
 import os
 
 # drone and pipuck
-drone_locations = generate_random_locations(20,                  # total number
+drone_locations = generate_random_locations(12,                  # total number
                                             0, 0,             # origin location
                                             -1.5, 1.5,              # random x range
                                             -1.5, 1.5,              # random y range
                                             0.5, 1.5)           # near limit and far limit
-drone_xml = generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
+
+drone_locations2 = generate_random_locations(8,                  # total number
+                                             6, 0,             # origin location
+                                             5.0, 7.0,              # random x range
+                                             -1.0, 1.0,              # random y range
+                                             0.5, 1.5)           # near limit and far limit
+
+drone_xml =  generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
+drone_xml += generate_drones(drone_locations2, 13)                 # from label 13 generate drone xml tags
 
 obstacle_xml = generate_3D_rectangular_gate_xml(1,                     # id
-                                                8, 0, 3, # position
+                                                10, 0, 3, # position
                                                 0, 0, 0, # orientation 
                                                 100,                    # payload
                                                 4, 4, 0.1)              # size x, y, thickness

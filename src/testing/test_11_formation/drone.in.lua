@@ -18,7 +18,7 @@ local structure12 = require("morphology_12")
 local structure12_rec = require("morphology_12_rec")
 local structure12_tri = require("morphology_12_tri")
 local structure20 = require("morphology_20")
-local structure_search = require("morphology2")
+local structure_search = require("morphology_2")
 
 local gene = {
 	robotTypeS = "drone",
@@ -48,8 +48,8 @@ function init()
 	if robot.id == "drone1" then
 		api.parameters.droneDefaultStartHeight = 1
 	end
-	if robot.id == "drone2" then
-		api.parameters.droneDefaultStartHeight = 5.0
+	if robot.id == "drone20" then
+		api.parameters.droneDefaultStartHeight = 1.0
 	end
 
 	--api.debug.show_all = true
@@ -104,6 +104,7 @@ return function()
 		if vns.scalemanager.scale["drone"] == 8 then
 			vns.setMorphology(vns, structure8)
 		elseif vns.scalemanager.scale["drone"] == 12 then
+			--vns.setMorphology(vns, structure12_rec)
 			vns.setMorphology(vns, structure12_tri)
 			--vns.setMorphology(vns, structure12)
 		elseif vns.scalemanager.scale["drone"] == 20 then

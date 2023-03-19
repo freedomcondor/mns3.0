@@ -1,5 +1,5 @@
 configure_file( drone.in.lua      simu_code/drone.lua)
-configure_file( morphology2.lua    simu_code/morphology2.lua)
+configure_file( morphology_2.lua    simu_code/morphology_2.lua)
 configure_file( morphology_4.lua    simu_code/morphology_4.lua)
 configure_file( morphology_8.lua    simu_code/morphology_8.lua)
 configure_file( morphology_12.lua    simu_code/morphology_12.lua)

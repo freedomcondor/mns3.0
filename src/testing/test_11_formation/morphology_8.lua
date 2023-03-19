@@ -1,4 +1,3 @@
-local dis = 1.5
 local baseValueFunction = function(base, current, target)
 	local base_target_V3 = target - base
 	local base_current_V3 = current - base
@@ -14,39 +13,49 @@ local baseValueFunction = function(base, current, target)
 		return elliptic_distance2
 	end
 end
+
+local dis = 1.5
+local height = dis * 1.5
 	
 return 
 {	robotTypeS = "drone",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
+	drawLines = {vector3(dis, 0, 0), vector3(0, dis, 0), vector3(0, 0, height)},
 	children = {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(dis, 0, 0),
 		orientationQ = quaternion(),
+		drawLines = {vector3(0, dis, 0), vector3(0, 0, height)},
 	},
 	{	robotTypeS = "drone",
 		positionV3 = vector3(0, dis, 0),
-		orientationQ = quaternion(-math.pi/2, vector3(1,0,0)),
+		orientationQ = quaternion(),
 		calcBaseValue = baseValueFunction,
+		drawLines = {vector3(dis, 0, 0), vector3(0, 0, height)},
 		children = {
 		{	robotTypeS = "drone",
 			positionV3 = vector3(dis, 0, 0),
 			orientationQ = quaternion(),
+			drawLines = {vector3(0, 0, height)},
 		},
 	}},
 	{	robotTypeS = "drone",
 		positionV3 = vector3(0, 0, dis*1.5),
 		orientationQ = quaternion(),
 		calcBaseValue = baseValueFunction,
+		drawLines = {vector3(dis, 0, 0), vector3(0, dis, 0)},
 		children = {
 		{	robotTypeS = "drone",
 			positionV3 = vector3(dis, 0, 0),
 			orientationQ = quaternion(),
+			drawLines = {vector3(0, dis, 0)},
 		},
 		{	robotTypeS = "drone",
 			positionV3 = vector3(0, dis, 0),
-			orientationQ = quaternion(math.pi/2, vector3(1, 0, 0)),
+			orientationQ = quaternion(),
 			calcBaseValue = baseValueFunction,
+			drawLines = {vector3(dis, 0, 0)},
 			children = {
 			{	robotTypeS = "drone",
 				positionV3 = vector3(dis, 0, 0),
