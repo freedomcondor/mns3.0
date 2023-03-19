@@ -287,6 +287,13 @@ function api.debug.showObstacles(vns, essential)
 	end
 end
 
+function api.debug.showMorphologyLines(vns, essential)
+	if vns.allocator ~= nil and vns.allocator.target.drawLines ~= nil then
+		for i, vec in ipairs(vns.allocator.target.drawLines) do
+			vns.api.debug.drawArrow("green", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(vec), essential)
+		end
+	end
+end
 -------------------------------------------------------------
 function api.linkRobotInterface(VNS)
 	VNS.Msg.sendTable = function(table)

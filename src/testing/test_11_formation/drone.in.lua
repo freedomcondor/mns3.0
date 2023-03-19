@@ -79,17 +79,12 @@ function step()
 
 	bt()
 
-	if vns.allocator.target.drawLines ~= nil then
-		for i, vec in ipairs(vns.allocator.target.drawLines) do
-			vns.api.debug.drawArrow("green", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(vec), true)
-		end
-	end
-
 	vns.postStep(vns)
 	api.postStep()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
+	api.debug.showMorphologyLines(vns, true)
 end
 
 function destroy()
