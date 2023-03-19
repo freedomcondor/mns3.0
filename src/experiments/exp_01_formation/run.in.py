@@ -5,18 +5,24 @@ exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'
 import os
 
 # drone and pipuck
-drone_locations = generate_random_locations(20,                  # total number
+
+#structure_config = ["morphology_2",      2]
+#structure_config = ["morphology_4",      4]
+#structure_config = ["morphology_8",      8]
+#structure_config = ["morphology_12",     12]
+#structure_config = ["morphology_12_rec", 12]
+#structure_config = ["morphology_12_tri", 12]
+structure_config = ["morphology_20",     20]
+
+structure = structure_config[0]
+n = structure_config[1]
+
+drone_locations = generate_random_locations(n,                  # total number
                                             0, 0,             # origin location
                                             -1.5, 1.5,              # random x range
                                             -1.5, 1.5,              # random y range
                                             0.5, 1.5)           # near limit and far limit
 drone_xml = generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
-
-obstacle_xml = generate_3D_rectangular_gate_xml(1,                     # id
-                                                8, 0, 3, # position
-                                                0, 0, 0, # orientation 
-                                                100,                    # payload
-                                                4, 4, 0.1)              # size x, y, thickness
 
 parameters = '''
     mode_2D="false"
@@ -35,7 +41,9 @@ parameters = '''
     driver_default_speed="0.5"
     driver_slowdown_zone="0.7"
     driver_stop_zone="0.15"
-'''
+
+    structure={}
+'''.format(structure)
 
 # generate argos file
 generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 
@@ -44,7 +52,6 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["DRONES",            drone_xml], 
-        ["OBSTACLES",         obstacle_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, False, False)],
