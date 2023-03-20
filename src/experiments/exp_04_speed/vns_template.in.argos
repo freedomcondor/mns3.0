@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="TOTALLENGTH" ticks_per_second="5" random_seed="RANDOMSEED" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    PIPUCK_CONTROLLER
+    DRONE_CONTROLLER
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="200, 20, 20.0" positional_index="grid" center="90, 0, 5">
+    <floor id="floor" source="image" path="floor_texture/wood_floor.png" />
+    <!-- real scenario -->
+    REAL_SCENARIO
+
+    <!-- drones -->
+    DRONES
+    <!-- pipucks -->
+    PIPUCKS
+    <!-- walls -->
+    WALL 
+    <!-- target -->
+    TARGET
+    <!-- random obstacles-->
+    OBSTACLES
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <pointmass3d id="pm3d" iterations="10" />
+    <dynamics3d id="dyn3d" iterations="25" >
+      <gravity g="9.8" />
+      <floor />
+      <srocs />
+    </dynamics3d>
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <directional_led id="directional_leds" index="grid" grid_size="20,20,20"/>
+    <tag id="tags" index="grid" grid_size="20,20,20" />
+    <radio id="nfc" index="grid" grid_size="20,20,20" />
+    <radio id="wifi" index="grid" grid_size="20,20,20" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <loop_functions library="@CMAKE_BINARY_DIR@/libmy_extensions"
+                  label="my_loop_functions" />
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl lua_editor="true" show_boundary="false">
+      <user_functions library="@CMAKE_BINARY_DIR@/libmy_qtopengl_extensions"
+                      label="my_qtopengl_user_functions" />
+      <camera>
+        <placements>
+          <placement index="0"  position="0,-0.1,25"    look_at="0,0,0"     up="0,0,1" lens_focal_length="30" />
+          <placement index="9"  position="0, 20, 15"     look_at="0,0,0.25" up="0,0,1" lens_focal_length="30" />
+          <placement index="10" position="70,20, 15"     look_at="70,0,0.25" up="0,0,1" lens_focal_length="30" />
+          <placement index="11" position="140 - 20,20, 15"     look_at="140,0,0.25" up="0,0,1" lens_focal_length="30" />
+        </placements>
+        <timeline loop="1000">
+          <keyframe placement="0" step="1" />
+          <interpolate />
+          <keyframe placement="9" step="75" />
+          <interpolate />
+          <!--keyframe placement="10" step="400" />
+          <interpolate /-->
+          <keyframe placement="11" step="900" />
+        </timeline>
+      </camera>
+    </qt-opengl>
+  </visualization>
+
+</argos-configuration>
