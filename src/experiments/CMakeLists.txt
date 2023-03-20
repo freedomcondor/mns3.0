@@ -1,2 +1,3 @@
 add_subdirectory(exp_01_formation)
 add_subdirectory(exp_02_3Dgates)
+add_subdirectory(exp_03_split_and_merge)
