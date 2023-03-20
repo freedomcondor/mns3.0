@@ -852,7 +852,7 @@ def generate_drones(locations, start_id) :
     tagstr = ""
     i = start_id
     for loc in locations :
-        tagstr = tagstr + generate_drone_xml(i, loc[0], loc[1], -45)
+        tagstr = tagstr + generate_drone_xml(i, loc[0], loc[1], 0)
         i = i + 1
     return tagstr
 
