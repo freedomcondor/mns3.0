@@ -1,4 +1,5 @@
 local L = 1.5
+local height_rate = 2
 
 local function rad(degree)
 	return degree * math.pi / 180
@@ -14,21 +15,25 @@ return
 {	robotTypeS = "drone",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
+	drawLines = {vector3(L * math.sqrt(3) * 0.5,  L * 0.5, 0),
+	             vector3(L * math.sqrt(3) * 0.5,  -L * 0.5, 0),
+	             vector3(L / math.sqrt(3), 0, math.sqrt(2/3) * height_rate)
+	            },
 	children = {
 	{	robotTypeS = "drone",
-		positionV3 = vector3(0, 0, L),
-		orientationQ = quaternion(),
+		positionV3 = vector3(L * math.sqrt(3) * 0.5,  L * 0.5, 0),
+		orientationQ = quaternion(-math.pi*2/3, vector3(0,0,1)),
+		drawLines = {vector3(L * math.sqrt(3) * 0.5,  L * 0.5, 0),
+		             vector3(L / math.sqrt(3), 0, math.sqrt(2/3) * height_rate)
+		            },
 	},
 	{	robotTypeS = "drone",
-		positionV3 = vector3(L/math.sqrt(3), 0, -L*(math.sqrt(2/3)-0.5*math.sqrt(3/2))),
-		orientationQ = quaternion(),
+		positionV3 = vector3(L * math.sqrt(3) * 0.5, -L * 0.5, 0),
+		orientationQ = quaternion(math.pi*2/3, vector3(0,0,1)),
+		drawLines = {vector3(L / math.sqrt(3), 0, math.sqrt(2/3) * height_rate)},
 	},
 	{	robotTypeS = "drone",
-		positionV3 = vector3(-L*math.sqrt(3)*0.5, L*0.5, -L*(math.sqrt(2/3)-0.5*math.sqrt(3/2))),
-		orientationQ = quaternion(),
-	},
-	{	robotTypeS = "drone",
-		positionV3 = vector3(-L*math.sqrt(3)*0.5, -L*0.5, -L*(math.sqrt(2/3)-0.5*math.sqrt(3/2))),
+		positionV3 = vector3(L / math.sqrt(3), 0, math.sqrt(2/3) * height_rate),
 		orientationQ = quaternion(),
 	},
 }}
