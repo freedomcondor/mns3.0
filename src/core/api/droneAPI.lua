@@ -422,10 +422,10 @@ api.tagLabelIndex.builderbot.from = tonumber(from)
 api.tagLabelIndex.builderbot.to   = tonumber(to)
 
 tagOffset = {
-	pipuck = vector3(0, 0, 0.08),
-	drone = vector3(0, 0, 0.25),
-	builderbot = vector3(0, 0, 0.38),
-	block = vector3(0, 0, 0.08),
+	pipuck = vector3(0, 0, 0.0685),
+	drone = vector3(0, 0, 0.285),
+	builderbot = vector3(0, 0, 0.3875),
+	block = vector3(0, 0, 0.028),
 }
 
 function api.droneAddSeenRobots(tags, seenRobotsInRealFrame)
