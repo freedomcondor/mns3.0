@@ -18,7 +18,7 @@ index 6bdb1426..7edc2c66 100644
     const Real CDroneEntity::WIFI_TRANSMISSION_RANGE = 10.0;
  
 +   const Real CDroneEntity::TAG_SIDE_LENGTH = 0.0235;
-+   const CVector3 CDroneEntity::TAG_OFFSET_POSITION = {0.0, 0.0, 0.285};
++   const CVector3 CDroneEntity::TAG_OFFSET_POSITION = {0.0, 0.0, 0.25};
 +
     /****************************************/
     /****************************************/
