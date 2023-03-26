@@ -8,11 +8,12 @@
 
 	Fix the left-right wheel offset in the 3D dynamics model for the Pi-Puck (#196)
 	```
-	To clone and choose the right version:
+	To clone, checkout the right version, and create a branch for it:
 	```bash
 	git clone https://github.com/ilpincy/argos3
 	cd argos3
 	git checkout c04be869311801976a83613552e111b2eef4dd45
+	git switch -c mns3.0
 	```
 
 2. Before compiling and installing argos, it is highly recommended to delete old version of argos from your system. To do that, check /usr/local, which it is the default place when installing argos. To check:
@@ -27,13 +28,27 @@
 	```
 	will do, but again, **check carefully**.
 
-	After removed old version argos, and cloned our version of argos, you may want to apply some patch for argos3 from folder `argos3-patch`, depends on what do you need. For our mns experiments, two essential patches are applied, which are the first two described below:
+	After removing old version argos installation, and before compiling our version, you may want to apply some patch for argos3 from folder `argos3-patch`, depends on what do you need. For most of our mns experiments, 4 patches are essential, which are the first 4 described below. The last two are optional, but it is highly recommended :
 
-	* `Drone_Tags_far_Camera_Sight.patch` is for 3D drone experiments. It contains two changes: 1, it adds a tag on top of the drone. 2, it makes drone sees farther.
+	* `AddATagOnTheDrone.patch` is for 3D drone experiments. It adds a tag on top of the drone.
 
-	* `Builderbot-tag-detection-number.patch` is for builderbot experiments. It fixes bugs when builderbot cameras sees a pipuck tag.
+	* `EnlargeDroneSight.patch` is for 3D drone experiments. It makes the drone sees farther and wider.
 
-	* `Normalize_drone_orientation_error.patch` is for fixing a small bug of the drone in argos. It is useful when you need to rotate the drone acrossing the edge of Pi.
+	* `NormalizeDroneOrientationError.patch` is for fixing a small bug of the drone in argos. It is useful when you need to rotate the drone acrossing the edge of Pi.
+
+	* `BuilderbotTagDetectionNumber.patch` is for builderbot experiments. It fixes bugs when builderbot cameras sees a pipuck tag.
+
+	* `DroneModelAppearing.patch` is for make the drone looks nicer and closer to the real drone.
+
+	* `QTOpenglCameraAndMouseOperation.patch` is for tweaking argos operations. It makes argos mouse operation better for 3D experiments.
+
+	To apply these patches :
+	```bash
+	cd argos3
+	git checkout -b 
+	git apply ../mns3.0/argos-patch/xxx.patch
+	git commit -m "Apply the patch for xxx"
+	```
 
 3. To compile and install argos, follow the instructions of argos. Here is a guideline, you may need to change some details based on your platform and system setup.
 	```bash
