@@ -250,7 +250,7 @@ function Driver.step(vns, waiting)
 	-- check myself
 	local goalV2 = vector3(vns.goal.positionV3)
 	if vns.api.parameters.mode_2D == true then goalV2.z = 0 end
-	if goalV2:length() > 0.3 then
+	if goalV2:length() > vns.Parameters.driver_arrive_zone then
 		-- not arrive
 		all_arrive_flag = false
 		if vns.robotTypeS == "drone" then drone_arrive_flag = false end

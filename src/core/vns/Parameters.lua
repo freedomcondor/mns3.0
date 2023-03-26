@@ -68,6 +68,7 @@ return {
 	driver_stop_zone = tonumber(robot.params.driver_stop_zone or 0.01),
 	driver_default_rotate_scalar = tonumber(robot.params.driver_default_rotate_scalar or 0.5),
 	driver_spring_default_speed_scalar = tonumber(robot.params.driver_spring_default_speed_scalar or 2),
+	driver_arrive_zone = tonumber(robot.params.driver_arrive_zone or 0.30),
 
 	-- time out
 	connector_waiting_count = tonumber(robot.params.connector_waiting_count or 7),
