@@ -1,5 +1,5 @@
 diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp
-index 8562e1ca..e05af650 100644
+index 8562e1ca..99915556 100644
 --- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp
 +++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.cpp
 @@ -222,6 +222,32 @@ namespace argos {
@@ -35,7 +35,7 @@ index 8562e1ca..e05af650 100644
     /****************************************/
     /****************************************/
  
-@@ -379,6 +405,43 @@ namespace argos {
+@@ -379,6 +405,44 @@ namespace argos {
        m_sActivePlacement.Target += cForward;
     }
  
@@ -47,12 +47,13 @@ index 8562e1ca..e05af650 100644
 +      /* Get cUp and calculate cForward and cLeft */
 +      const CVector3& cUp = m_sActivePlacement.Up;
 +      CVector3 cForward(m_sActivePlacement.Target - m_sActivePlacement.Position);
++      Real fTargetDistance = cForward.Length();
 +      cForward.SetZ(0);
 +      cForward.Normalize();
 +      CVector3 cLeft = m_sActivePlacement.Up;
 +      cLeft.CrossProduct(cForward).Normalize();
 +      /* Calculate motion sensitivity */
-+      Real fMotionSensitivity = MOVE_GAIN * Exp(m_sActivePlacement.LensFocalLength);
++      Real fMotionSensitivity = MOVE_GAIN * Exp(m_sActivePlacement.LensFocalLength) * fTargetDistance * 0.2;
 +      /* Apply translation */
 +      CVector3 cMovement = cForward * (fMotionSensitivity * n_forwards_backwards) +
 +                           cLeft * (fMotionSensitivity * n_sideways) +
@@ -97,7 +98,7 @@ index 331b2d7d..40a451aa 100644
                         UInt32 un_end_placement,
                         Real f_time_fraction);
 diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
-index fe70c6df..b30ad99e 100644
+index fe70c6df..d5d1057f 100644
 --- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
 +++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
 @@ -879,20 +879,23 @@ namespace argos {
@@ -128,7 +129,7 @@ index fe70c6df..b30ad99e 100644
                 m_cMouseGrabPos = pc_event->pos();
                 update();
              }
-@@ -907,7 +910,19 @@ namespace argos {
+@@ -907,7 +910,18 @@ namespace argos {
     /****************************************/
  
     void CQTOpenGLWidget::wheelEvent(QWheelEvent *pc_event) {
@@ -137,7 +138,6 @@ index fe70c6df..b30ad99e 100644
 +      Qt::KeyboardModifiers cControl = pc_event->modifiers() & Qt::ControlModifier;
 +      Qt::KeyboardModifiers cAlt = pc_event->modifiers() & Qt::AltModifier;
 +
-+      bool bMouseRightButton = (pc_event->buttons() == Qt::RightButton);
 +      bool bKey1 = (cControl != 0);
 +      bool bKey2 = (cShift != 0);
 +
@@ -149,7 +149,7 @@ index fe70c6df..b30ad99e 100644
           /* Treat selected entity as an embodied entity */
           auto* pcEntity = dynamic_cast<CEmbodiedEntity*>(m_sSelectionInfo.Entity);
           if(pcEntity == nullptr) {
-@@ -922,14 +937,39 @@ namespace argos {
+@@ -922,14 +936,39 @@ namespace argos {
           }
           /*
            * If we get here, pcEntity is set to a non-NULL value
