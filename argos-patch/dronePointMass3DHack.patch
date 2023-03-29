@@ -1,0 +1,49 @@
+diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
+index 5b124bf2..47042d71 100644
+--- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
++++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
+@@ -100,16 +100,31 @@ namespace argos
+       /* CDroneFlightSystemEntity: local coordinate system of the drone */
+       /* CPointMass3DDroneModel: global coordinate system */
+       CVector3 cTargetPosition(m_cFlightSystemEntity.GetTargetPosition());
++      /*
+       m_cInputPosition =
+          m_cHomePosition + cTargetPosition.RotateZ(CRadians(m_fHomeYawAngle));
+       m_fInputYawAngle =
+          m_fHomeYawAngle + m_cFlightSystemEntity.GetTargetYawAngle().GetValue();
++      */
++      // consider velocity is given directly
++      m_cInputPosition = cTargetPosition;
++      m_fInputYawAngle = m_cFlightSystemEntity.GetTargetYawAngle().GetValue();
+    }
+ 
+    /****************************************/
+    /****************************************/
+ 
+    void CPointMass3DDroneModel::UpdatePhysics() {
++      // consider velocity is given directly
++      //m_cVelocity = (m_cInputPosition - m_cPosition) / GetPM3DEngine().GetPhysicsClockTick();
++      m_cVelocity = m_cInputPosition;
++      m_cAngularVelocity.SetZ(m_fInputYawAngle);
++
++      m_cPosition += m_cVelocity * GetPM3DEngine().GetPhysicsClockTick();
++      m_cOrientation += m_cAngularVelocity * GetPM3DEngine().GetPhysicsClockTick();
++   }
++
++   void CPointMass3DDroneModel::UpdatePhysics_backup() {
+       /* update the position (XY) and altitude (Z) controller */
+       CVector3 cPositionError(m_cInputPosition - m_cPosition);
+       /* accumulate the altitude error */
+diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
+index 19da0fea..7cbeaf56 100644
+--- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
++++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
+@@ -37,6 +37,8 @@ namespace argos {
+ 
+       virtual void UpdatePhysics();
+ 
++      virtual void UpdatePhysics_backup();
++
+       virtual void Step() {}
+ 
+       virtual void MoveTo(const CVector3& c_position,
