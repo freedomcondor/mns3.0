@@ -32,7 +32,55 @@ api.actuator.flight_preparation = {
 	state_count = 0,
 }
 
-api.actuator.flight_preparation.run_state = function()
+api.actuator.flight_preparation.run_state_velocity_control_mode = function()
+	if robot.flight_system ~= nil and robot.flight_system.ready() then
+		-- flight preparation state machine
+		if api.actuator.flight_preparation.state == "pre_flight" then
+			api.actuator.newPosition.x = 0
+			api.actuator.newPosition.y = 0
+			api.actuator.newPosition.z = 0
+			api.actuator.newRad = 0
+
+			api.actuator.flight_preparation.state_count =
+				api.actuator.flight_preparation.state_count + 1
+			if api.actuator.flight_preparation.state_count >= api.actuator.flight_preparation.state_duration then
+				api.actuator.flight_preparation.state_count = 0
+				api.actuator.flight_preparation.state = "armed"
+			end
+		elseif api.actuator.flight_preparation.state == "armed" then
+			api.actuator.newPosition.x = 0
+			api.actuator.newPosition.y = 0
+			api.actuator.newPosition.z = 0
+			api.actuator.newRad = 0
+
+			robot.flight_system.set_armed(true, false)
+			robot.flight_system.set_offboard_mode(true)
+			api.actuator.flight_preparation.state = "take_off"
+			api.actuator.flight_preparation.state_count = 0
+		elseif api.actuator.flight_preparation.state == "take_off" then
+			api.actuator.newPosition.x = 0
+			api.actuator.newPosition.y = 0
+			if robot.flight_system.position.z < api.parameters.droneDefaultStartHeight then
+				api.actuator.newPosition.z = (api.parameters.droneDefaultStartHeight - robot.flight_system.position.z) / 5;
+			else
+				api.actuator.newPosition.z = 0
+			end
+			api.actuator.newRad = 0
+
+			api.actuator.flight_preparation.state_count =
+				api.actuator.flight_preparation.state_count + 1
+			if api.actuator.flight_preparation.state_count >= api.actuator.flight_preparation.state_duration * 2 then
+				api.actuator.flight_preparation.state_count = 0
+				api.actuator.flight_preparation.state = "navigation"
+			end
+		elseif api.actuator.flight_preparation.state == "navigation" then
+			-- TODO: there may be a jump after navigation mode
+			--do nothing
+		end
+	end
+end
+
+api.actuator.flight_preparation.run_state_waypoint_control_mode = function()
 	if robot.flight_system ~= nil and robot.flight_system.ready() then
 		-- flight preparation state machine
 		if api.actuator.flight_preparation.state == "pre_flight" then
@@ -76,6 +124,12 @@ api.actuator.flight_preparation.run_state = function()
 	end
 end
 
+if api.parameters.droneVelocityControlMode == true then
+	api.actuator.flight_preparation.run_state = api.actuator.flight_preparation.run_state_velocity_control_mode
+else
+	api.actuator.flight_preparation.run_state = api.actuator.flight_preparation.run_state_waypoint_control_mode
+end
+
 ---- Virtual Frame and tilt ---------------------
 --api.virtualFrame.orientationQ = quaternion(math.pi/4, vector3(0,0,1))
 api.virtualFrame.orientationQ = quaternion()
@@ -87,7 +141,7 @@ function api.virtualFrame.rotateInSpeed(_speedV3)
 	if api.parameters.mode_2D == true then speedV3.x = 0; speedV3.y = 0 end
 	local axis = vector3(speedV3):normalize()
 	if speedV3:length() == 0 then axis = vector3(0,0,1) end
-	api.virtualFrame.logicOrientationQ = 
+	api.virtualFrame.logicOrientationQ =
 		api.virtualFrame.logicOrientationQ *
 		quaternion(speedV3:length() * api.time.period, axis)
 end
@@ -130,7 +184,7 @@ function api.preStep()
 	api.droneTags = nil
 	if robot.params.simulation == true and api.parameters.droneRealNoise == true then
 		DroneRealistSimulator.changeSensors(api)
-		if robot.flight_system ~= nil then 
+		if robot.flight_system ~= nil then
 			logger("droneAPI: after real sim  = ", robot.flight_system.position, robot.flight_system.orientation)
 		end
 	end
@@ -241,7 +295,11 @@ function api.updateLastSpeed()
 	}
 end
 
-function api.droneSetSpeed(x, y, z, th)
+function api.droneSetSpeed_velocity_control_mode(x, y, z, th)
+	api.actuator.setNewLocation(vector3(x, y, z), th)
+end
+
+function api.droneSetSpeed_waypoint_control_mode(x, y, z, th)
 	logger("droneSetSpeed = ", x, y, z, th)
 	if robot.flight_system == nil then return end
 	-- x, y, z in m/s, x front, z up, y left
@@ -252,7 +310,7 @@ function api.droneSetSpeed(x, y, z, th)
 	api.rememberLastSpeed(x, y, z, th)
 
 	if api.actuator.lastSetSpeed ~= nil then
-		logger(" last speed = ", api.actuator.lastSetSpeed.x, 
+		logger(" last speed = ", api.actuator.lastSetSpeed.x,
 		                         api.actuator.lastSetSpeed.y,
 		                         api.actuator.lastSetSpeed.z,
 		                         api.actuator.lastSetSpeed.th)
@@ -288,6 +346,12 @@ function api.droneSetSpeed(x, y, z, th)
 	)
 end
 
+if api.parameters.droneVelocityControlMode == true then
+	api.droneSetSpeed = api.droneSetSpeed_velocity_control_mode
+else
+	api.droneSetSpeed = api.droneSetSpeed_waypoint_control_mode
+end
+
 api.setSpeed = api.droneSetSpeed
 --api.move is implemented in commonAPI
 
@@ -295,7 +359,7 @@ api.setSpeed = api.droneSetSpeed
 function api.droneEnableCameras()
 	for index, camera in pairs(robot.cameras_system) do
 		camera.enable()
-	end 
+	end
 end
 
 function api.droneDisableCameras()
@@ -341,18 +405,18 @@ function api.droneDetectTags(option)
 	-- This function returns a tags table, in real robot coordinate frame
 	api.droneDetectLeds()
 
-	-- add tags 
+	-- add tags
 	tags = {}
 	for _, camera in pairs(robot.cameras_system) do
 		for _, newTag in ipairs(camera.tags) do
-			local positionV3 = 
+			local positionV3 =
 			  (
-			    camera.transform.position + 
+			    camera.transform.position +
 			    vector3(newTag.position):rotate(camera.transform.orientation)
 			  )
 
-			local orientationQ = 
-				camera.transform.orientation * 
+			local orientationQ =
+				camera.transform.orientation *
 				newTag.orientation * quaternion(math.pi, vector3(1,0,0))
 
 			-- check existed
