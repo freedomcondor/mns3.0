@@ -84,6 +84,7 @@ function Transform.subAccumulator(accumulator, transform)
 end
 
 function Transform.averageAccumulator(accumulator, transform)
+	if accumulator.n == 0 then return {positionV3 = vector3(), orientationQ = quaternion()} end
 	if transform == nil then transform = {} end
 	transform.positionV3 = accumulator.positionV3 * (1/accumulator.n)
 	local X = (accumulator.orientation_X_V3 * (1/accumulator.n)):normalize()
@@ -95,8 +96,10 @@ end
 
 -------------------------------------------------------------------
 -- Average Quaternion 
-function Transform.fromToQuaternion(vec1, vec2)
-	-- assuming vec1 and vec2 are normal vectors
+function Transform.fromToQuaternion(_vec1, _vec2)
+	local vec1 = vector3(_vec1):normalize()
+	local vec2 = vector3(_vec2):normalize()
+	-- vec1 and vec2 are normal vectors
 	if vec1 == vec2 then return quaternion() end
 	local axis = vector3(vec1):cross(vec2)
 	-- if vec1 == -vec2 then they cancel each other and axis is 0
@@ -107,7 +110,7 @@ function Transform.fromToQuaternion(vec1, vec2)
 		local angle = math.pi
 		return quaternion(angle, axis:normalize())
 	end
-	-- if everything is normal
+	-- if everything is good
 	local angle = math.acos(vec1:dot(vec2))
 	return quaternion(angle, axis:normalize())
 end
