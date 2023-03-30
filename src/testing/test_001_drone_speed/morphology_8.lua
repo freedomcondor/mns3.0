@@ -22,6 +22,7 @@ return
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	drawLines = {vector3(dis, 0, 0), vector3(0, dis, 0), vector3(0, 0, height)},
+	ranger = true,
 	children = {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(dis, 0, 0),
@@ -56,7 +57,6 @@ return
 			orientationQ = quaternion(),
 			calcBaseValue = baseValueFunction,
 			drawLines = {vector3(dis, 0, 0)},
-			leader = true,
 			children = {
 			{	robotTypeS = "drone",
 				positionV3 = vector3(dis, 0, 0),

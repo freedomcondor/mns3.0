@@ -86,7 +86,7 @@
           <interpolate />
           <!--keyframe placement="10" step="400" />
           <interpolate /-->
-          <keyframe placement="11" step="300" />
+          <keyframe placement="11" step="700" />
         </timeline>
       </camera>
     </qt-opengl>

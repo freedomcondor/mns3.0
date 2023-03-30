@@ -58,6 +58,7 @@ function step()
 	api.postStep()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
+	api.debug.showParent(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 	api.debug.showMorphologyLines(vns, true)
 end
@@ -91,13 +92,14 @@ function create_navigation_node(vns)
 			end
 			if marker == nil then marker = marker_behind end
 
-			local speed = 1
+			local speed = 3
 	
 			if marker ~= nil then
 				local target_position = marker.positionV3 + vector3(-0.7,-0.7,0.7):rotate(marker.orientationQ)
 				local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
 				local vertical_position = target_position - target_position:dot(dirVec) * dirVec
-				local vertical_speed = vertical_position:normalize() * 0.1
+				--local vertical_speed = vertical_position:normalize() * 1
+				local vertical_speed = vertical_position * 1
 				local move_speed = vector3(dirVec):rotate(marker.orientationQ) * speed
 	
 				vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
@@ -106,6 +108,7 @@ function create_navigation_node(vns)
 				vns.setGoal(vns, vector3(0,0,0), quaternion())
 				vns.Spreader.emergency_after_core(vns, vector3(speed, 0, 0), vector3())
 			end
+			--vns.Spreader.emergency_after_core(vns, vector3(speed, 0, speed), vector3())
 		end
 	
 		return false, true

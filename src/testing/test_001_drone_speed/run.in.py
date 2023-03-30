@@ -6,7 +6,7 @@ import os
 
 # drone and pipuck
 
-drone_locations = generate_random_locations(8,                  # total number
+drone_locations = generate_random_locations(1,                  # total number
                                             0, 0,             # origin location
                                             -1.5, 1.5,              # random x range
                                             -1.5, 1.5,              # random y range
@@ -17,15 +17,22 @@ obstacle_xml = ""
 
 for i in range(0, 20) :
     obstacle_xml += generate_3D_rectangular_gate_xml(i,                     # id
-                                                     7 * i, 0, 3, # position
+                                                     1 * i, 0, 3, # position
                                                      0,0,0, # orientation
+                                                     100,                    # payload
+                                                     3, 4, 0.1)              # size x, y, thickness
+
+for i in range(0, 20) :
+    obstacle_xml += generate_3D_rectangular_gate_xml(i + 20,                     # id
+                                                     0, 0, 1 * i, # position
+                                                     0,90,0, # orientation
                                                      100,                    # payload
                                                      3, 4, 0.1)              # size x, y, thickness
 
 parameters = '''
     mode_2D="false"
     drone_real_noise="false"
-    drone_tilt_sensor="true"
+    drone_tilt_sensor="false"
 
     drone_label="1, 20"
     obstacle_label="100, 103"
@@ -36,14 +43,9 @@ parameters = '''
 
     second_report_sight="true"
 
-    driver_default_speed="1.0"
-    driver_slowdown_zone="0.5"
+    driver_default_speed="0.5"
+    driver_slowdown_zone="0.7"
     driver_stop_zone="0.15"
-'''
-
-'''
-    driver_default_speed="5.0"
-    driver_slowdown_zone="3.0"
 '''
 
 # generate argos file
@@ -53,7 +55,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["DRONES",            drone_xml], 
-        #["OBSTACLES",         obstacle_xml],
+        ["OBSTACLES",         obstacle_xml],
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, False, False)],
