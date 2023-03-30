@@ -15,7 +15,7 @@ end
 if robot.params.hardware ~= true and robot.params.simulation ~= true then
 	print("[Warning]: simulation and hardware both unset, overwrite hardware true and simulation false!")
 	robot.params.hardware = true
-	robot.params.simulation = nil 
+	robot.params.simulation = nil
 end
 if robot.params.hardware == true then
 	print("Hardware mode")
@@ -46,7 +46,7 @@ api.estimateLocation = {
 }
 
 ---- Virtual Coordinate Frame -----------------
-	-- instead of turn(sometimes move) the real robot, we turn the virtual coordinate frame, 
+	-- instead of turn(sometimes move) the real robot, we turn the virtual coordinate frame,
 	-- so that a pipuck can be "omni directional"
 api.virtualFrame = {
 	positionV3 = vector3(),  -- currently virtual position is not used
@@ -68,7 +68,7 @@ function api.virtualFrame.rotateInSpeed(_speedV3)
 	if api.parameters.mode_2D == true then speedV3.x = 0; speedV3.y = 0 end
 	local axis = vector3(speedV3):normalize()
 	if speedV3:length() == 0 then axis = vector3(0,0,1) end
-	api.virtualFrame.orientationQ = 
+	api.virtualFrame.orientationQ =
 		api.virtualFrame.orientationQ *
 		quaternion(speedV3:length() * api.time.period, axis)
 end
@@ -103,7 +103,7 @@ function api.move(transV3, rotateV3)
 	api.estimateLocation.positionV3 = transV3 * api.time.period
 	local axis = vector3(rotateV3):normalize()
 	if rotateV3:length() == 0 then axis = vector3(0,0,1) end
-	api.estimateLocation.orientationQ = 
+	api.estimateLocation.orientationQ =
 		quaternion(rotateV3:length() * api.time.period, axis)
 end
 
@@ -117,12 +117,12 @@ function api.debug.drawArrow(color, begin, finish, essential)
 	local colorArray = {}
 	for word in string.gmatch(color, '([^,]+)') do
 		colorArray[#colorArray + 1] = word
-	end 
+	end
 	-- draw
 	if tonumber(colorArray[1]) == nil then
 		robot.debug.draw_arrow(begin, finish, color)
 	else
-		robot.debug.draw_arrow(begin, finish, 
+		robot.debug.draw_arrow(begin, finish,
 		                       tonumber(colorArray[1]),
 		                       tonumber(colorArray[2]),
 		                       tonumber(colorArray[3])
@@ -138,11 +138,11 @@ function api.debug.drawRing(color, middle, radius, essential)
 	local colorArray = {}
 	for word in string.gmatch(color, '([^,]+)') do
 		colorArray[#colorArray + 1] = word
-	end 
+	end
 	if tonumber(colorArray[1]) == nil then
 		robot.debug.draw_ring(middle, radius, color) -- 0,0,255 (blue)
 	else
-		robot.debug.draw_ring(middle, radius, 
+		robot.debug.draw_ring(middle, radius,
 		                       tonumber(colorArray[1]),
 		                       tonumber(colorArray[2]),
 		                       tonumber(colorArray[3])
@@ -189,55 +189,53 @@ end
 
 function api.debug.showEstimateLocation(essential)
 	api.debug.drawArrow(
-		"red", 
+		"red",
 			-vector3(api.estimateLocation.positionV3):rotate(
 			quaternion(api.estimateLocation.orientationQ):inverse()
-		), 
+		),
 		vector3(0,0,0.1),
 		essential
 	)
 end
 
-function api.debug.showParent(vns)
-	if vns.parentR ~= nil then
-		local robotR = vns.parentR
-		api.debug.drawArrow("blue", vector3(), api.virtualFrame.V3_VtoR(vector3(robotR.positionV3)), true)
-		api.debug.drawArrow("blue", 
-			api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1),
-			api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1) +
-			vector3(0.1, 0, 0):rotate(
-				api.virtualFrame.Q_VtoR(quaternion(robotR.orientationQ))
-			),
-			true  -- essential
-		)
-	end
-end
+function api.debug.showRobot(vns, robotR, option)
+	local color = "blue"
+	local drawOrientation = false
+	local offset = vector3(0,0,0.1)
+	local margin = 0.2
+	if option ~= nil and option.color ~= nil           then color = option.color end
+	if option ~= nil and option.drawOrientation ~= nil then drawOrientation = option.drawOrientation end
+	if option ~= nil and option.offset ~= nil          then offset = option.offset end
+	if option ~= nil and option.margin ~= nil          then margin = option.margin end
 
-function api.debug.showChildren(vns, option)
-	-- draw children location
-	for i, robotR in pairs(vns.childrenRT) do
-		api.debug.drawArrow(
-			"blue",
-			vector3(),
-			api.virtualFrame.V3_VtoR(
-				vector3(
-					robotR.positionV3 * (
-						(robotR.positionV3:length() - 0.2) / robotR.positionV3:length()
-					)
-				)
-			),
-			true
-		)
-		if option ~= nil and option.drawOrientation == true then
-			api.debug.drawArrow("blue", 
-				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1),
-				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1) +
+	if robotR ~= nil then
+		api.debug.drawArrow(color,
+		                    offset,
+		                    offset + api.virtualFrame.V3_VtoR(vector3(
+		                        robotR.positionV3 * ((robotR.positionV3:length() - margin) / robotR.positionV3:length())
+		                    )),
+		                    true)
+		if drawOrientation == true then
+			api.debug.drawArrow(color,
+				api.virtualFrame.V3_VtoR(robotR.positionV3) + offset,
+				api.virtualFrame.V3_VtoR(robotR.positionV3) + offset +
 				vector3(0.1, 0, 0):rotate(
 					api.virtualFrame.Q_VtoR(quaternion(robotR.orientationQ))
 				),
 				true
 			)
 		end
+	end
+end
+
+function api.debug.showParent(vns, option)
+	api.debug.showRobot(vns, vns.parentR, option)
+end
+
+function api.debug.showChildren(vns, option)
+	-- draw children location
+	for i, robotR in pairs(vns.childrenRT) do
+		api.debug.showRobot(vns, robotR, option)
 	end
 
 	if vns.parentR == nil then
@@ -260,7 +258,7 @@ function api.debug.showSeenRobots(vns, option)
 			true
 		)
 		if option ~= nil and option.drawOrientation == true then
-			api.debug.drawArrow("red", 
+			api.debug.drawArrow("red",
 				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1),
 				api.virtualFrame.V3_VtoR(robotR.positionV3) + vector3(0,0,0.1) +
 				vector3(0.2, 0, 0):rotate(
