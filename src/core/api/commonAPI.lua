@@ -45,6 +45,11 @@ api.estimateLocation = {
 	orientationQ = quaternion(),
 }
 
+api.estimateLocationInRealFrame = {
+	positionV3 = vector3(),
+	orientationQ = quaternion(),
+}
+
 ---- Virtual Coordinate Frame -----------------
 	-- instead of turn(sometimes move) the real robot, we turn the virtual coordinate frame,
 	-- so that a pipuck can be "omni directional"
@@ -97,6 +102,7 @@ function api.move(transV3, rotateV3)
 	local transRealV3 = api.virtualFrame.V3_VtoR(transV3)
 	--local rotateRealV3 = api.virtualFrame.V3_VtoR(rotateV3)
 	api.setSpeed(transRealV3.x, transRealV3.y, transRealV3.z, 0)
+	api.estimateLocationInRealFrame.positionV3 = transRealV3 * api.time.period
 	-- rotate virtual frame
 	api.virtualFrame.rotateInSpeed(rotateV3)
 	-- estimate location of the new step

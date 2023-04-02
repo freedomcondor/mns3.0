@@ -355,6 +355,17 @@ end
 api.setSpeed = api.droneSetSpeed
 --api.move is implemented in commonAPI
 
+api.commonMove = api.move
+function api.move(transV3, rotateV3)
+	api.commonMove(transV3, rotateV3)
+	if api.actuator.flight_preparation.state ~= "navigation" then
+		api.estimateLocation.positionV3 = vector3()
+		api.estimateLocation.orientationQ = quaternion()
+		api.estimateLocationInRealFrame.positionV3 = vector3()
+		api.estimateLocationInRealFrame.orientationQ = quaternion()
+	end
+end
+
 ---- Cameras -------------------------
 function api.droneEnableCameras()
 	for index, camera in pairs(robot.cameras_system) do
