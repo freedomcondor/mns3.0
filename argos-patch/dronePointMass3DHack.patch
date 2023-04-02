@@ -1,8 +1,8 @@
 diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
-index 5b124bf2..47042d71 100644
+index 5b124bf2..2eada260 100644
 --- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
 +++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
-@@ -100,16 +100,31 @@ namespace argos
+@@ -100,16 +100,37 @@ namespace argos
        /* CDroneFlightSystemEntity: local coordinate system of the drone */
        /* CPointMass3DDroneModel: global coordinate system */
        CVector3 cTargetPosition(m_cFlightSystemEntity.GetTargetPosition());
@@ -26,7 +26,13 @@ index 5b124bf2..47042d71 100644
 +      m_cVelocity = m_cInputPosition;
 +      m_cAngularVelocity.SetZ(m_fInputYawAngle);
 +
-+      m_cPosition += m_cVelocity * GetPM3DEngine().GetPhysicsClockTick();
++      CQuaternion cOrientationInQuaternion;
++      cOrientationInQuaternion.FromEulerAngles(
++         CRadians(m_cOrientation.GetZ()),
++         CRadians(m_cOrientation.GetY()),
++         CRadians(m_cOrientation.GetX())
++      );
++      m_cPosition += CVector3(m_cVelocity).Rotate(cOrientationInQuaternion) * GetPM3DEngine().GetPhysicsClockTick();
 +      m_cOrientation += m_cAngularVelocity * GetPM3DEngine().GetPhysicsClockTick();
 +   }
 +
