@@ -36,14 +36,14 @@ parameters = '''
 
     second_report_sight="true"
 
-    driver_default_speed="1.0"
+    driver_default_speed="0.5"
     driver_slowdown_zone="0.5"
     driver_stop_zone="0.15"
 '''
 
 '''
-    driver_default_speed="5.0"
-    driver_slowdown_zone="3.0"
+    driver_default_speed="1.0"
+    driver_slowdown_zone="0.5"
 '''
 
 # generate argos file
@@ -53,7 +53,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["DRONES",            drone_xml], 
-        #["OBSTACLES",         obstacle_xml],
+        ["OBSTACLES",         obstacle_xml],
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, False, False)],

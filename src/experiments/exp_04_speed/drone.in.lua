@@ -57,8 +57,8 @@ function step()
 	vns.postStep(vns)
 	api.postStep()
 	--api.debug.showVirtualFrame(true)
-	api.debug.showChildren(vns, {drawOrientation = false})
-	api.debug.showParent(vns, {drawOrientation = false})
+	api.debug.showChildren(vns, {drawOrientation = false, offset = vector3(), margin = 0, color="blue"})
+	api.debug.showParent(vns, {drawOrientation = false, offset = vector3(), margin = 0, color="red"})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 	api.debug.showMorphologyLines(vns, true)
 end
@@ -69,6 +69,8 @@ function destroy()
 end
 
 function create_navigation_node(vns)
+local state = "preparation"
+local stateCount = 0
 	return function()
 		if vns.parentR == nil then
 			-- add vns.avoider.obstacles and vns.collectivesensor.receiveList together
@@ -92,14 +94,25 @@ function create_navigation_node(vns)
 			end
 			if marker == nil then marker = marker_behind end
 
-			local speed = 3
+			local speed = 0
+
+			if state == "preparation" then
+				stateCount = stateCount + 1
+				if stateCount == 300 then
+					state = "forward"
+				end
+			elseif state == "forward" then
+				stateCount = stateCount + 1
+				speed = (stateCount - 300) * 1.0 / 50
+				if speed > 5 then speed = 5 end
+			end
 	
 			if marker ~= nil then
 				local target_position = marker.positionV3 + vector3(-0.7,-0.7,0.7):rotate(marker.orientationQ)
 				local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
 				local vertical_position = target_position - target_position:dot(dirVec) * dirVec
 				--local vertical_speed = vertical_position:normalize() * 1
-				local vertical_speed = vertical_position * 1
+				local vertical_speed = vertical_position * 0.5
 				local move_speed = vector3(dirVec):rotate(marker.orientationQ) * speed
 	
 				vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
@@ -110,6 +123,7 @@ function create_navigation_node(vns)
 			end
 			--vns.Spreader.emergency_after_core(vns, vector3(speed, 0, speed), vector3())
 		end
+		--]]
 	
 		return false, true
 	end 
