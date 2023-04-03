@@ -189,6 +189,10 @@ function api.preStep()
 		end
 	end
 	api.droneTiltVirtualFrame()
+
+	if api.parameters.droneVelocityControlMode == true then
+		api.actuator.newPosition = vector3()
+	end
 end
 
 api.commonPostStep = api.postStep
@@ -201,7 +205,12 @@ function api.postStep()
 			DroneRealistSimulator.changeActuators(api)
 			logger("droneAPI: after real simu = ", api.actuator.newPosition, api.actuator.newRad)
 		end
-		robot.flight_system.set_target_pose(api.actuator.newPosition, api.actuator.newRad)
+		if api.parameters.droneVelocityControlMode == true then
+			robot.flight_system.set_target_velocity(api.actuator.newPosition)
+			robot.flight_system.set_target_pose(vector3(), api.actuator.newRad)
+		else
+			robot.flight_system.set_target_pose(api.actuator.newPosition, api.actuator.newRad)
+		end
 		api.updateLastSpeed()
 	end
 	api.commonPostStep()
@@ -296,7 +305,9 @@ function api.updateLastSpeed()
 end
 
 function api.droneSetSpeed_velocity_control_mode(x, y, z, th)
-	api.actuator.setNewLocation(vector3(x, y, z), th)
+	local rad = robot.flight_system.orientation.z
+	local q = quaternion(rad, vector3(0,0,1))
+	api.actuator.setNewLocation(vector3(x,y,z):rotate(q), rad+th)
 end
 
 function api.droneSetSpeed_waypoint_control_mode(x, y, z, th)
