@@ -65,7 +65,7 @@ for loc in gate_locations :
 parameters = '''
     mode_2D="false"
     drone_real_noise="false"
-    drone_tilt_sensor="false"
+    drone_tilt_sensor="true"
 
     drone_label="1, 20"
     obstacle_label="100, 110"
@@ -93,7 +93,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, False, False)],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
     ]
 )
 
