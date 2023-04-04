@@ -61,7 +61,7 @@ api.actuator.flight_preparation.run_state_velocity_control_mode = function()
 			api.actuator.newPosition.x = 0
 			api.actuator.newPosition.y = 0
 			if robot.flight_system.position.z < api.parameters.droneDefaultStartHeight then
-				api.actuator.newPosition.z = (api.parameters.droneDefaultStartHeight - robot.flight_system.position.z) / 5;
+				api.actuator.newPosition.z = (api.parameters.droneDefaultStartHeight - robot.flight_system.position.z) / 3;
 			else
 				api.actuator.newPosition.z = 0
 			end
@@ -87,6 +87,7 @@ api.actuator.flight_preparation.run_state_waypoint_control_mode = function()
 			api.actuator.newPosition.x = 0
 			api.actuator.newPosition.y = 0
 			api.actuator.newPosition.z = api.parameters.droneDefaultStartHeight
+			if robot.params.simulation == true then api.actuator.newPosition.z = 0 end
 			api.actuator.newRad = 0
 
 			api.actuator.flight_preparation.state_count =
@@ -124,7 +125,7 @@ api.actuator.flight_preparation.run_state_waypoint_control_mode = function()
 	end
 end
 
-if api.parameters.droneVelocityControlMode == true then
+if api.parameters.droneVelocityMode == true then
 	api.actuator.flight_preparation.run_state = api.actuator.flight_preparation.run_state_velocity_control_mode
 else
 	api.actuator.flight_preparation.run_state = api.actuator.flight_preparation.run_state_waypoint_control_mode
@@ -190,7 +191,7 @@ function api.preStep()
 	end
 	api.droneTiltVirtualFrame()
 
-	if api.parameters.droneVelocityControlMode == true then
+	if api.parameters.droneVelocityMode == true then
 		api.actuator.newPosition = vector3()
 	end
 end
@@ -205,9 +206,8 @@ function api.postStep()
 			DroneRealistSimulator.changeActuators(api)
 			logger("droneAPI: after real simu = ", api.actuator.newPosition, api.actuator.newRad)
 		end
-		if api.parameters.droneVelocityControlMode == true then
-			robot.flight_system.set_target_velocity(api.actuator.newPosition)
-			robot.flight_system.set_target_pose(vector3(), api.actuator.newRad)
+		if api.parameters.droneVelocityMode == true then
+			robot.flight_system.set_target_velocity(api.actuator.newPosition, api.actuator.newRad)
 		else
 			robot.flight_system.set_target_pose(api.actuator.newPosition, api.actuator.newRad)
 		end
@@ -250,7 +250,11 @@ function api.droneAdjustHeight(z)
 		local ZScalar = 5
 		if robot.params.hardware == true then ZScalar = 3 end
 		-- TODO: there may be a jump here
-		api.actuator.newPosition.z = robot.flight_system.position.z + heightError * api.time.period * ZScalar
+		if api.parameters.droneVelocityMode == true then
+			api.actuator.newPosition.z = heightError * 1.0 / 3
+		else
+			api.actuator.newPosition.z = robot.flight_system.position.z + heightError * api.time.period * ZScalar
+		end
 		logger("heightError = ", heightError)
 		logger("robot.flight_system.position.z = ", robot.flight_system.position.z)
 		logger("api.actuator.newPosition.z = ", api.actuator.newPosition.z)
@@ -307,7 +311,7 @@ end
 function api.droneSetSpeed_velocity_control_mode(x, y, z, th)
 	local rad = robot.flight_system.orientation.z
 	local q = quaternion(rad, vector3(0,0,1))
-	api.actuator.setNewLocation(vector3(x,y,z):rotate(q), rad+th)
+	api.actuator.setNewLocation(vector3(x,y,z):rotate(q), th)
 end
 
 function api.droneSetSpeed_waypoint_control_mode(x, y, z, th)
@@ -357,7 +361,7 @@ function api.droneSetSpeed_waypoint_control_mode(x, y, z, th)
 	)
 end
 
-if api.parameters.droneVelocityControlMode == true then
+if api.parameters.droneVelocityMode == true then
 	api.droneSetSpeed = api.droneSetSpeed_velocity_control_mode
 else
 	api.droneSetSpeed = api.droneSetSpeed_waypoint_control_mode

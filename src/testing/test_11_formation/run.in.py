@@ -41,8 +41,10 @@ parameters = '''
     second_report_sight="true"
 
     driver_default_speed="0.5"
-    driver_slowdown_zone="0.7"
+    driver_slowdown_zone="1.5"
     driver_stop_zone="0.15"
+
+    drone_velocity_mode="true"
 '''
 
 # generate argos file
@@ -55,7 +57,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["OBSTACLES",         obstacle_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters, False, False)],
+        ''' + parameters, {"ideal_mode":False, "velocity_mode":True})],
         ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
     ]
 )

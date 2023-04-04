@@ -27,8 +27,8 @@ function step()
 	api.virtualFrame.rotateInSpeed(vector3(0,0,0.1))
 	--]]
 
-	--api.droneSetSpeed(0.1, 0, 0.1, 0.2)
-	api.move(vector3(0.1, 0, 0.1), vector3(0, 0, 0.2))
+	api.droneSetSpeed(0.1, 0, 0.0, 0.2)
+	--api.move(vector3(0.1, 0, 0.1), vector3(0, 0, 0.2))
 
 	api.postStep()
 	api.debug.showVirtualFrame()

@@ -50,23 +50,27 @@ random.seed(Inputseed)
 
 #######################################################################
 # Controller
-def generate_drone_controller(params, show_tag_rays=False, show_frustum=False) :
-    if show_tag_rays == True :
-        show_tag_rays = "true"
-    else :
-        show_tag_rays = "false"
+def generate_drone_controller(params, option={}) :
+    show_tag_rays = "false"
+    show_frustum = "false"
+    ideal_mode ="false"
+    velocity_mode ="false"
 
-    if show_frustum == True :
+    if "show_tag_rays" in option and option["show_tag_rays"] == True :
+        show_tag_rays = "true"
+    if "show_frustum" in option and option["show_frustum"] == True :
         show_frustum = "true"
-    else :
-        show_frustum = "false"
+    if "ideal_mode" in option and option["ideal_mode"] == True :
+        ideal_mode = "true"
+    if "velocity_mode" in option and option["velocity_mode"] == True :
+        velocity_mode = "true"
 
     text = '''
     <!-- Drone Controller -->
     <lua_controller id="drone">
       <actuators>
         <debug implementation="default" />
-        <drone_flight_system implementation="default" />
+        <drone_flight_system implementation="default" ideal_mode="{}" velocity_mode="{}" />
         <drone_leds implementation="default" />
         <radios implementation="default" />
       </actuators>
@@ -78,7 +82,7 @@ def generate_drone_controller(params, show_tag_rays=False, show_frustum=False) :
       </sensors>
       <params simulation="true" {} />
     </lua_controller>
-    '''.format(show_frustum, show_tag_rays, params)
+    '''.format(ideal_mode, velocity_mode, show_frustum, show_tag_rays, params)
 
     return text
 

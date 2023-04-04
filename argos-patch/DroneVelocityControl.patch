@@ -1,0 +1,755 @@
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.cpp b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.cpp
+index 8900829a..39872df2 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.cpp
++++ b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.cpp
+@@ -92,6 +92,32 @@ namespace argos {
+    /****************************************/
+    /****************************************/
+ 
++#ifdef ARGOS_WITH_LUA
++   /*
++    * The stack must have one value:
++    * 1. target velocity (vector3)
++    */
++   int LuaSetDroneFlightSystemTargetVelocity(lua_State* pt_lua_state) {
++      /* Check parameters */
++      if(lua_gettop(pt_lua_state) != 2) {
++         return luaL_error(pt_lua_state, "robot.flight_system.set_target_velocity() expects 2 arguments");
++      }
++      luaL_checktype(pt_lua_state, 1, LUA_TUSERDATA);
++      luaL_checktype(pt_lua_state, 2, LUA_TNUMBER);
++      /* Get actuator instance */
++      CCI_DroneFlightSystemActuator* pcFlightSystemActuator =
++         CLuaUtility::GetDeviceInstance<CCI_DroneFlightSystemActuator>(pt_lua_state, "flight_system");
++      /* Update actuator */
++      const CVector3& cTargetVelocity = CLuaVector3::ToVector3(pt_lua_state, 1);
++      pcFlightSystemActuator->SetTargetVelocity(cTargetVelocity);
++      pcFlightSystemActuator->SetTargetYawVelocity(lua_tonumber(pt_lua_state, 2));
++      return 0;
++   }
++#endif
++
++   /****************************************/
++   /****************************************/
++
+ #ifdef ARGOS_WITH_LUA
+    /*
+     * The stack must have zero values
+@@ -129,6 +155,9 @@ namespace argos {
+       CLuaUtility::AddToTable(pt_lua_state,
+                               "set_target_pose",
+                               &LuaSetDroneFlightSystemTargetPose);
++      CLuaUtility::AddToTable(pt_lua_state,
++                              "set_target_velocity",
++                              &LuaSetDroneFlightSystemTargetVelocity);
+       CLuaUtility::CloseRobotStateTable(pt_lua_state);
+    }
+ #endif
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.h b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.h
+index b7e87f50..64928e74 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.h
++++ b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_actuator.h
+@@ -23,12 +23,14 @@ namespace argos {
+ 
+       CCI_DroneFlightSystemActuator() :
+          m_cTargetPosition(CVector3::ZERO),
++         m_cTargetVelocity(CVector3::ZERO),
+          m_cTargetYawAngle(0.0) {} 
+ 
+       virtual ~CCI_DroneFlightSystemActuator() {}
+ 
+       virtual void Reset() {
+          m_cTargetPosition = CVector3::ZERO;
++         m_cTargetVelocity = CVector3::ZERO;
+          m_cTargetYawAngle.SetValue(0.0);
+       }
+ 
+@@ -36,11 +38,20 @@ namespace argos {
+           m_cTargetPosition = c_position;
+       }
+ 
++      void SetTargetVelocity(const CVector3& c_velocity) {
++         m_cTargetVelocity = c_velocity;
++      }
++
+       void SetTargetYawAngle(Real f_yaw_angle) {
+          m_cTargetYawAngle.SetValue(f_yaw_angle);
+          m_cTargetYawAngle.SignedNormalize();
+       }
+ 
++      void SetTargetYawVelocity(Real f_yaw_velocity) {
++         m_cTargetYawVelocity.SetValue(f_yaw_velocity);
++         m_cTargetYawVelocity.SignedNormalize();
++      }
++
+       virtual bool Ready() = 0;
+ 
+       virtual void Arm(bool b_arm, bool b_bypass_safety_checks) = 0;
+@@ -53,7 +64,9 @@ namespace argos {
+ 
+    protected:
+       CVector3 m_cTargetPosition;
++      CVector3 m_cTargetVelocity;
+       CRadians m_cTargetYawAngle;
++      CRadians m_cTargetYawVelocity;
+    };
+  
+ }
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.cpp b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.cpp
+index 4602b844..636333b6 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.cpp
++++ b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.cpp
+@@ -25,6 +25,7 @@ namespace argos {
+       CLuaUtility::AddToTable(pt_lua_state, "velocity", GetVelocity());
+       CLuaUtility::AddToTable(pt_lua_state, "angular_velocity", GetAngularVelocity());
+       CLuaUtility::AddToTable(pt_lua_state, "target_position", GetTargetPosition());
++      CLuaUtility::AddToTable(pt_lua_state, "target_velocity", GetTargetVelocity());
+       CLuaUtility::AddToTable(pt_lua_state, "height", GetHeight());
+       CLuaUtility::AddToTable(pt_lua_state, "battery_voltage", GetBatteryVoltage());
+       CLuaUtility::AddToTable(pt_lua_state, "temperature", GetTemperature());
+@@ -44,6 +45,7 @@ namespace argos {
+       CLuaUtility::AddToTable(pt_lua_state, "velocity", GetVelocity());
+       CLuaUtility::AddToTable(pt_lua_state, "angular_velocity", GetAngularVelocity());
+       CLuaUtility::AddToTable(pt_lua_state, "target_position", GetTargetPosition());
++      CLuaUtility::AddToTable(pt_lua_state, "target_velocity", GetTargetVelocity());
+       CLuaUtility::AddToTable(pt_lua_state, "height", GetHeight());
+       CLuaUtility::AddToTable(pt_lua_state, "battery_voltage", GetBatteryVoltage());
+       CLuaUtility::AddToTable(pt_lua_state, "temperature", GetTemperature());
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.h b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.h
+index 1f02ff37..2a720e42 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.h
++++ b/src/plugins/robots/drone/control_interface/ci_drone_flight_system_sensor.h
+@@ -28,6 +28,7 @@ namespace argos {
+          m_cOrientation(CVector3::ZERO),
+          m_cTargetOrientation(CVector3::ZERO),
+          m_cVelocity(CVector3::ZERO),
++         m_cTargetVelocity(CVector3::ZERO),
+          m_cAngularVelocity(CVector3::ZERO),
+          m_cAccelerometer(CVector3::ZERO),
+          m_cMagnetometer(CVector3::ZERO),
+@@ -44,6 +45,7 @@ namespace argos {
+          m_cOrientation = CVector3::ZERO;
+          m_cTargetOrientation = CVector3::ZERO;
+          m_cVelocity = CVector3::ZERO;
++         m_cTargetVelocity = CVector3::ZERO;
+          m_cAngularVelocity = CVector3::ZERO;
+          m_cAccelerometer = CVector3::ZERO;
+          m_cMagnetometer = CVector3::ZERO;
+@@ -73,6 +75,10 @@ namespace argos {
+          return m_cVelocity;
+       }
+ 
++      const CVector3& GetTargetVelocity() const {
++         return m_cTargetVelocity;
++      }
++
+       const CVector3& GetAngularVelocity() const {
+          return m_cAngularVelocity;
+       }
+@@ -101,6 +107,7 @@ namespace argos {
+       CVector3 m_cOrientation;
+       CVector3 m_cTargetOrientation;
+       CVector3 m_cVelocity;
++      CVector3 m_cTargetVelocity;
+       CVector3 m_cAngularVelocity; 
+       CVector3 m_cAccelerometer;
+       CVector3 m_cMagnetometer;
+diff --git a/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp b/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp
+index 4dbd761e..9ce90e7e 100644
+--- a/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp
++++ b/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp
+@@ -38,6 +38,12 @@ namespace argos {
+    void CDroneFlightSystemDefaultActuator::Init(TConfigurationNode& t_tree) {
+       try {
+          CCI_DroneFlightSystemActuator::Init(t_tree);
++         bool bIdealMode = false;
++         GetNodeAttributeOrDefault(t_tree, "ideal_mode", bIdealMode, bIdealMode);
++         m_pcFlightSystemEntity->SetIdealMode(bIdealMode);
++         bool bVelocityMode = false;
++         GetNodeAttributeOrDefault(t_tree, "velocity_mode", bVelocityMode, bVelocityMode);
++         m_pcFlightSystemEntity->SetVelocityMode(bVelocityMode);
+       }
+       catch(CARGoSException& ex) {
+          THROW_ARGOSEXCEPTION_NESTED("Initialization error in the drone flight system actuator.", ex);
+@@ -49,7 +55,9 @@ namespace argos {
+ 
+    void CDroneFlightSystemDefaultActuator::Update() {
+       m_pcFlightSystemEntity->SetTargetPosition(m_cTargetPosition);
++      m_pcFlightSystemEntity->SetTargetVelocity(m_cTargetVelocity);
+       m_pcFlightSystemEntity->SetTargetYawAngle(m_cTargetYawAngle);
++      m_pcFlightSystemEntity->SetTargetYawVelocity(m_cTargetYawVelocity);
+    }
+ 
+    /****************************************/
+diff --git a/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp b/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp
+index 7b4f4874..aeefaa01 100644
+--- a/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp
++++ b/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp
+@@ -21,9 +21,10 @@ namespace argos {
+       m_cVelocityReading(CVector3::ZERO),
+       m_cAngularVelocityReading(CVector3::ZERO),
+       m_cTargetPosition(CVector3::ZERO),
+-      m_fTargetYawAngle(0.0) {}
+-
+-
++      m_cTargetVelocity(CVector3::ZERO),
++      m_fTargetYawAngle(0.0),
++      m_bIdealMode(false),
++      m_bVelocityMode(false) {}
+ 
+    /****************************************/
+    /****************************************/
+@@ -36,6 +37,7 @@ namespace argos {
+       m_cVelocityReading(CVector3::ZERO),
+       m_cAngularVelocityReading(CVector3::ZERO),
+       m_cTargetPosition(CVector3::ZERO),
++      m_cTargetVelocity(CVector3::ZERO),
+       m_fTargetYawAngle(0.0) {}
+ 
+    /****************************************/
+@@ -47,6 +49,7 @@ namespace argos {
+       m_cVelocityReading = CVector3::ZERO;
+       m_cAngularVelocityReading = CVector3::ZERO;
+       m_cTargetPosition = CVector3::ZERO;
++      m_cTargetVelocity = CVector3::ZERO;
+       m_fTargetYawAngle = CRadians::ZERO;
+    }
+ 
+diff --git a/src/plugins/robots/drone/simulator/drone_flight_system_entity.h b/src/plugins/robots/drone/simulator/drone_flight_system_entity.h
+index b1fb7b69..bd18262a 100644
+--- a/src/plugins/robots/drone/simulator/drone_flight_system_entity.h
++++ b/src/plugins/robots/drone/simulator/drone_flight_system_entity.h
+@@ -79,6 +79,14 @@ namespace argos {
+          return m_cTargetPosition;
+       }
+ 
++      void SetTargetVelocity(const CVector3& c_velocity) {
++         m_cTargetVelocity = c_velocity;
++      }
++
++      const CVector3& GetTargetVelocity() const {
++         return m_cTargetVelocity;
++      }
++
+       void SetTargetYawAngle(const CRadians f_yaw_angle) {
+          m_fTargetYawAngle = f_yaw_angle;
+       }
+@@ -87,18 +95,45 @@ namespace argos {
+          return m_fTargetYawAngle;
+       }
+ 
++      void SetTargetYawVelocity(const CRadians f_yaw_velocity) {
++         m_fTargetYawVelocity = f_yaw_velocity;
++      }
++
++      const CRadians& GetTargetYawVelocity() const {
++         return m_fTargetYawVelocity;
++      }
++
+       virtual std::string GetTypeDescription() const {
+          return "flight_system";
+       }
+ 
++      void SetIdealMode(const bool b_ideal_mode) {
++         m_bIdealMode = b_ideal_mode;
++      }
++
++      const bool GetIdealMode() const {
++         return m_bIdealMode;
++      }
++
++      void SetVelocityMode(const bool b_velocity_mode) {
++         m_bVelocityMode = b_velocity_mode;
++      }
++
++      const bool GetVelocityMode() const {
++         return m_bVelocityMode;
++      }
++
+    private:
+       CVector3 m_cPositionReading;
+       CVector3 m_cOrientationReading;
+       CVector3 m_cVelocityReading;
+       CVector3 m_cAngularVelocityReading;
+       CVector3 m_cTargetPosition;
++      CVector3 m_cTargetVelocity;
+       CRadians m_fTargetYawAngle;
+-      
++      CRadians m_fTargetYawVelocity;
++      bool m_bIdealMode;
++      bool m_bVelocityMode;
+    };
+ }
+ 
+diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
+index 42af8764..d238ad76 100644
+--- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
++++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
+@@ -56,20 +56,25 @@ namespace argos
+       /* reset the drone's angular velocity */
+       m_cAngularVelocity.Set(0.0, 0.0, 0.0);
+       m_cAngularVelocityPrev.Set(0.0, 0.0, 0.0);
++       /* reset the drone's acceleration */
++      m_cAccelerometer.Set(0.0, 0.0, 0.0);
+       /* reset the drone's previous acceleration */
+       m_cAccelerationPrev.Set(0.0, 0.0, 0.0);
+       /* reset the drone's previous angular acceleration */
+       m_cAngularAccelerationPrev.Set(0.0, 0.0, 0.0);
+       /* reset the variables for PID controller  */
++      m_cPositionError.Set(0.0, 0.0, 0.0);
+       m_cOrientationTargetPrev.Set(0.0, 0.0, 0.0);
+       m_cAngularVelocityCumulativeError.Set(0.0, 0.0, 0.0);
+-      m_fAltitudeCumulativeError = 0.0;
+-      m_fTargetPositionZPrev = 0.0;
+-      /* reset the gyro bias */   
++      m_cPositionCumulativeError.Set(0.0, 0.0, 0.0);
++      /* set the gyro bias */
+       m_fGyroBias = MEMS_GYRO_BIAS_INIT;
+-      m_fAccelBias = MEMS_ACCEL_BIAS_INIT;   
++      /* set the accelerometer bias */
++      m_fAccelBias = MEMS_ACCEL_BIAS_INIT;
++      /* set the angle and velocity random walks */
+       m_fAngleRandomWalk = MEMS_GYRO_RANDOM_WALK_INIT;
+       m_fVelocityRandomWalk = MEMS_ACCEL_RANDOM_WALK_INIT;
++      /* create the random number generator */
+       m_pcRNG = CRandom::CreateRNG("argos");
+       /* update the axis-aligned bounding box, anchors, and entities */
+       UpdateEntityStatus();
+@@ -102,70 +107,130 @@ namespace argos
+       CVector3 cTargetPosition(m_cFlightSystemEntity.GetTargetPosition());
+       m_cInputPosition =
+          m_cHomePosition + cTargetPosition.RotateZ(CRadians(m_fHomeYawAngle));
++      CVector3 cTargetVelocity(m_cFlightSystemEntity.GetTargetVelocity());
++      m_cInputVelocity = cTargetVelocity.RotateZ(CRadians(m_fHomeYawAngle));
+       m_fInputYawAngle =
+          m_fHomeYawAngle + m_cFlightSystemEntity.GetTargetYawAngle().GetValue();
++      m_fInputYawVelocity = m_cFlightSystemEntity.GetTargetYawVelocity().GetValue();
+    }
+ 
+    /****************************************/
+    /****************************************/
+ 
+    void CPointMass3DDroneModel::UpdatePhysics() {
+-      /* update the position (XY) and altitude (Z) controller */
+-      CVector3 cPositionError(m_cInputPosition - m_cPosition);
+-      /* accumulate the altitude error */
+-      m_fAltitudeCumulativeError += cPositionError.GetZ() * GetPM3DEngine().GetPhysicsClockTick();
+-      /* calculate the azimuth contribution to the navigation of drone on XY plane */
+-      Real fAzimuth = std::atan2(std::abs(cPositionError.GetY()),
+-                                 std::abs(cPositionError.GetX()));
++      if (m_cFlightSystemEntity.GetIdealMode()) {
++         m_cVelocity = m_cInputVelocity;
++         m_cAngularVelocity.SetZ(m_fInputYawVelocity);
++
++         CQuaternion cOrientationInQuaternion;
++         cOrientationInQuaternion.FromEulerAngles(
++            CRadians(m_cOrientation.GetZ()),
++            CRadians(m_cOrientation.GetY()),
++            CRadians(m_cOrientation.GetX())
++         );
++         m_cPosition += m_cVelocity * GetPM3DEngine().GetPhysicsClockTick();
++         m_cOrientation += m_cAngularVelocity * GetPM3DEngine().GetPhysicsClockTick();
++         return;
++      }
+       /* calculate velocity limits */
+-      CRange<Real> cVelocityLimitX(-XY_VEL_MAX * std::cos(fAzimuth), XY_VEL_MAX * std::cos(fAzimuth));
+-      CRange<Real> cVelocityLimitY(-XY_VEL_MAX * std::sin(fAzimuth), XY_VEL_MAX * std::sin(fAzimuth));
++      CRange<Real> cVelocityLimitX(-XY_VEL_MAX, XY_VEL_MAX);
++      CRange<Real> cVelocityLimitY(-XY_VEL_MAX, XY_VEL_MAX);
+       CRange<Real> cVelocityLimitZ(-Z_VEL_MAX, Z_VEL_MAX);
+-      /* calculate desired XYZ velocities */
+-      Real fTargetTransVelX =
+-         cPositionError.GetX() * XY_POS_KP;
+-      Real fTargetTransVelY =
+-         cPositionError.GetY() * XY_POS_KP;
+-      Real fTargetTransVelZ =
+-         (m_cInputPosition.GetZ() - m_fTargetPositionZPrev) / GetPM3DEngine().GetPhysicsClockTick();
++      /* desired XYZ velocities */
++      Real fTargetTransVelX;
++      Real fTargetTransVelY;
++      Real fTargetTransVelZ;
++      if (m_cFlightSystemEntity.GetVelocityMode()) {
++         /* use input velocity as desired XYZ velocities */
++         fTargetTransVelX = m_cInputVelocity.GetX();
++         fTargetTransVelY = m_cInputVelocity.GetY();
++         fTargetTransVelZ = m_cInputVelocity.GetZ();
++      }
++      else {
++         /* store the positon errors */
++         m_cPositionError = m_cInputPosition - m_cPosition;
++         /* calculate the azimuth contribution to the navigation of drone on XY plane */
++         Real fAzimuth = std::atan2(std::abs(m_cPositionError.GetY()),
++                                std::abs(m_cPositionError.GetX()));
++         /* calculate velocity limits */
++         cVelocityLimitX = CRange<Real>(-XY_VEL_MAX * std::cos(fAzimuth), XY_VEL_MAX * std::cos(fAzimuth));
++         cVelocityLimitY = CRange<Real>(-XY_VEL_MAX * std::sin(fAzimuth), XY_VEL_MAX * std::sin(fAzimuth));
++         /* calculate desired XY velocities;  output of the XY position controller  */
++         fTargetTransVelX = m_cPositionError.GetX() * XY_POS_KP;
++         fTargetTransVelY = m_cPositionError.GetY() * XY_POS_KP;
++         fTargetTransVelZ = m_cPositionError.GetZ() * ALT_POS_KP;
++      }
++       /* accumulate the position errors */
++      m_cPositionCumulativeError += m_cPositionError * GetPM3DEngine().GetPhysicsClockTick();
+       /* saturate velocities */
+       cVelocityLimitX.TruncValue(fTargetTransVelX);
+       cVelocityLimitY.TruncValue(fTargetTransVelY);
+       cVelocityLimitZ.TruncValue(fTargetTransVelZ);
+-      /* store the previous desired altitude for the altitude PID calculation */
+-      m_fTargetPositionZPrev = m_cInputPosition.GetZ();
+-      /* store XYZ velocity error */
++      /* store the velocity errors */
+       CVector3 cTransVelocityError(fTargetTransVelX, fTargetTransVelY, fTargetTransVelZ);
+       cTransVelocityError -= m_cVelocity;
+-      /* calculate XY desired accelerations */
+-      CVector3 cTargetTransAcc = cTransVelocityError * XY_VEL_KP;
++      /* calculate desired XYZ acceleration */
++      Real fTargetTransAccX  = cTransVelocityError.GetX() * XY_VEL_KP;
++      Real fTargetTransAccY  = cTransVelocityError.GetY() * XY_VEL_KP;
++      Real fTargetTransAccZ  = cTransVelocityError.GetZ() * ALT_VEL_KP;
++      /* store the desired XYZ acceleration */
++      CVector3 cTargetTransAcc(fTargetTransAccX, fTargetTransAccY, fTargetTransAccZ);
++      /* output of the velocity controllers */
++     Real fVelocityXControlSignal = CalculatePIDResponse(cTransVelocityError.GetX(),
++                                                          m_cPositionCumulativeError.GetX(),
++                                                          cTransVelocityError.GetX(),
++                                                          XY_VEL_KP,
++                                                          XY_VEL_KI,
++                                                          XY_VEL_KD) + cTargetTransAcc.GetX();
++      Real fVelocityYControlSignal = CalculatePIDResponse(cTransVelocityError.GetY(),
++                                                            m_cPositionCumulativeError.GetY(),
++                                                            cTransVelocityError.GetY(),
++                                                            XY_VEL_KP,
++                                                            XY_VEL_KI,
++                                                            XY_VEL_KD) + cTargetTransAcc.GetY();
++      Real fVelocityZControlSignal = MASS * GetPM3DEngine().GetGravity() +
++         CalculatePIDResponse(m_cPositionError.GetZ(),
++                              m_cPositionCumulativeError.GetZ(),
++                              cTransVelocityError.GetZ(),
++                              ALT_VEL_KP,
++                              ALT_VEL_KI,
++                              ALT_VEL_KD) / (std::cos(m_cOrientation.GetX()) * std::cos(m_cOrientation.GetY())) + cTargetTransAcc.GetZ();
++      /* store the control signals */
++      CVector3 cControlSignals(fVelocityXControlSignal, fVelocityYControlSignal, fVelocityZControlSignal);
+       /* yaw angle correction to get downward Z axis in the right handed coordinate system */
+       Real fYawAngleCorrected(m_cOrientation.GetZ() + M_PI);
+       /* outputs of the position controller */
+       Real fDesiredRollAngle = std::cos(m_cOrientation.GetY()) * std::cos(m_cOrientation.GetX()) *
+-         (std::sin(fYawAngleCorrected) * cTargetTransAcc.GetX() - std::cos(fYawAngleCorrected) * cTargetTransAcc.GetY()) / m_cPM3DEngine.GetGravity();
++         (std::sin(fYawAngleCorrected) * cControlSignals.GetX() - std::cos(fYawAngleCorrected) * cControlSignals.GetY()) / m_cPM3DEngine.GetGravity();
+       Real fDesiredPitchAngle = std::cos(m_cOrientation.GetY()) * std::cos(m_cOrientation.GetX()) *
+-         (std::cos(fYawAngleCorrected) * cTargetTransAcc.GetX() + std::sin(fYawAngleCorrected) * cTargetTransAcc.GetY()) / m_cPM3DEngine.GetGravity();
+-      Real fDesiredYawAngle = m_fInputYawAngle;
++         (std::cos(fYawAngleCorrected) * cControlSignals.GetX() + std::sin(fYawAngleCorrected) * cControlSignals.GetY()) / m_cPM3DEngine.GetGravity();
++      Real fDesiredYawAngle = m_cOrientation.GetZ();
++      if (!m_cFlightSystemEntity.GetVelocityMode()) {
++         fDesiredYawAngle = m_fInputYawAngle;
++      }
+       /* saturate the outputs of the position controller */
+       ROLL_PITCH_LIMIT.TruncValue(fDesiredRollAngle);
+       ROLL_PITCH_LIMIT.TruncValue(fDesiredPitchAngle);
+       /* store the desired orientation values in a  vector */
+       CVector3 cOrientationTarget(fDesiredRollAngle, fDesiredPitchAngle, fDesiredYawAngle);
+-      /* output of the altitude controller */
+-      Real fAltitudeControlSignal = MASS * GetPM3DEngine().GetGravity() + 
+-         CalculatePIDResponse(cPositionError.GetZ(),
+-                              m_fAltitudeCumulativeError,
+-                              cTransVelocityError.GetZ(),
+-                              ALTITUDE_KP,
+-                              ALTITUDE_KI,
+-                              ALTITUDE_KD) / (std::cos(m_cOrientation.GetX()) * std::cos(m_cOrientation.GetY()));
+       /*** attitude (roll, pitch, yaw) control ***/
+       /* roll, pitch, yaw errors */
+       CVector3 cOrientationError(cOrientationTarget - m_cOrientation);
++      /* Normalize yaw error to [-pi, pi] */
++      CRadians cOrientationYawError;
++      cOrientationYawError.SetValue(cOrientationError.GetZ());
++      cOrientationError.SetZ(cOrientationYawError.SignedNormalize().GetValue());
+       /* desired  roll, pitch, yaw rates */
++      CVector3 cPrevTargetOrientationError = cOrientationTarget - m_cOrientationTargetPrev;
++      /* Normalize previous target orientation yaw error to [-pi, pi] */
++      CRadians cPrevTargetYawError;
++      cPrevTargetYawError.SetValue(cPrevTargetOrientationError.GetZ());
++      cPrevTargetOrientationError.SetZ(cPrevTargetYawError.SignedNormalize().GetValue());
+       CVector3 cAngularVelocityTarget =
+-         (cOrientationTarget - m_cOrientationTargetPrev) / GetPM3DEngine().GetPhysicsClockTick();
++         cPrevTargetOrientationError / GetPM3DEngine().GetPhysicsClockTick();
++      if (m_cFlightSystemEntity.GetVelocityMode()) {
++         cAngularVelocityTarget.SetZ(m_fInputYawVelocity);
++      }
+       /* previous desired roll, pitch, yaw values for the controllers */
+       m_cOrientationTargetPrev = cOrientationTarget;
+       /* rotational rate errors */
+@@ -182,7 +247,7 @@ namespace argos
+                               ROLL_PITCH_KI,
+                               ROLL_PITCH_KD);
+       /* pitch controller output signal */
+-      Real fAttitudeControlSignalY = INERTIA.GetY() * 
++      Real fAttitudeControlSignalY = INERTIA.GetY() *
+          CalculatePIDResponse(cOrientationError.GetY(),
+                               m_cAngularVelocityCumulativeError.GetY(),
+                               cAngularVelocityError.GetY(),
+@@ -190,7 +255,7 @@ namespace argos
+                               ROLL_PITCH_KI,
+                               ROLL_PITCH_KD);
+       /* yaw controller output signal */
+-      Real fAttitudeControlSignalZ = INERTIA.GetZ() * 
++      Real fAttitudeControlSignalZ = INERTIA.GetZ() *
+          CalculatePIDResponse(cOrientationError.GetZ(),
+                               m_cAngularVelocityCumulativeError.GetZ(),
+                               cAngularVelocityError.GetZ(),
+@@ -203,25 +268,25 @@ namespace argos
+       TORQUE_LIMIT.TruncValue(fAttitudeControlSignalZ);
+       /* calculate the rotor speeds from the control signals */
+       std::array<Real, 4> arrSquaredRotorSpeeds = {
+-         fAltitudeControlSignal / (4 * B) - 
++         cControlSignals.GetZ() / (4 * B) -
+             fAttitudeControlSignalX * (ROOT_TWO / (4 * B * ARM_LENGTH)) -
+             fAttitudeControlSignalY * (ROOT_TWO / (4 * B * ARM_LENGTH)) -
+             fAttitudeControlSignalZ / (4 * D),
+-         fAltitudeControlSignal / (4 * B) -
++         cControlSignals.GetZ() / (4 * B) -
+             fAttitudeControlSignalX * (ROOT_TWO / (4 * B * ARM_LENGTH)) +
+             fAttitudeControlSignalY * (ROOT_TWO / (4 * B * ARM_LENGTH)) +
+             fAttitudeControlSignalZ / (4 * D),
+-         fAltitudeControlSignal / (4 * B) +
++         cControlSignals.GetZ() / (4 * B) +
+             fAttitudeControlSignalX * (ROOT_TWO / (4 * B * ARM_LENGTH)) +
+             fAttitudeControlSignalY * (ROOT_TWO / (4 * B * ARM_LENGTH)) -
+             fAttitudeControlSignalZ / (4 * D),
+-         fAltitudeControlSignal / (4 * B) +
++         cControlSignals.GetZ() / (4 * B) +
+             fAttitudeControlSignalX * (ROOT_TWO / (4 * B * ARM_LENGTH)) -
+             fAttitudeControlSignalY * (ROOT_TWO / (4 * B * ARM_LENGTH)) +
+             fAttitudeControlSignalZ / (4 * D),
+       };
+       /* calculate the effect of the rotor speed on the drone dynamics*/
+-      Real fOmegaR = -std::sqrt(std::abs(arrSquaredRotorSpeeds[0])) + 
++      Real fOmegaR = -std::sqrt(std::abs(arrSquaredRotorSpeeds[0])) +
+                       std::sqrt(std::abs(arrSquaredRotorSpeeds[1])) +
+                      -std::sqrt(std::abs(arrSquaredRotorSpeeds[2])) +
+                       std::sqrt(std::abs(arrSquaredRotorSpeeds[3]));
+@@ -237,7 +302,7 @@ namespace argos
+       /* saturate the thrust */
+       THRUST_LIMIT.TruncValue(fThrust);
+       /* calculate the system response: acceleration */
+-      CVector3 cAcceleration {
++      m_cAccelerometer = {
+          (std::cos(fYawAngleCorrected) * std::sin(m_cOrientation.GetY()) * std::cos(m_cOrientation.GetX()) +
+           std::sin(fYawAngleCorrected) * std::sin(m_cOrientation.GetX())) * fThrust / MASS,
+          (std::sin(fYawAngleCorrected) * std::sin(m_cOrientation.GetY()) * std::cos(m_cOrientation.GetX()) -
+@@ -273,18 +338,18 @@ namespace argos
+       m_cOrientation += m_cAngularVelocity * GetPM3DEngine().GetPhysicsClockTick();
+       m_cAngularVelocityPrev = m_cAngularVelocity;
+       /* accelerometer sensor readings */
+-      cAcceleration.Set(
+-         cAcceleration.GetX() + m_pcRNG->Gaussian(MEMS_ACCEL_NOISE_STD_DEV_X, MEMS_ACCEL_NOISE_MEAN) + m_fAccelBias,
+-         cAcceleration.GetY() + m_pcRNG->Gaussian(MEMS_ACCEL_NOISE_STD_DEV_Y, MEMS_ACCEL_NOISE_MEAN) + m_fAccelBias,
+-         cAcceleration.GetZ() + m_pcRNG->Gaussian(MEMS_ACCEL_NOISE_STD_DEV_Z, MEMS_ACCEL_NOISE_MEAN) + m_fAccelBias
++      m_cAccelerometer.Set(
++         m_cAccelerometer.GetX() + m_pcRNG->Gaussian(MEMS_ACCEL_NOISE_STD_DEV_X, MEMS_ACCEL_NOISE_MEAN) + m_fAccelBias,
++         m_cAccelerometer.GetY() + m_pcRNG->Gaussian(MEMS_ACCEL_NOISE_STD_DEV_Y, MEMS_ACCEL_NOISE_MEAN) + m_fAccelBias,
++         m_cAccelerometer.GetZ() + m_pcRNG->Gaussian(MEMS_ACCEL_NOISE_STD_DEV_Z, MEMS_ACCEL_NOISE_MEAN) + m_fAccelBias
+       );
+       m_fAccelBias += m_fVelocityRandomWalk *  m_pcRNG->Gaussian(MEMS_ACCEL_BIAS_STD_DEV, MEMS_ACCEL_BIAS_MEAN);
+       /* update the accel bias velocity random walk */
+       m_fVelocityRandomWalk *= std::sqrt(GetPM3DEngine().GetPhysicsClockTick());
+       /* update the velocity using trapezoid integration */
+-      cAcceleration = 0.5 * (m_cAccelerationPrev + cAcceleration);
+-      m_cVelocity += cAcceleration * GetPM3DEngine().GetPhysicsClockTick();
+-      m_cAccelerationPrev = cAcceleration;
++      m_cAccelerometer = 0.5 * (m_cAccelerationPrev + m_cAccelerometer);
++      m_cVelocity += m_cAccelerometer * GetPM3DEngine().GetPhysicsClockTick();
++      m_cAccelerationPrev = m_cAccelerometer;
+       /* update the position using trapezoid integration */
+       m_cVelocity = 0.5 * (m_cVelocityPrev + m_cVelocity);
+       m_cPosition += m_cVelocity * GetPM3DEngine().GetPhysicsClockTick();
+@@ -345,7 +410,7 @@ namespace argos
+ 
+    bool CPointMass3DDroneModel::CheckIntersectionWithRay(Real &f_t_on_ray,
+                                                          const CRay3 &c_ray) const {
+-      const CQuaternion& cDroneOrientation = 
++      const CQuaternion& cDroneOrientation =
+          GetEmbodiedEntity().GetOriginAnchor().Orientation;
+       CVector3 cDroneAxis(CVector3::Z);
+       cDroneAxis.Rotate(cDroneOrientation);
+@@ -377,22 +442,25 @@ namespace argos
+    const CVector3 CPointMass3DDroneModel::INERTIA = {0.01085, 0.01092, 0.02121};
+    const Real CPointMass3DDroneModel::B = 1.1236e-5;
+    const Real CPointMass3DDroneModel::D = 1.4088e-7;
+-   const Real CPointMass3DDroneModel::JR = 5.225e-5; 
++   const Real CPointMass3DDroneModel::JR = 5.225e-5;
+    /* Limits */
+    const CRange<Real> CPointMass3DDroneModel::TORQUE_LIMIT = CRange<Real>(-0.5721, 0.5721);
+    const CRange<Real> CPointMass3DDroneModel::THRUST_LIMIT = CRange<Real>(-15, 15);
+-   const CRange<Real> CPointMass3DDroneModel::ROLL_PITCH_LIMIT = CRange<Real>(-0.5, 0.5);
+-   const Real CPointMass3DDroneModel::XY_VEL_MAX = 1;
+-   const Real CPointMass3DDroneModel::Z_VEL_MAX = 0.05;
++   const CRange<Real> CPointMass3DDroneModel::ROLL_PITCH_LIMIT = CRange<Real>(-0.1, 0.1);
++   const Real CPointMass3DDroneModel::XY_VEL_MAX = 5;
++   const Real CPointMass3DDroneModel::Z_VEL_MAX = 5;
+    /* PID coefficients */
+    const Real CPointMass3DDroneModel::XY_POS_KP = 1;
+-   const Real CPointMass3DDroneModel::XY_VEL_KP = 3;
++   const Real CPointMass3DDroneModel::ALT_POS_KP = 1;
+    const Real CPointMass3DDroneModel::YAW_KP = 13;
+    const Real CPointMass3DDroneModel::YAW_KI = 0;
+    const Real CPointMass3DDroneModel::YAW_KD = 8;
+-   const Real CPointMass3DDroneModel::ALTITUDE_KP = 5;
+-   const Real CPointMass3DDroneModel::ALTITUDE_KI = 0;
+-   const Real CPointMass3DDroneModel::ALTITUDE_KD = 6;   
++   const Real CPointMass3DDroneModel::ALT_VEL_KP = 5;
++   const Real CPointMass3DDroneModel::ALT_VEL_KI = 0;
++   const Real CPointMass3DDroneModel::ALT_VEL_KD = 6;
++   const Real CPointMass3DDroneModel::XY_VEL_KP = 1;
++   const Real CPointMass3DDroneModel::XY_VEL_KI = 0;
++   const Real CPointMass3DDroneModel::XY_VEL_KD = 3;
+    const Real CPointMass3DDroneModel::ROLL_PITCH_KP = 12;
+    const Real CPointMass3DDroneModel::ROLL_PITCH_KI = 0;
+    const Real CPointMass3DDroneModel::ROLL_PITCH_KD = 6;
+diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
+index 19da0fea..9956242a 100644
+--- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
++++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
+@@ -7,6 +7,7 @@
+ 
+ #ifndef POINTMASS3D_DRONE_MODEL_H
+ #define POINTMASS3D_DRONE_MODEL_H
++//#define POINTMASS3D_DRONE_DISABLE_NOISE
+ 
+ namespace argos {
+    class CPointMass3DEngine;
+@@ -23,12 +24,12 @@ namespace argos {
+    class CPointMass3DDroneModel : public CPointMass3DModel {
+ 
+    public:
+-      
++
+       CPointMass3DDroneModel(CPointMass3DEngine& c_engine,
+                              CDroneEntity& c_drone);
+ 
+       virtual ~CPointMass3DDroneModel() {}
+-      
++
+       virtual void Reset();
+ 
+       virtual void UpdateEntityStatus();
+@@ -50,7 +51,7 @@ namespace argos {
+       virtual void UpdateOriginAnchor(SAnchor& s_anchor);
+ 
+    private:
+-   
++
+       /* Random number generator */
+       CRandom::CRNG* m_pcRNG;
+       /* pid controller */
+@@ -61,16 +62,19 @@ namespace argos {
+                                        Real  f_k_i,
+                                        Real  f_k_d);
+ 
+-      /* reference to the flight system entity */ 
++      /* reference to the flight system entity */
+       CDroneFlightSystemEntity& m_cFlightSystemEntity;
+-      /* position and yaw input from the controller */ 
++      /* position, velocity and yaw input from the controller */
+       Real m_fInputYawAngle;
++      Real m_fInputYawVelocity;
+       CVector3 m_cInputPosition;
++      CVector3 m_cInputVelocity;
+       /* home position and yaw angle */
+       CVector3 m_cHomePosition;
+       Real m_fHomeYawAngle;
+       /* local copy of the drone's position */
+       CVector3 m_cPosition;
++      CVector3 m_cPositionError;
+       /* local copy of the drone's orientation */
+       CVector3 m_cOrientation;
+       /* velocity of the drone */
+@@ -80,14 +84,16 @@ namespace argos {
+       CVector3 m_cAngularVelocity;
+       CVector3 m_cAngularVelocityPrev;
+       /* acceleration of the drone */
++      CVector3 m_cAccelerometer;
+       CVector3 m_cAccelerationPrev;
+       /* angular acceleration of the drone */
+       CVector3 m_cAngularAccelerationPrev;
+       /* variables for PID controller */
+       CVector3 m_cOrientationTargetPrev;
+       CVector3 m_cAngularVelocityCumulativeError;
+-      Real m_fAltitudeCumulativeError;
+-      Real m_fTargetPositionZPrev;
++      CVector3 m_cPositionCumulativeError;
++      CVector3 m_cVelocityCumulativeError;
++      CVector3 m_cTargetPositionPrev;
+       /* sensor noise parameters */
+       Real m_fGyroBias;
+       Real m_fAccelBias;
+@@ -95,43 +101,46 @@ namespace argos {
+       Real m_fVelocityRandomWalk;
+ 
+       const static Real ROOT_TWO;
+-      /* height of the drone's body */ 
++      /* height of the drone's body */
+       const static Real HEIGHT;
+       /* length of the drone's arms */
+       const static Real ARM_LENGTH;
+       /* mass of the drone */
+       const static Real MASS;
+-      /* inertia of the drone */      
++      /* inertia of the drone */
+       const static CVector3 INERTIA;
+       /* thrust factor */
+       const static Real B;
+       /* torque factor */
+       const static Real D;
+-      /* rotor coefficient */ 
++      /* rotor coefficient */
+       const static Real JR;
+       /* position controller output limit */
+       const static CRange<Real> ROLL_PITCH_LIMIT;
+       /* thrust limit */
+       const static CRange<Real> THRUST_LIMIT;
+       /* torque limit */
+-      const static CRange<Real> TORQUE_LIMIT;    
++      const static CRange<Real> TORQUE_LIMIT;
+       /* max velocity can be achieved in the XY plane */
+       const static Real XY_VEL_MAX;
+       /* max velocity can be achieved on the Z axis */
+       const static Real Z_VEL_MAX;
+-      /* position controller parameters*/ 
++      /* position controller parameters*/
+       const static Real XY_POS_KP;
+-      const static Real XY_VEL_KP;
++      const static Real ALT_POS_KP;
+       /* PID controller constants */
+-      const static Real ALTITUDE_KP;     
+-      const static Real ALTITUDE_KI;
+-      const static Real ALTITUDE_KD;
+-      const static Real ROLL_PITCH_KP; 
+-      const static Real ROLL_PITCH_KI; 
++      const static Real ALT_VEL_KP;
++      const static Real ALT_VEL_KI;
++      const static Real ALT_VEL_KD;
++      const static Real XY_VEL_KP;
++      const static Real XY_VEL_KI;
++      const static Real XY_VEL_KD;
++      const static Real ROLL_PITCH_KP;
++      const static Real ROLL_PITCH_KI;
+       const static Real ROLL_PITCH_KD;
+-      const static Real YAW_KP; 
+-      const static Real YAW_KI; 
+-      const static Real YAW_KD; 
++      const static Real YAW_KP;
++      const static Real YAW_KI;
++      const static Real YAW_KD;
+       /* sensors noise constants*/
+       const static Real MEMS_GYRO_NOISE_MEAN;
+       const static Real MEMS_GYRO_BIAS_MEAN;
+@@ -149,7 +158,7 @@ namespace argos {
+       const static Real MEMS_ACCEL_NOISE_STD_DEV_Z;
+       const static Real MEMS_ACCEL_RANDOM_WALK_INIT;
+       const static Real MEMS_ACCEL_BIAS_INIT;
+-   
++
+    };
+ 
+ }

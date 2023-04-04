@@ -17,7 +17,7 @@
     <lua_controller id="drone">
       <actuators>
         <debug implementation="default" />
-        <drone_flight_system implementation="default" />
+        <drone_flight_system implementation="default" ideal_mode="true" velocity_mode="false"/>
         <drone_leds implementation="default" />
         <radios implementation="default" />
       </actuators>
@@ -30,9 +30,11 @@
       <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua" 
               simulation="true"
 
-              mode_2D="false"
-              drone_real_noise="false"
+              mode_2D="true"
+              drone_real_noise="true"
               drone_tilt_sensor="false"
+
+              drone_velocity_mode="true"
       />
     </lua_controller>
   </controllers>

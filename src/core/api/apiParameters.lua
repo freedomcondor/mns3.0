@@ -2,7 +2,7 @@ local Parameters = {
 	mode_2D = robot.params.mode_2D or "false",
 	mode_builderbot = robot.params.mode_builderbot or "false",
 	---- Drones ------------------------
-	droneVelocityControlMode = robot.params.drone_velocity_control_mode or "true",
+	droneVelocityMode = robot.params.drone_velocity_mode or "false",
 	droneRealNoise = robot.params.drone_real_noise or "false",
 	droneTiltSensor = robot.params.drone_tilt_sensor or "false",
 	second_report_sight = robot.params.second_report_sight or "un_set",
@@ -29,10 +29,10 @@ else
 	Parameters.mode_2D = false
 end
 
-if Parameters.droneVelocityControlMode == "true" then
-	Parameters.droneVelocityControlMode = true
+if Parameters.droneVelocityMode == "true" then
+	Parameters.droneVelocityMode = true
 else
-	Parameters.droneVelocityControlMode = false
+	Parameters.droneVelocityMode = false
 end
 
 if Parameters.second_report_sight == "true" then
