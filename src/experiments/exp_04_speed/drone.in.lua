@@ -95,16 +95,17 @@ local stateCount = 0
 			if marker == nil then marker = marker_behind end
 
 			local speed = 0
+			local max_speed = 5
 
 			if state == "preparation" then
 				stateCount = stateCount + 1
-				if stateCount == 300 then
+				if stateCount == 220 then
 					state = "forward"
 				end
 			elseif state == "forward" then
 				stateCount = stateCount + 1
-				speed = (stateCount - 300) * 1.0 / 50
-				if speed > 5 then speed = 5 end
+				speed = max_speed * (stateCount - 220) / 100
+				if speed > max_speed then speed = max_speed end
 			end
 	
 			if marker ~= nil then
@@ -113,7 +114,8 @@ local stateCount = 0
 				local vertical_position = target_position - target_position:dot(dirVec) * dirVec
 				--local vertical_speed = vertical_position:normalize() * 1
 				local vertical_speed = vertical_position * 0.5
-				local move_speed = vector3(dirVec):rotate(marker.orientationQ) * speed
+				--local move_speed = vector3(dirVec):rotate(marker.orientationQ) * speed
+				local move_speed = dirVec * speed
 	
 				vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
 				vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
