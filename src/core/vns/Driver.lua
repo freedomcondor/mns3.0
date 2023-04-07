@@ -291,12 +291,21 @@ function Driver.step(vns, waiting)
 		                        vns.api.virtualFrame.V3_VtoR(vector3(0,0,0)),
 		                        vns.api.virtualFrame.V3_VtoR(vector3(vns.goal.positionV3 + vector3(0,0,0.1)))
 		                       )
+
+		vns.api.debug.drawRing(color,
+		                       vns.api.virtualFrame.V3_VtoR(vector3(vns.goal.positionV3)),
+		                       0.2,
+		                       )
 	else
 		vns.driver.all_arrive = false
 		local color = "0,255,255,0"
 		vns.api.debug.drawArrow(color,
 		                        vns.api.virtualFrame.V3_VtoR(vector3(0,0,0)),
 		                        vns.api.virtualFrame.V3_VtoR(vector3(vns.goal.positionV3 + vector3(0,0,0.1)))
+		                       )
+		vns.api.debug.drawRing(color,
+		                       vns.api.virtualFrame.V3_VtoR(vector3(vns.goal.positionV3)),
+		                       0.2,
 		                       )
 	end
 	if vns.parentR ~= nil then
