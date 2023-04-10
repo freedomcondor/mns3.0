@@ -611,14 +611,14 @@ def generate_3D_circle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0, 
 #	]
 #	and the middle of the largest gate
 attempt_count_down_default = 1000
-def generate_gate_locations(gate_number, left_end, right_end, small_limit, large_limit, max_size) :
+def generate_gate_locations(gate_number, left_end, right_end, small_limit, large_limit, max_size, attempt_count_down_input=attempt_count_down_default) :
     margin = 0.4
     a = []
     largest_length = 0
     largest_loc = 0
     for i in range(1, gate_number+1) :
         valid_position = False
-        attempt_count_down = attempt_count_down_default
+        attempt_count_down = attempt_count_down_input
         while valid_position == False :
             # check attempt
             if attempt_count_down == 0 :
@@ -743,7 +743,8 @@ def generate_line_locations(number, x_left, y_left, x_right, y_right) :
 def generate_random_locations(n, origin_x,    origin_y, 
                                  x_min_limit, x_max_limit,
                                  y_min_limit, y_max_limit, 
-                                 near_limit,  far_limit) :
+                                 near_limit,  far_limit,
+                                 attempt_count_down_input=attempt_count_down_default) :
     a = []
 
     # if origin is not None then add origin as the first
@@ -755,7 +756,7 @@ def generate_random_locations(n, origin_x,    origin_y,
     # start generating
     for i in range(start, n) : # 0/1 to n - 1
         valid = False
-        attempt_count_down = attempt_count_down_default
+        attempt_count_down = attempt_count_down_input
         while valid == False :
             # check attempt
             if attempt_count_down == 0 :
@@ -807,7 +808,8 @@ def generate_slave_locations_with_origin(n, master_locations,
                                          origin_x, origin_y,
                                          x_min_limit, x_max_limit,
                                          y_min_limit, y_max_limit,
-                                         near_limit, far_limit) :
+                                         near_limit, far_limit,
+                                         attempt_count_down_input=attempt_count_down_default) :
     a = []
 
     # if origin is not None then add origin as the first
@@ -818,7 +820,7 @@ def generate_slave_locations_with_origin(n, master_locations,
 
     for i in range(start, n) :
         valid = False
-        attempt_count_down = attempt_count_down_default
+        attempt_count_down = attempt_count_down_input
         while valid == False :
             # check attempt
             if attempt_count_down == 0 :
