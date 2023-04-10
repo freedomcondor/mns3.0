@@ -294,7 +294,7 @@ function Driver.step(vns, waiting)
 
 		vns.api.debug.drawRing(color,
 		                       vns.api.virtualFrame.V3_VtoR(vector3(vns.goal.positionV3)),
-		                       0.2,
+		                       0.2
 		                       )
 	else
 		vns.driver.all_arrive = false
@@ -305,7 +305,7 @@ function Driver.step(vns, waiting)
 		                       )
 		vns.api.debug.drawRing(color,
 		                       vns.api.virtualFrame.V3_VtoR(vector3(vns.goal.positionV3)),
-		                       0.2,
+		                       0.2
 		                       )
 	end
 	if vns.parentR ~= nil then
