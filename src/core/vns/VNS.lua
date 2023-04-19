@@ -17,6 +17,7 @@ VNS.BrainKeeper = require("BrainKeeper")
 VNS.CollectiveSensor = require("CollectiveSensor")
 VNS.IntersectionDetector = require("IntersectionDetector")
 VNS.Neuron = require("Neuron")
+VNS.Learner = require("Learner")
 VNS.Stabilizer = require("Stabilizer")
 
 VNS.Driver= require("Driver")
@@ -40,6 +41,7 @@ VNS.Modules = {
 	VNS.BrainKeeper,
 
 	VNS.Neuron,
+	VNS.Learner,
 
 	VNS.Driver,
 }
@@ -180,6 +182,17 @@ function VNS.setGoal(vns, positionV3, orientationQ)
 			module.setGoal(vns, positionV3, orientationQ)
 		end
 	end
+end
+
+function VNS.getNeighbours(vns)
+	local neighbours = {}
+	for idS, robotR in pairs(vns.childrenRT) do
+		neighbours[idS] = robotR
+	end
+	if vns.parentR ~= nil then
+		neighbours[vns.parentR.idS] = vns.parentR
+	end
+	return neighbours
 end
 
 ---- Print Debug Info ------------------------------------------

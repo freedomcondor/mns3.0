@@ -10,3 +10,6 @@ add_subdirectory(test_07_chain)
 
 add_subdirectory(test_11_formation)
 add_subdirectory(test_21_scalability)
+
+add_subdirectory(test_31_learner)
+add_subdirectory(test_32_learner_inter_robots)
