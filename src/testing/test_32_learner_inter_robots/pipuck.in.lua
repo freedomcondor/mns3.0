@@ -39,7 +39,7 @@ function reset()
 	}))
 
 	if robot.id == "pipuck1" then
-		vns.learner.knowledge["rescue"] = string.format([[
+		vns.learner.knowledges["rescue"] = {hash = 1, rank = 1, node = string.format([[
 			function()
 				local childID = "%s"
 				if vns.childrenRT[childID] ~= nil and
@@ -53,9 +53,9 @@ function reset()
 				end
 				return false, true
 			end
-		]], robot.id)
+		]], robot.id)}
 
-		vns.learner.knowledge["execute_rescue"] = [[
+		vns.learner.knowledges["execute_rescue"] = {hash = 1, rank = 1, node = [[
 			function()
 				if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "obstacle")) do
 					local target = {
@@ -68,11 +68,11 @@ function reset()
 				end end
 				return false, true
 			end
-		]]
+		]]}
 	end
 
 	if robot.id == "pipuck2" then
-		vns.learner.knowledge["rescue"] = string.format([[
+		vns.learner.knowledges["rescue"] = {hash = 2, rank = 2, node = string.format([[
 			function()
 				local childID = "%s"
 				if vns.childrenRT[childID] ~= nil and
@@ -86,9 +86,9 @@ function reset()
 				end
 				return false, true
 			end
-		]], robot.id)
+		]], robot.id)}
 
-		vns.learner.knowledge["execute_rescue"] = [[
+		vns.learner.knowledges["execute_rescue"] = {hash = 1, rank = 1, node = [[
 			function()
 				if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "obstacle_trans")) do
 					local trans = msgM.dataT.obstacle.transV3
@@ -99,7 +99,7 @@ function reset()
 				end end
 				return false, true
 			end
-		]]
+		]]}
 	end
 end
 
@@ -110,8 +110,8 @@ function step()
 
 	bt()
 
-	if vns.learner.knowledge["rescue"] ~= nil then
-		vns.Learner.spreadKnowledge(vns, "rescue", vns.learner.knowledge["rescue"])
+	if vns.learner.knowledges["rescue"] ~= nil then
+		vns.Learner.spreadKnowledge(vns, "rescue", vns.learner.knowledges["rescue"])
 	end
 
 	vns.postStep(vns)

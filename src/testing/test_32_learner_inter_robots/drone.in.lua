@@ -42,7 +42,7 @@ function reset()
 	}))
 
 	if robot.id == "drone1" then
-		vns.learner.knowledge["search_and_rescue"] = [[
+		vns.learner.knowledges["search_and_rescue"] = {hash = 1, rank = 1, node = [[
 			{type = "selector", children = {
 				{type = "sequence", children = {
 					vns.Learner.create_knowledge_node(vns, "search"),
@@ -50,8 +50,8 @@ function reset()
 				}},
 				function() return false, true end -- always return true
 			}}
-		]]
-		vns.learner.knowledge["search"] = [[
+		]]}
+		vns.learner.knowledges["search"] = {hash = 1, rank = 1, node = [[
 			function()
 				if vns.avoider.obstacles[1] ~= nil then
 					print("I see a block")
@@ -61,7 +61,7 @@ function reset()
 					return false, false
 				end
 			end
-		]]
+		]]}
 	end
 end
 

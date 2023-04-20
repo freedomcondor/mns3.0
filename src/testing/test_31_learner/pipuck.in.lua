@@ -37,17 +37,17 @@ function reset()
 	}))
 
 	if robot.id == "pipuck1" then
-		vns.learner.knowledge["print_test"] = [[
+		vns.learner.knowledges["print_test"] = {hash = 1, rank = 1, node = [[
 			function()
 				print("test")
 				return false, true
 			end
-		]]
-		vns.learner.knowledge["print_twice"] = [[
+		]]}
+		vns.learner.knowledges["print_twice"] = {hash = 1, rank = 1, node = [[
 		{type = "sequence", children = {
 			vns.Learner.create_knowledge_node(vns, "print_test"),
 			vns.Learner.create_knowledge_node(vns, "print_test2"),
-		}}]]
+		}}]]}
 	end
 end
 
@@ -59,8 +59,8 @@ function step()
 	bt()
 
 	if robot.id == "pipuck1" then
-		vns.Learner.spreadKnowledge(vns, "print_test", vns.learner.knowledge["print_test"])
-		vns.Learner.spreadKnowledge(vns, "print_twice", vns.learner.knowledge["print_twice"])
+		vns.Learner.spreadKnowledge(vns, "print_test", vns.learner.knowledges["print_test"])
+		vns.Learner.spreadKnowledge(vns, "print_twice", vns.learner.knowledges["print_twice"])
 	end
 
 	vns.postStep(vns)

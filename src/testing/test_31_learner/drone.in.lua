@@ -42,7 +42,7 @@ function reset()
 	}))
 
 	if robot.id == "drone1" then
-		vns.learner.knowledge["print_test2"] = "function() print(\"test2\") return false, true end"
+		vns.learner.knowledges["print_test2"] = {hash = 1, rank = 1, node = "function() print(\"test2\") return false, true end"}
 	end
 end
 
