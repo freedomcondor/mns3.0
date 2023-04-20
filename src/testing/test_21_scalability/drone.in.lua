@@ -77,14 +77,40 @@ function reset()
 end
 
 function step()
+	local getMEM_title_linux  = "top -n 1 | grep PID"
+	local getMEM_argos_linux = "top -b -n 1 | grep argos3"
+	local getMEM_title_mac  = "top -l 1 | grep PID"
+	local getMEM_argos_mac = "top -l 1 | grep argos3"
+	local getTIME_linux = "date +\"%s.%N\""
+	local getTIME_mac   = "gdate +\"%s.%N\""
+
+	local getMEM_title = getMEM_title_linux
+	local getMEM_argos = getMEM_argos_linux
+	local getTIME = getTIME_linux
+
+	local mac = false
+	if mac == true then
+		getMEM_title = getMEM_title_mac
+		getMEM_argos = getMEM_argos_mac
+		getTIME = getTIME_mac
+	end
+
 	if robot.id == "drone1" then
 		if api.stepCount == 74 then
-			os.execute("top -l 1 | grep PID > " .. dataFileName)
-			os.execute("top -l 1 | grep argos3 >> " .. dataFileName)
+			--os.execute("top -n 1 | grep PID > " .. dataFileName)
+			--os.execute("top -b -n 1 | grep argos3 >> " .. dataFileName)
+			--os.execute("top -l 1 | grep PID > " .. dataFileName)
+			--os.execute("top -l 1 | grep argos3 >> " .. dataFileName)
+			os.execute(getMEM_title .. " > " .. dataFileName)
+			os.execute(getMEM_argos .. " >> " .. dataFileName)
 		elseif api.stepCount == 75 then
-			os.execute("gdate +\"%s.%N\" >> " .. dataFileName)
+			--os.execute("date +\"%s.%N\" >> " .. dataFileName)
+			--os.execute("gdate +\"%s.%N\" >> " .. dataFileName)
+			os.execute(getTIME .. " >> " .. dataFileName)
 		elseif api.stepCount == 100 then
-			os.execute("gdate +\"%s.%N\" >> " .. dataFileName)
+			--os.execute("date +\"%s.%N\" >> " .. dataFileName)
+			--os.execute("gdate +\"%s.%N\" >> " .. dataFileName)
+			os.execute(getTIME .. " >> " .. dataFileName)
 		end
 	end
 
