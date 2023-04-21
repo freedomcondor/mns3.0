@@ -48,9 +48,9 @@
                for index, child in ipairs(children) do
                   if states[index] == nil then
                      if node.dynamic == true then
-                        running, success = child(children)
+                        running, states[index] = child(children)
                      else
-                        running, success = child()
+                        running, states[index] = child()
                      end
                      if running then
                         return true -- child running
@@ -89,9 +89,9 @@
                for index, child in ipairs(children) do
                   if states[index] == nil then
                      if node.dynamic == true then
-                        running, success = child(children)
+                        running, states[index] = child(children)
                      else
-                        running, success = child()
+                        running, states[index] = child()
                      end
                      if running then
                         return true -- child running
