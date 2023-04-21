@@ -193,7 +193,8 @@ namespace argos {
 
    const btScalar CDynamics3DPiPuckExtModel::BODY_MASS(0.33);
    const btScalar CDynamics3DPiPuckExtModel::BODY_DISTANCE_FROM_FLOOR(0.00125);
-   const btVector3 CDynamics3DPiPuckExtModel::BODY_HALF_EXTENTS(0.0362, 0.03165, 0.0362);
+   //const btVector3 CDynamics3DPiPuckExtModel::BODY_HALF_EXTENTS(0.0362, 0.03165, 0.0362);
+   const btVector3 CDynamics3DPiPuckExtModel::BODY_HALF_EXTENTS(0.1, 0.03165, 0.1);
    const btTransform CDynamics3DPiPuckExtModel::BODY_OFFSET(
       btQuaternion(0.0, 0.0, 0.0, 1.0), btVector3(0.0, BODY_DISTANCE_FROM_FLOOR, 0.0)
    );
