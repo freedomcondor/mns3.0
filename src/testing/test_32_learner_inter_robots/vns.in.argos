@@ -123,10 +123,10 @@
     </pipuck_ext-->
 
     <!-- add builderbots -->
-    <!--builderbot id="builderbot21">
+    <builderbot id="builderbot21">
       <body position="0.5,0,0" orientation="0,0,0"/>
       <controller config="builderbot"/>
-    </builderbot-->
+    </builderbot>
 
     <block id="block">
       <body position="0.2,0,0" orientation="0,0,0" />

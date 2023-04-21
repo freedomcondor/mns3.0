@@ -17,7 +17,10 @@ pairs = require("AlphaPairs")
 local api = require("builderbotAPI")
 robot.vns_api = api
 local VNS = require("VNS")
-local BT = require("BehaviorTree")
+local BT = require("DynamicBehaviorTree")
+--local BT = require("BehaviorTree")
+
+Transform = require("Transform")
 
 ----- data
 local bt
@@ -84,6 +87,8 @@ function reset()
 	{type = "sequence", children = {
 		vns.create_preconnector_node(vns),
 		vns.create_vns_core_node(vns),
+		vns.Learner.create_learner_node(vns),
+		vns.Learner.create_knowledge_node(vns, "execute_rescue"),
 		{type = "selector*", children = {
 			{type = "sequence", children = {
 				function() 
@@ -101,6 +106,37 @@ function reset()
 			}},
 		}}
 	}}
+
+	vns.learner.knowledges["rescue"] = {hash = 3, rank = 3, node = string.format([[
+		function()
+			local childID = "%s"
+			if vns.childrenRT[childID] ~= nil and
+			   data.target ~= nil then
+				vns.Msg.send(childID, "obstacle", {
+					obstacle = {
+						positionV3 = vns.api.virtualFrame.V3_VtoR(data.target.positionV3),
+						orientationQ = vns.api.virtualFrame.Q_VtoR(data.target.orientationQ),
+					}
+				})
+			end
+			return false, true
+		end
+	]], robot.id)}
+
+	vns.learner.knowledges["execute_rescue"] = {hash = 1, rank = 1, node = [[
+		function()
+			if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "obstacle")) do
+				local target = {
+					positionV3 = msgM.dataT.obstacle.positionV3,
+					orientationQ = msgM.dataT.obstacle.orientationQ,
+				}
+				Transform.AxBisC(vns.parentR, target, target)
+
+				vns.setGoal(vns, target.positionV3, target.orientationQ)
+			end end
+			return false, true
+		end
+	]]}
 end
 
 function step()
@@ -109,6 +145,10 @@ function step()
 	vns.preStep(vns)
 
 	bt()
+
+	if vns.learner.knowledges["rescue"] ~= nil then
+		vns.Learner.spreadKnowledge(vns, "rescue", vns.learner.knowledges["rescue"])
+	end
 
 	vns.postStep(vns)
 	api.postStep()
