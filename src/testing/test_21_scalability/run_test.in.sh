@@ -5,7 +5,7 @@ runPath=scalability_test
 mkdir $runPath
 cd $runPath
 
-for i in 5 10 15 20 25 30
+for i in 20 40 60 80 100 120 140 160 180 200
 do
 	echo running $i
 	mkdir $i

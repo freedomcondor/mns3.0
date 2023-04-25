@@ -50,4 +50,4 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
     ]
 )
 
-os.system("argos3 -c vns.argos" + VisualizationArgosFlag)
+os.system("timeout 3600 argos3 -c vns.argos" + VisualizationArgosFlag)

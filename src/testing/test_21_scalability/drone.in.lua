@@ -88,7 +88,7 @@ function step()
 	local getMEM_argos = getMEM_argos_linux
 	local getTIME = getTIME_linux
 
-	local mac = false
+	local mac = true
 	if mac == true then
 		getMEM_title = getMEM_title_mac
 		getMEM_argos = getMEM_argos_mac
@@ -96,22 +96,24 @@ function step()
 	end
 
 	if robot.id == "drone1" then
+		if api.stepCount == 1  then
+			os.execute(getMEM_title .. " > " .. dataFileName)
+		end
+		if api.stepCount % 5 == 0  then
+			os.execute("echo ".. tostring(api.stepCount) .. " >> " .. dataFileName)
+			os.execute(getMEM_argos .. " >> " .. dataFileName)
+			os.execute(getTIME .. " >> " .. dataFileName)
+		end
+		--[[
 		if api.stepCount == 74 then
-			--os.execute("top -n 1 | grep PID > " .. dataFileName)
-			--os.execute("top -b -n 1 | grep argos3 >> " .. dataFileName)
-			--os.execute("top -l 1 | grep PID > " .. dataFileName)
-			--os.execute("top -l 1 | grep argos3 >> " .. dataFileName)
 			os.execute(getMEM_title .. " > " .. dataFileName)
 			os.execute(getMEM_argos .. " >> " .. dataFileName)
 		elseif api.stepCount == 75 then
-			--os.execute("date +\"%s.%N\" >> " .. dataFileName)
-			--os.execute("gdate +\"%s.%N\" >> " .. dataFileName)
 			os.execute(getTIME .. " >> " .. dataFileName)
 		elseif api.stepCount == 100 then
-			--os.execute("date +\"%s.%N\" >> " .. dataFileName)
-			--os.execute("gdate +\"%s.%N\" >> " .. dataFileName)
 			os.execute(getTIME .. " >> " .. dataFileName)
 		end
+		--]]
 	end
 
 	--logger(robot.id, api.stepCount, "----------------------------")
