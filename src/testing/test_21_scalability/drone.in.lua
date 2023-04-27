@@ -77,7 +77,7 @@ function reset()
 end
 
 function step()
-	local getMEM_title_linux  = "top -n 1 | grep PID"
+	local getMEM_title_linux  = "top -b -n 1 | grep PID"
 	local getMEM_argos_linux = "top -b -n 1 | grep argos3"
 	local getMEM_title_mac  = "top -l 1 | grep PID"
 	local getMEM_argos_mac = "top -l 1 | grep argos3"
