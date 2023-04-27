@@ -88,7 +88,7 @@ function step()
 	local getMEM_argos = getMEM_argos_linux
 	local getTIME = getTIME_linux
 
-	local mac = true
+	local mac = @CMAKE_APPLE_FLAG@
 	if mac == true then
 		getMEM_title = getMEM_title_mac
 		getMEM_argos = getMEM_argos_mac

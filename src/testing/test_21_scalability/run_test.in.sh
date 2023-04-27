@@ -11,7 +11,7 @@ do
 	mkdir $i
 
 	cd $i
-	python3 $pythonPath -l $i -v false
+	timeout 3600 python3 $pythonPath -l $i -v false
 	cd ..
 done
 
