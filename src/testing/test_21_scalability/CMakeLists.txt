@@ -15,8 +15,6 @@ configure_file( morphology_20.lua    simu_code/morphology_20.lua)
 configure_file( vns_template.in.argos      simu_code/vns_template.argos)
 configure_file( run.in.py                  simu_code/run.py)
 
-configure_file( run_test.in.sh             run_test.sh)
-
 file(GLOB MY_PUBLIC_HEADERS ${CMAKE_SOURCE_DIR}/core/api/*)
 file(COPY ${MY_PUBLIC_HEADERS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/simu_code)
 
@@ -25,3 +23,5 @@ file(COPY ${MY_PUBLIC_HEADERS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/simu_code
 
 file(GLOB MY_PUBLIC_HEADERS ${CMAKE_SOURCE_DIR}/core/vns/*)
 file(COPY ${MY_PUBLIC_HEADERS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/simu_code)
+
+add_subdirectory(scripts)

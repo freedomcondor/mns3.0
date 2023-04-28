@@ -96,8 +96,9 @@ function step()
 	end
 
 	if robot.id == "drone1" then
-		if api.stepCount == 1  then
+		if api.stepCount == 0  then
 			os.execute(getMEM_title .. " > " .. dataFileName)
+			os.execute(getTIME .. " >> " .. dataFileName)
 		end
 		if api.stepCount % 5 == 0  then
 			os.execute("echo ".. tostring(api.stepCount) .. " >> " .. dataFileName)

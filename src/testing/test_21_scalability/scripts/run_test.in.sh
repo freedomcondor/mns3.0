@@ -1,4 +1,4 @@
-pythonPath=@CMAKE_CURRENT_BINARY_DIR@/simu_code/run.py
+pythonPath=@CMAKE_CURRENT_BINARY_DIR@/../simu_code/run.py
 currentPath=`pwd`
 runPath=scalability_test
 
