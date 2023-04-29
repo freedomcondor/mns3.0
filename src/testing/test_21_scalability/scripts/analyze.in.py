@@ -22,7 +22,8 @@ def getSubfolders(data_dir) :
 
 #----------------------------------------------------------------
 def readMemFromLine_linux(line) :
-	return 1
+	memstr = line.split()[9]
+	return float(memstr)
 
 def readMemFromLine_mac(line) :
 	memstr = line.split()[7]
@@ -33,9 +34,12 @@ def readMemFromLine_mac(line) :
 	return float(memstr)
 
 readMemFromLine = readMemFromLine_linux
+
+'''
 mac = "@CMAKE_APPLE_FLAG@"
 if mac == "true" :
 	readMemFromLine = readMemFromLine_mac
+'''
 
 def readDataFile(fileName) :
 	file = open(fileName,"r")
@@ -48,6 +52,10 @@ def readDataFile(fileName) :
 	for line in file :
 		#--- start     ----
 		if idx == "init" :
+			if line.split()[1] == "COMMAND" :
+				readMemFromLine = readMemFromLine_mac
+			else :
+				readMemFromLine = readMemFromLine_linux
 			idx = "init_time"
 			continue
 		#--- init time ----
@@ -77,7 +85,8 @@ def readDataFile(fileName) :
 	return step, mem, time
 
 #----------------------------------------------------------------
-dataFolder = "scalability_test"
+#dataFolder = "scalability_test"
+dataFolder = "scalability_test_officePC"
 dataFile = "record.dat"
 
 tests = []

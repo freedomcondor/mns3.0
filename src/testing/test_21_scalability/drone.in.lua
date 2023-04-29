@@ -81,23 +81,28 @@ function step()
 	local getMEM_argos_linux = "top -b -n 1 | grep argos3"
 	local getMEM_title_mac  = "top -l 1 | grep PID"
 	local getMEM_argos_mac = "top -l 1 | grep argos3"
+	local getTotalMEM_linux = "grep MemTotal /proc/meminfo"
+	local getTotalMEM_mac = "sysctl hw.memsize"
 	local getTIME_linux = "date +\"%s.%N\""
 	local getTIME_mac   = "gdate +\"%s.%N\""
 
 	local getMEM_title = getMEM_title_linux
 	local getMEM_argos = getMEM_argos_linux
-	local getTIME = getTIME_linux
+	local getTIME      = getTIME_linux
+	local getTotalMEM  = getTotalMEM_linux
 
 	local mac = @CMAKE_APPLE_FLAG@
 	if mac == true then
 		getMEM_title = getMEM_title_mac
 		getMEM_argos = getMEM_argos_mac
-		getTIME = getTIME_mac
+		getTIME      = getTIME_mac
+		getTotalMEM  = getTotalMEM_mac
 	end
 
 	if robot.id == "drone1" then
 		if api.stepCount == 0  then
-			os.execute(getMEM_title .. " > " .. dataFileName)
+			os.execute(getTotalMEM .. " > " .. dataFileName)
+			os.execute(getMEM_title .. " >> " .. dataFileName)
 			os.execute(getTIME .. " >> " .. dataFileName)
 		end
 		if api.stepCount % 5 == 0  then
