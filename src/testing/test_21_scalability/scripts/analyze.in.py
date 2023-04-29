@@ -21,11 +21,11 @@ def getSubfolders(data_dir) :
 	return subfolders
 
 #----------------------------------------------------------------
-def readMemFromLine_linux(line) :
-	memstr = line.split()[9]
-	return float(memstr)
+def readMemFromLine_linux(line, total_mem) :
+	memstr = line.split()[9] # %
+	return float(memstr) * 0.01 * total_mem
 
-def readMemFromLine_mac(line) :
+def readMemFromLine_mac(line, total_mem) :
 	memstr = line.split()[7]
 	memstr = memstr.replace("K", "E-06")
 	memstr = memstr.replace("M", "E-03")
@@ -48,14 +48,24 @@ def readDataFile(fileName) :
 	mem = []
 	time = []
 
-	idx = "init"
+	total_mem = 0
+
+	idx = "total_mem"
 	for line in file :
 		#--- start     ----
-		if idx == "init" :
-			if line.split()[1] == "COMMAND" :
-				readMemFromLine = readMemFromLine_mac
-			else :
+		if idx == "total_mem" :
+			if line.split()[0] == "MemTotal:" :
+				# linux
 				readMemFromLine = readMemFromLine_linux
+				total_mem = float(line.split()[1]) * 1E-06
+			if line.split()[0] == "hw.memsize:" :
+				# mac
+				readMemFromLine = readMemFromLine_mac
+				total_mem = float(line.split()[1]) * 1E-09
+			idx = "init"
+			continue
+		if idx == "init" :
+			# read the title line
 			idx = "init_time"
 			continue
 		#--- init time ----
@@ -70,7 +80,7 @@ def readDataFile(fileName) :
 			continue
 		#--- step block: mem ---
 		if idx == "mem" :
-			mem.append(readMemFromLine(line))
+			mem.append(readMemFromLine(line, total_mem))
 			idx = "time"
 			continue
 		#--- step block: time ---
