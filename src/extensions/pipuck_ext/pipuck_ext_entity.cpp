@@ -60,11 +60,14 @@ namespace argos {
          if(!strWifiMedium.empty()) {
             CRadioMedium& cWifiRadioMedium =
                CSimulator::GetInstance().GetMedium<CRadioMedium>(strWifiMedium);
+            Real fWifiTransmissionRange = WIFI_TRANSMISSION_RANGE;
+            GetNodeAttributeOrDefault(t_tree, "wifi_transmission_range", fWifiTransmissionRange, fWifiTransmissionRange);
             m_pcRadioEquippedEntity->AddRadio("wifi",
                                               WIFI_OFFSET_POSITION,
                                               m_pcEmbodiedEntity->GetOriginAnchor(),
                                               cWifiRadioMedium,
-                                              WIFI_TRANSMISSION_RANGE);
+                                              fWifiTransmissionRange,
+                                              GetId());
             m_pcRadioEquippedEntity->Enable();
          }
          AddComponent(*m_pcRadioEquippedEntity);

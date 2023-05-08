@@ -370,22 +370,28 @@ def generate_block_xml(i, x, y, th, type) :
     '''.format(i, type, x, y, th)
     return tag
 
-def generate_drone_xml(i, x, y, th) :
+def generate_drone_xml(i, x, y, th, wifi_range=None) :
+    wifi_range_xml = ""
+    if wifi_range != None:
+      wifi_range_xml = '''wifi_transmission_range="{}"'''.format(wifi_range)
     tag = '''
-    <drone id="drone{}" wifi_medium="wifi" >
+    <drone id="drone{}" wifi_medium="wifi" {}>
         <body position="{},{},0" orientation="{},0,0"/>
         <controller config="drone"/>
     </drone>
-    '''.format(i, x, y, th)
+    '''.format(i, wifi_range_xml, x, y, th)
     return tag
 
-def generate_pipuck_xml(i, x, y, th) :
+def generate_pipuck_xml(i, x, y, th, wifi_range=None) :
+    wifi_range_xml = ""
+    if wifi_range != None:
+      wifi_range_xml = '''wifi_transmission_range="{}"'''.format(wifi_range)
     tag = '''
     <pipuck_ext id="pipuck{}" wifi_medium="wifi" tag_medium="tags" debug="true">
         <body position="{},{},0" orientation="{},0,0"/>
         <controller config="pipuck"/>
     </pipuck_ext>
-    '''.format(i, x, y, th)
+    '''.format(i, wifi_range_xml, x, y, th)
     return tag
 
 ########## target ##############################################################
@@ -854,19 +860,19 @@ def generate_slave_locations_with_origin(n, master_locations,
             break
     return a
 
-def generate_drones(locations, start_id) :
+def generate_drones(locations, start_id, wifi_range=None) :
     tagstr = ""
     i = start_id
     for loc in locations :
-        tagstr = tagstr + generate_drone_xml(i, loc[0], loc[1], 0)
+        tagstr = tagstr + generate_drone_xml(i, loc[0], loc[1], 0, wifi_range)
         i = i + 1
     return tagstr
 
-def generate_pipucks(locations, start_id) :
+def generate_pipucks(locations, start_id, wifi_range=None) :
     tagstr = ""
     i = start_id
     for loc in locations :
-        tagstr = tagstr + generate_pipuck_xml(i, loc[0], loc[1], 0)
+        tagstr = tagstr + generate_pipuck_xml(i, loc[0], loc[1], 0, wifi_range)
         i = i + 1
     return tagstr
 

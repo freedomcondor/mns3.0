@@ -122,8 +122,9 @@ def slide(A,B,C,D,X) :
 
 #----------------------------------------------------------------
 #dataFolder = "scalability_test"
-#dataFolder = "scalability_test_officePC"
-dataFolder = "scalability_test_m5zn6xlarge"
+#dataFolder = "scalability_test_officePC_single"
+dataFolder = "scalability_test_wifi_range_5"
+#dataFolder = "scalability_test_m5zn6xlarge"
 dataFile = "record.dat"
 
 tests = []
@@ -171,10 +172,12 @@ ax1.set_title("time per step")
 ax1.set_xlabel("swarm scale")
 ax1.set_ylabel("steps")
 ax1.set_zlabel("time(s)")
+ax1.set_zlim([0, 15])
 
 ax2.set_title("memory")
 ax2.set_xlabel("swarm scale")
 ax2.set_ylabel("steps")
 ax2.set_zlabel("mem(G)")
+ax2.set_zlim([0, 16])
 
 plt.show()

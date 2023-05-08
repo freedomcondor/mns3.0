@@ -18,11 +18,11 @@ structure = structure_config[0]
 n = structure_config[1]
 
 drone_locations = generate_random_locations(n,                  # total number
-                                            0, 0,             # origin location
-                                            -1.5, 1.5,              # random x range
-                                            -1.5, 1.5,              # random y range
+                                            0, 0,               # origin location
+                                            -1.5, 1.5,          # random x range
+                                            -1.5, 1.5,          # random y range
                                             0.5, 1.5)           # near limit and far limit
-drone_xml = generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
+drone_xml = generate_drones(drone_locations, 1, 3)              # from label 1 generate drone xml tags, with wifi range 3m
 
 parameters = '''
     mode_2D="false"
@@ -55,7 +55,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters)],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True)],
     ]
 )
 

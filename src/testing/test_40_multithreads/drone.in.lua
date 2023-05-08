@@ -20,8 +20,12 @@ local structure = require(robot.params.structure or "morphology_20")
 function getCurrentTime()
 	local tmpfile = robot.id .. '_time_tmp.dat'
 
-	--os.execute('date +\"%s.%N\" > ' .. tmpfile)
-	os.execute('gdate +\"%s.%N\" > ' .. tmpfile) -- use gdate in mac
+	local mac = @CMAKE_APPLE_FLAG@
+	if mac == true then
+		os.execute('gdate +\"%s.%N\" > ' .. tmpfile) -- use gdate in mac
+	else
+		os.execute('date +\"%s.%N\" > ' .. tmpfile)
+	end
 
 	local time
 	local f = io.open(tmpfile)

@@ -5,7 +5,7 @@
   <!-- * General configuration * -->
   <!-- ************************* -->
   <framework>
-    <system threads="2" method="balance_quantity"/>
+    <system threads="10" method="balance_quantity"/>
     <experiment length="TOTALLENGTH" ticks_per_second="5" random_seed="RANDOMSEED" />
   </framework>
   

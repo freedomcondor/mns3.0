@@ -34,7 +34,7 @@ function Message.preStep()
 end
 
 function Message.postStep(stepCount)
-	--[[ send one big table
+	--[[ send one big table --- out dated
 	Message.sendTable{
 		fromS = Message.myIDS(),
 		message = Message.waitToSend,
@@ -44,19 +44,21 @@ function Message.postStep(stepCount)
 	--]]
 	---[[ send table to each
 	for toIDS, list in pairs(Message.waitToSend) do
-		Message.sendTable{
+		local msgTable = {}
+		msgTable[toIDS] = { -- toS as an extra key is for ARGoS to easily read the target of the message
 			toS = toIDS,
 			fromS = Message.myIDS(),
 			message = list,
 			stepCount = stepCount,
 			sendTime = robot.system.time,
 		}
+		Message.sendTable(msgTable)
 	end
 	--]]
 end
 
 function Message.arrange()
-	--[[ receive one big table
+	--[[ receive one big table --- out dated
 	for iN, msgFromEachRobot in ipairs(Message.getTablesAT()) do
 		for toS, msgArray in pairs(msgFromEachRobot.message) do
 			if toS == Message.myIDS() or toS == "ALLMSG" then
@@ -79,7 +81,12 @@ function Message.arrange()
 	--]]
 
 	---[[ receive small tables
-	for iN, msgArray in ipairs(Message.getTablesAT()) do
+	for iN, msgArray_with_key in ipairs(Message.getTablesAT()) do
+		local msgArray
+		for i, v in pairs(msgArray_with_key) do
+			msgArray = v
+			break
+		end
 		if msgArray.toS == Message.myIDS() or msgArray.toS == "ALLMSG" then
 			for jN, msgM in ipairs(msgArray.message) do
 				msgM.fromS = msgArray.fromS
