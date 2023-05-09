@@ -10,12 +10,12 @@ half_side_length = n_drone ** (1/3) / 2 * 1.5
 # drone and pipuck
 drone_locations = generate_random_locations(n_drone,
                                             -half_side_length, -half_side_length,               # origin location
-                                            -half_side_length-1.5, half_side_length+1.5,            # random x range
-                                            -half_side_length-1.5, half_side_length+1.5,            # random y range
+                                            -half_side_length-1, half_side_length+1,            # random x range
+                                            -half_side_length-1, half_side_length+1,            # random y range
                                             0.5, 1.5,           # near limit and far limit
                                             10000)              # attempt count
 
-drone_xml =  generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
+drone_xml =  generate_drones(drone_locations, 1, 3.5)                 # from label 1 generate drone xml tags
 
 parameters = '''
     mode_2D="false"

@@ -94,7 +94,9 @@ function step()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
-	--api.debug.showMorphologyLines(vns, true)
+	if vns.goal.positionV3:length() < vns.Parameters.driver_stop_zone * 2 then
+		api.debug.showMorphologyLines(vns, true)
+	end
 end
 
 function destroy()
