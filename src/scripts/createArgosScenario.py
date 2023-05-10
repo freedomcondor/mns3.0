@@ -10,32 +10,34 @@ usage="[usage] example: python3 xxx.py -r 1 -l 1000 -v true"
 
 #----------------------------------------------------------------------------------------------
 # parse opts
-try:
-    optlist, args = getopt.getopt(sys.argv[1:], "r:l:v:h")
-except:
-    print("[error] unexpected opts")
-    print(usage)
-    sys.exit(0)
+if "customizeOpts" not in locals() or customizeOpts != True :
+    try:
+        optlist, args = getopt.getopt(sys.argv[1:], "r:l:v:h")
+    except:
+        print("[error] unexpected opts")
+        print(usage)
+        sys.exit(0)
 
 Inputseed = None
 Experiment_length = None
 Visualization = True
 VisualizationArgosFlag = ""
 
-for opt, value in optlist:
-    if opt == "-r":
-        Inputseed = int(value)
-        print("Inputseed provided:", Inputseed)
-    elif opt == "-l":
-        Experiment_length = int(value)
-        print("experiment_length provided:", Experiment_length)
-    elif opt == "-v":
-        if value == "False" or value == "false" :
-            Visualization = False
-        print("visualization provided:", Visualization)
-    elif opt == "-h":
-        print(usage)
-        exit()
+if "customizeOpts" not in locals() or customizeOpts != True :
+    for opt, value in optlist:
+        if opt == "-r":
+            Inputseed = int(value)
+            print("Inputseed provided:", Inputseed)
+        elif opt == "-l":
+            Experiment_length = int(value)
+            print("experiment_length provided:", Experiment_length)
+        elif opt == "-v":
+            if value == "False" or value == "false" :
+                Visualization = False
+            print("visualization provided:", Visualization)
+        elif opt == "-h":
+            print(usage)
+            exit()
 
 if Inputseed == None :
     Inputseed = int(time.time())
@@ -106,11 +108,17 @@ def generate_pipuck_controller(params) :
 
     return text
 
-def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=True) :
+def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False, replay=False) :
     if lua_editor :
         lua_editor = "true"
     else :
         lua_editor = "false"
+      
+    loop_functions_lib = "libmy_extensions"
+    loop_functions_label = "my_loop_functions"
+    if replay == True:
+        loop_functions_lib = "libreplay_loop_functions"
+        loop_functions_label = "replay_loop_functions"
 
     text = '''
   <!-- ******************* -->
@@ -136,8 +144,8 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=True)
   <!-- ****************** -->
   <!-- * Loop functions * -->
   <!-- ****************** -->
-  <loop_functions library="{}/libmy_extensions"
-                  label="my_loop_functions" />
+  <loop_functions library="{}/{}"
+                  label="{}" />
 
   <!-- ****************** -->
   <!-- * Visualization  * -->
@@ -153,7 +161,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=True)
       </camera>
     </qt-opengl>
   </visualization>
-    '''.format(cmake_binary_dir, lua_editor, cmake_binary_dir)
+    '''.format(cmake_binary_dir, loop_functions_lib, loop_functions_label, lua_editor, cmake_binary_dir)
 
     return text
 
