@@ -15,7 +15,7 @@ drone_locations = generate_random_locations(n_drone,
                                             0.5, 1.5,           # near limit and far limit
                                             10000)              # attempt count
 
-drone_xml =  generate_drones(drone_locations, 1, 3.5)                 # from label 1 generate drone xml tags
+drone_xml =  generate_drones(drone_locations, 1, 4)                 # from label 1 generate drone xml tags
 
 parameters = '''
     mode_2D="false"
@@ -26,7 +26,7 @@ parameters = '''
     obstacle_label="100, 100"
 
     drone_default_start_height="3.0"
-    safezone_drone_drone="3.5"
+    safezone_drone_drone="4.0"
     dangerzone_drone="1"
 
     second_report_sight="true"

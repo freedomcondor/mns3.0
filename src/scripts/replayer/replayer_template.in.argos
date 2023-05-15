@@ -19,7 +19,7 @@
         <debug implementation="default" />
       </actuators>
       <sensors />
-      <params simulation="true" script="dummy.lua" />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/replayer/dummy.lua" />
     </lua_controller>
     <!-- Pipuck Controller -->
     <lua_controller id="pipuck">
@@ -27,7 +27,7 @@
         <debug implementation="default" />
       </actuators>
       <sensors />
-      <params simulation="true" script="dummy.lua" />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/replayer/dummy.lua" />
     </lua_controller>
   </controllers>
 
