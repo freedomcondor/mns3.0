@@ -19,8 +19,8 @@ if robot.params.hardware ~= true and robot.params.simulation ~= true then
 end
 if robot.params.hardware == true then
 	print("Hardware mode")
-else
-	print("Simulation mode")
+--else
+--	print("Simulation mode")
 end
 
 -------------------------------------------------------------
