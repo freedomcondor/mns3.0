@@ -56,6 +56,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
                     "vns.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
+        ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["DRONES",            drone_xml], 
         #["OBSTACLES",         obstacle_xml],

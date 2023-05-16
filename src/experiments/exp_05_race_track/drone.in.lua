@@ -169,7 +169,8 @@ function create_navigation_node(vns)
 		local marker = find_marker(vns)
 
 		-- fail safe
-		if vns.scalemanager.scale["drone"] == 1 then
+		if vns.scalemanager.scale["drone"] == 1 and
+		   vns.api.actuator.flight_preparation.state == "navigation" then
 			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.5), vector3())
 			return false, true
 		end
