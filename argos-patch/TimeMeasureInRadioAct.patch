@@ -1,0 +1,45 @@
+diff --git a/src/plugins/robots/generic/control_interface/ci_radios_actuator.cpp b/src/plugins/robots/generic/control_interface/ci_radios_actuator.cpp
+index 32c56086..6f090a24 100644
+--- a/src/plugins/robots/generic/control_interface/ci_radios_actuator.cpp
++++ b/src/plugins/robots/generic/control_interface/ci_radios_actuator.cpp
+@@ -10,6 +10,8 @@
+ #include <argos3/core/wrappers/lua/lua_utility.h>
+ #endif
+ 
++#include <time.h>
++
+ namespace argos {
+ 
+    /****************************************/
+@@ -39,6 +41,17 @@ namespace argos {
+       ps_interface->Messages.emplace_back(cMessage);
+       return 0;
+    }
++
++   int LuaRadioActuatorGetTime(lua_State* pt_lua_state) {
++      struct timespec sCurrentTime;
++      clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++      lua_pushnumber(pt_lua_state, sCurrentTime.tv_sec);
++      lua_pushnumber(pt_lua_state, sCurrentTime.tv_nsec);
++      clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++      lua_pushnumber(pt_lua_state, sCurrentTime.tv_sec);
++      lua_pushnumber(pt_lua_state, sCurrentTime.tv_nsec);
++      return 4;
++   }
+ #endif
+ 
+    /****************************************/
+@@ -54,6 +67,13 @@ namespace argos {
+          lua_pushlightuserdata(pt_lua_state, &s_interface);
+          lua_pushcclosure(pt_lua_state, &LuaRadioActuatorSend, 1);
+          lua_settable(pt_lua_state, -3);
++
++         /* push a pointer to each interface onto the lua stack */
++         lua_pushstring(pt_lua_state, "get_time");
++         lua_pushlightuserdata(pt_lua_state, &s_interface);
++         lua_pushcclosure(pt_lua_state, &LuaRadioActuatorGetTime, 1);
++         lua_settable(pt_lua_state, -3);
++
+          CLuaUtility::EndTable(pt_lua_state);
+       }
+       CLuaUtility::EndTable(pt_lua_state);
