@@ -42,6 +42,10 @@ namespace argos {
    /****************************************/
 
    void CReplayLoopFunctions::PreStep() {
+      std::map<std::string, CVector3> mapPosition;
+      std::map<std::string, CQuaternion> mapOrientation;
+      std::map<std::string, std::string> mapParent;
+
       for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
          // read a line
          std::string strLine;
@@ -55,24 +59,74 @@ namespace argos {
             std::getline(strstreamLineStream, substr, ',' );
             vecWordList.push_back(substr);
          }
+
          CVector3 CPositionV3(0,0,0);
          CQuaternion COrientationQ(0,0,0,0);
+         // get Position
          if (vecWordList.size() >= 3) {
             CPositionV3.SetX(std::stod(vecWordList[0]));
             CPositionV3.SetY(std::stod(vecWordList[1]));
             CPositionV3.SetZ(std::stod(vecWordList[2]));
          }
+         // get Orientation
          if (vecWordList.size() >= 6) {
-            COrientationQ.FromEulerAngles(
-               CRadians(std::stod(vecWordList[3])),
-               CRadians(std::stod(vecWordList[4])),
-               CRadians(std::stod(vecWordList[5]))
-            );
+            CRadians CX, CY, CZ;
+            CZ.FromValueInDegrees(std::stod(vecWordList[3]));
+            CY.FromValueInDegrees(std::stod(vecWordList[4]));
+            CX.FromValueInDegrees(std::stod(vecWordList[5]));
+            COrientationQ.FromEulerAngles(CZ, CY, CX);
          }
 
-         s_tracked_entity.EmbodiedEntity->MoveTo(CPositionV3, CQuaternion(1,0,0,1), false, true);
-         //if (s_tracked_entity.DebugEntity != nullptr)
-         //   s_tracked_entity.DebugEntity->GetArrows().emplace_back(CVector3(0,0,0), CVector3(1,0,0), CColor::BLUE);
+         s_tracked_entity.EmbodiedEntity->MoveTo(CPositionV3, COrientationQ, false, true);
+
+         //mapPosition.insert(std::make_pair(s_tracked_entity.EmbodiedEntity->GetId(), CPositionV3));
+         std::string ID = s_tracked_entity.Entity->GetId();
+         mapPosition[ID] = CPositionV3;
+         mapOrientation[ID] = COrientationQ;
+
+         if (vecWordList.size() > 6) {
+            CQuaternion CVirtualOrientationQ(0,0,0,0);
+            CVector3 CGoalPositionV3(0,0,0);
+            CQuaternion CGoalOrientationQ(0,0,0,0);
+            // get Virtual Orientation
+            CRadians CX, CY, CZ;
+            CZ.FromValueInDegrees(std::stod(vecWordList[6]));
+            CY.FromValueInDegrees(std::stod(vecWordList[7]));
+            CX.FromValueInDegrees(std::stod(vecWordList[8]));
+            CVirtualOrientationQ.FromEulerAngles(CZ, CY, CX);
+
+            // get Goal Position 
+            CGoalPositionV3.SetX(std::stod(vecWordList[9]));
+            CGoalPositionV3.SetY(std::stod(vecWordList[10]));
+            CGoalPositionV3.SetZ(std::stod(vecWordList[11]));
+
+            // get Goal Orientation
+            //CRadians CX, CY, CZ;
+            CZ.FromValueInDegrees(std::stod(vecWordList[12]));
+            CY.FromValueInDegrees(std::stod(vecWordList[13]));
+            CX.FromValueInDegrees(std::stod(vecWordList[14]));
+            CGoalOrientationQ.FromEulerAngles(CZ, CY, CX);
+
+            std::string strTarget = vecWordList[15];
+            std::string strBrain = vecWordList[16];
+         }
+
+         if (vecWordList.size() >= 18) {
+            std::string strParent = vecWordList[17];
+            mapParent[ID] = strParent;
+         }
+      }
+
+      for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
+         std::string ID = s_tracked_entity.Entity->GetId();
+         std::string ParentID = mapParent[ID];
+         if (ParentID == "nil")
+            s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
+         else {
+            CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
+            CRelativePosition.Rotate(mapOrientation[ID].Inverse());
+            s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+         }
       }
    }
    

@@ -38,7 +38,7 @@ if "customizeOpts" not in locals() or customizeOpts != True :
             print("visualization provided:", Visualization)
         elif opt == "-m":
             MultiThreads = int(value) 
-            print("visualization provided:", Visualization)
+            print("Multi threads provided:", MultiThreads)
         elif opt == "-h":
             print(usage)
             exit()

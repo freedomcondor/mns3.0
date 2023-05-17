@@ -87,6 +87,7 @@ function step()
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 	api.debug.showMorphologyLines(vns, true)
+	vns.logLoopFunctionInfo(vns)
 end
 
 function destroy()
