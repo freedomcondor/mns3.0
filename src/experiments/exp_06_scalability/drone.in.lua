@@ -8,7 +8,8 @@ pairs = require("AlphaPairs")
 local api = require("droneAPI")
 local VNS = require("VNS")
 local BT = require("BehaviorTree")
-require("morphologyGenerator")
+require("morphologyGenerateCube")
+require("morphologyGenerateChain")
 
 -- datas ----------------
 local bt
@@ -16,7 +17,7 @@ local bt
 
 local n_drone = tonumber(robot.params.n_drone)
 
-local structure = generate_morphology(n_drone)
+local structure = generate_chain_morphology(n_drone)
 
 function init()
 	api.linkRobotInterface(VNS)
@@ -62,8 +63,11 @@ function step()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
-	api.debug.showMorphologyLines(vns, true)
 	vns.logLoopFunctionInfo(vns)
+
+	if vns.goal.positionV3:length() < vns.Parameters.driver_stop_zone * 2 then
+		api.debug.showMorphologyLines(vns, true)
+	end
 end
 
 function destroy()
@@ -108,7 +112,7 @@ return function()
 	-- state
 	-- init
 	if state == "init" then
-		if stateCount == 400 then
+		if stateCount == 300 then
 			newState(vns, "forward")
 		end
 	-- forward

@@ -6,8 +6,9 @@ import os
 
 # drone and pipuck
 
-n_drone = 216
-half_side_length = n_drone ** (1/3) / 2 * 1.5
+n_drone = 12
+n_side = n_drone ** (1/3)
+half_side_length = n_side * 0.5 * 1.5
 
 drone_locations = generate_random_locations(n_drone,
                                             -half_side_length, -half_side_length,               # origin location
@@ -18,11 +19,23 @@ drone_locations = generate_random_locations(n_drone,
 
 drone_xml = generate_drones(drone_locations, 1, 4.2)                 # from label 1 generate drone xml tags, communication range 4.2
 
-obstacle_xml = generate_3D_rectangular_gate_xml(id,                     # id
-                                                 3, 0, 3, # position
-                                                 0, 0, 0, # orientation
-                                                 1000,                 # payload
-                                                 3, 4, 0.1) # size x, knots, thickness
+obstacle_xml = generate_3D_rectangular_gate_xml(1,                     # id
+                                                half_side_length + 3, 0, 3, # position
+                                                0, 0, 0, # orientation
+                                                1001,                 # payload
+                                                n_side, 4, 0.1) # size x, knots, thickness
+
+obstacle_xml += generate_3D_rectangular_gate_xml(2,                     # id
+                                                half_side_length + 6, 1, 3, # position
+                                                30, 0, 0, # orientation
+                                                1001,                 # payload
+                                                n_side, 4, 0.1) # size x, knots, thickness
+
+obstacle_xml += generate_3D_rectangular_gate_xml(3,                     # id
+                                                half_side_length + 8, 3, 3, # position
+                                                40, 0, 0, # orientation
+                                                1001,                 # payload
+                                                n_side, 4, 0.1) # size x, knots, thickness
 
 parameters = '''
     mode_2D="false"
@@ -51,7 +64,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
-        #["OBSTACLES",         obstacle_xml],
+        ["OBSTACLES",         obstacle_xml],
         ["DRONES",            drone_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"

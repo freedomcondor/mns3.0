@@ -2,7 +2,7 @@ local L = 1.5
 
 DeepCopy = require("DeepCopy")
 
-function generate_morphology(n)
+function generate_cube_morphology(n)
 	side_n = math.ceil(n ^ (1/3))
 	return generate_cube(side_n)
 end
