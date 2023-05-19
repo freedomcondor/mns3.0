@@ -17,7 +17,7 @@ local bt
 
 local n_drone = tonumber(robot.params.n_drone)
 
-local structure = generate_chain_morphology(n_drone)
+local structure = generate_cube_morphology(n_drone)
 
 function init()
 	api.linkRobotInterface(VNS)

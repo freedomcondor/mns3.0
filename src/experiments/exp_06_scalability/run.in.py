@@ -6,34 +6,24 @@ import os
 
 # drone and pipuck
 
-n_drone = 12
+n_drone = Experiment_length   # abuse experiment length for drone numbers
 n_side = n_drone ** (1/3)
 half_side_length = n_side * 0.5 * 1.5
 
+offset = - n_side * 2
+
 drone_locations = generate_random_locations(n_drone,
-                                            -half_side_length, -half_side_length,               # origin location
-                                            -half_side_length-1, half_side_length+1,            # random x range
-                                            -half_side_length-1, half_side_length+1,            # random y range
+                                            offset - half_side_length, -half_side_length,               # origin location
+                                            offset -half_side_length-1, half_side_length+1,            # random x range
+                                            offset -half_side_length-1, half_side_length+1,            # random y range
                                             0.5, 1.5,           # near limit and far limit
                                             10000)              # attempt count
 
 drone_xml = generate_drones(drone_locations, 1, 4.2)                 # from label 1 generate drone xml tags, communication range 4.2
 
 obstacle_xml = generate_3D_rectangular_gate_xml(1,                     # id
-                                                half_side_length + 3, 0, 3, # position
+                                                offset + half_side_length + 3, 0, half_side_length + 2, # position
                                                 0, 0, 0, # orientation
-                                                1001,                 # payload
-                                                n_side, 4, 0.1) # size x, knots, thickness
-
-obstacle_xml += generate_3D_rectangular_gate_xml(2,                     # id
-                                                half_side_length + 6, 1, 3, # position
-                                                30, 0, 0, # orientation
-                                                1001,                 # payload
-                                                n_side, 4, 0.1) # size x, knots, thickness
-
-obstacle_xml += generate_3D_rectangular_gate_xml(3,                     # id
-                                                half_side_length + 8, 3, 3, # position
-                                                40, 0, 0, # orientation
                                                 1001,                 # payload
                                                 n_side, 4, 0.1) # size x, knots, thickness
 
