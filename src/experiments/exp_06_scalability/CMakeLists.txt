@@ -1,6 +1,7 @@
 configure_file( drone.in.lua                simu_code/drone.lua)
 configure_file( morphologyGenerateCube.lua  simu_code/morphologyGenerateCube.lua)
 configure_file( morphologyGenerateChain.lua simu_code/morphologyGenerateChain.lua)
+configure_file( morphology_8.lua            simu_code/morphology_8.lua)
 
 configure_file( vns_template.in.argos   simu_code/vns_template.argos)
 configure_file( run.in.py               simu_code/run.py)

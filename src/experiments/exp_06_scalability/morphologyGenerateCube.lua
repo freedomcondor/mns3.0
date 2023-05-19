@@ -3,11 +3,14 @@ local L = 1.5
 DeepCopy = require("DeepCopy")
 
 function generate_cube_morphology(n)
+	if n == 8 then
+		return require("morphology_8")
+	end
 	side_n = math.ceil(n ^ (1/3))
 	return generate_cube(side_n)
 end
 
-function generate_cube(n, positionV3, orientationQ)
+function generate_cube(n, positionV3, orientationQ, split)
 	if positionV3 == nil then positionV3 = vector3() end
 	if orientationQ == nil then orientationQ = quaternion() end
 
@@ -16,6 +19,7 @@ function generate_cube(n, positionV3, orientationQ)
 		{	robotTypeS = "drone",
 			positionV3 = positionV3,
 			orientationQ = orientationQ,
+			split = split,
 		}
 	else
 		return
@@ -27,6 +31,7 @@ function generate_cube(n, positionV3, orientationQ)
 				vector3(0, L, 0),
 				vector3(0, 0, L)
 			},
+			split = split,
 			children = {
 			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, true),
 			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
