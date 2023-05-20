@@ -130,6 +130,8 @@ function create_navigation_node(vns)
 		return marker
 	end
 
+	local obstacle_entrance = 1001
+	local obstacle_split = 1002
 
 return function()
 	stateCount = stateCount + 1
@@ -140,6 +142,7 @@ return function()
 
 	-- fail safe
 	if vns.scalemanager.scale["drone"] == 1 and
+	   n_drone ~= 8 and
 	   vns.api.actuator.flight_preparation.state == "navigation" then
 		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
 			local target = vns.brainkeeper.brain.positionV3 + vector3(0,0,5)
@@ -150,6 +153,9 @@ return function()
 		return false, true
 	end
 
+	-- find marker
+	local marker = find_marker(vns)
+
 	-- state
 	-- init
 	if state == "init" then
@@ -159,36 +165,44 @@ return function()
 			end
 		end
 	-- forward
-	elseif state == "forward" then
-		if vns.parentR == nil then
-			local marker = find_marker(vns)
-			if marker == nil then
-				vns.Spreader.emergency_after_core(vns, vector3(0.1, 0, 0), vector3())
-				return false, true
-			end
+	elseif state == "forward" and marker ~= nil and vns.parentR == nil then
+		local swarm_size = vns.scalemanager.scale["drone"]
+		local side_length = math.ceil(math.pow(swarm_size, 1.0/3))
 
-			local swarm_size = vns.scalemanager.scale["drone"]
-			local side_length = math.ceil(math.pow(swarm_size, 1.0/3))
-
-			local offset = vector3(-(side_length-1)*0.5 * 1.5, -(side_length-1)*0.5 * 1.5, 1)
-
-			-- vertical speed
-			local target_position = marker.positionV3 + offset:rotate(marker.orientationQ)
-			local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
-			local vertical_position = target_position - target_position:dot(dirVec) * dirVec
-			local vertical_speed = vertical_position * 0.1
-			if vertical_speed:length() > 0.3 then
-				vertical_speed = vertical_speed * (0.3 / vertical_speed:length())
-			end
-
-			-- horizontal speed
-			-- move forward with speed, calculate into move_speed
-			local move_speed = vector3(dirVec):rotate(marker.orientationQ) * 0.3
-
-			-- move forward with vertical speed and move speed
-			vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
-			vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
+		-- handle different condition
+		if marker.type == obstacle_split then
+			switchAndSendNewState(vns, "split")	
+			return false, true
 		end
+
+		local offset = vector3(-(side_length-1)*0.5 * 1.5, -(side_length-1)*0.5 * 1.5, 1)
+
+		-- vertical speed
+		local target_position = marker.positionV3 + offset:rotate(marker.orientationQ)
+		local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
+		local vertical_position = target_position - target_position:dot(dirVec) * dirVec
+		local vertical_speed = vertical_position * 0.1
+		if vertical_speed:length() > 0.3 then
+			vertical_speed = vertical_speed * (0.3 / vertical_speed:length())
+		end
+
+		-- horizontal speed
+		-- move forward with speed, calculate into move_speed
+		local move_speed = vector3(dirVec):rotate(marker.orientationQ) * 0.3
+
+		-- move forward with vertical speed and move speed
+		vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
+		vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
+
+	elseif state == "split" then
+		if vns.allocator.target.split == true then
+			-- rebellion
+			if vns.parentR ~= nil then
+				vns.Msg.send(vns.parentR.idS, "dismiss")
+				vns.deleteParent(vns)
+			end
+			vns.Connector.newVnsID(vns, 0.9, 200)
+		end	
 	end
 
 end end

@@ -46,7 +46,7 @@ obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
 obstacle_xml += generate_3D_rectangular_gate_xml(3,                    # id
                                                  half_side_length*2, -half_side_length*2-1.5, half_side_length+2, # position
                                                  0, 0, 0,              # orientation
-                                                 1003,                 # payload
+                                                 1002,                 # payload
                                                  half_side_length*2+3, half_side_length*2+3, 0.2)       # size x, size y, thickness
 
 parameters = '''
