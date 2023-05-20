@@ -2,17 +2,27 @@ local L = 1.5
 
 DeepCopy = require("DeepCopy")
 
-function generate_cube_morphology(n)
+function generate_cube_morphology(n, split_n)
 	if n == 8 then
 		return require("morphology_8")
 	end
 	side_n = math.ceil(n ^ (1/3))
-	return generate_cube(side_n)
+
+	local side_n_split = nil
+	if split_n ~= nil then
+		side_n_split = math.ceil(split_n ^ (1/3))
+	end
+
+	return generate_cube(side_n, vector3(), quaternion(), side_n_split)
 end
 
-function generate_cube(n, positionV3, orientationQ, split)
+function generate_cube(n, positionV3, orientationQ, split_n)
 	if positionV3 == nil then positionV3 = vector3() end
 	if orientationQ == nil then orientationQ = quaternion() end
+	local split = nil
+	if split_n == n then
+		split = true
+	end
 
 	if n == 1 then
 		return
@@ -33,7 +43,7 @@ function generate_cube(n, positionV3, orientationQ, split)
 			},
 			split = split,
 			children = {
-			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, true),
+			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, true, split_n),
 			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
 			generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
 			--generate_cube(n - 1, vector3(L, L, L), quaternion()),
@@ -41,10 +51,10 @@ function generate_cube(n, positionV3, orientationQ, split)
 	end
 end
 
-function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, with_sub_cube)
+function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, with_sub_cube, split_n)
 	local sub_cube = nil
 	if with_sub_cube == true then
-		sub_cube = generate_cube(n, vector3(0, L, L), quaternion())
+		sub_cube = generate_cube(n, vector3(0, L, L), quaternion(), split_n)
 	end
 	if n == 1 then
 		return 

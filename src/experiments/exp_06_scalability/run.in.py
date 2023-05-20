@@ -46,7 +46,7 @@ obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
 obstacle_xml += generate_3D_rectangular_gate_xml(3,                    # id
                                                  half_side_length*2, -half_side_length*2-1.5, half_side_length+2, # position
                                                  0, 0, 0,              # orientation
-                                                 1002,                 # payload
+                                                 1003,                 # payload
                                                  half_side_length*2+3, half_side_length*2+3, 0.2)       # size x, size y, thickness
 
 parameters = '''
@@ -66,6 +66,7 @@ parameters = '''
     driver_default_speed="0.5"
     driver_slowdown_zone="0.7"
     driver_stop_zone="0.15"
+    driver_arrive_zone="0.7"
 
     n_drone="{}"
 
@@ -86,7 +87,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, {"velocity_mode":True})],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True)],
     ]
 )
 

@@ -62,7 +62,6 @@ return
 			{	robotTypeS = "drone",
 				positionV3 = vector3(dis, 0, 0),
 				orientationQ = quaternion(),
-				split = true,
 			},
 		}},
 	}},
