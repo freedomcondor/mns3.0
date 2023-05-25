@@ -19,7 +19,7 @@ local n_drone = tonumber(robot.params.n_drone)
 
 local n_left_drone = 0
 if n_drone == 27 then  n_left_drone = 8 end
-if n_drone == 64 then  n_left_drone = 8 end
+if n_drone == 64 then  n_left_drone = 27 end
 if n_drone == 125 then n_left_drone = 64 end
 if n_drone == 216 then n_left_drone = 125 end
 if n_drone == 512 then n_left_drone = 216 end
@@ -304,8 +304,9 @@ return function()
 				vns.setMorphology(vns, structure_right)
 
 				local side_length = (n_right_side - 1) * 1.5
-				offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 0.5)
-				search_velocity = vector3(0.0, -0.1, 0)
+				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
+				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5, 0, 1)
+				search_velocity = vector3(0.1, 0, 0)
 			end
 
 			if split_marker ~= nil then
@@ -337,8 +338,8 @@ return function()
 				vns.setMorphology(vns, structure_right)
 			end
 
-			if vns.scalemanager.scale["drone"] == n_left_drone then
-				vns.Spreader.emergency_after_core(vns, vector3(0, -0.3, 0), vector3())
+			if vns.scalemanager.scale["drone"] == n_right_drone then
+				vns.Spreader.emergency_after_core(vns, vector3(0, 0.3, 0), vector3())
 			end
 		end
 		if vns.scalemanager.scale["drone"] == n_left_drone then
