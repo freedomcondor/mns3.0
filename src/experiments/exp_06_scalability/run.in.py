@@ -17,10 +17,12 @@ L = 1.5
 
 half_side_length = (n_side-1) * 0.5 * L
 
-arena_size = half_side_length * 20
-arena_z_center = arena_size * 0.5 - 2
+split_half_side_length = half_side_length - L*0.5
 
-offset = -half_side_length * 7
+arena_size = half_side_length * 8 + 10
+arena_z_center = half_side_length * 2 - 2
+
+offset = -half_side_length * 2 - 2
 drone_locations = generate_random_locations(n_drone,
                                             offset -half_side_length,   -half_side_length,               # origin location
                                             offset -half_side_length-1, offset+half_side_length+1,            # random x range
@@ -31,23 +33,51 @@ drone_locations = generate_random_locations(n_drone,
 drone_xml = generate_drones(drone_locations, 1, 4.2)                  # from label 1 generate drone xml tags, communication range 4.2
 
 obstacle_xml = ""
+rec_gate_half_length = half_side_length + 1
 obstacle_xml += generate_3D_rectangular_gate_xml(1,                    # id
-                                                 -half_side_length*4, 0, half_side_length+2, # position
+                                                 -rec_gate_half_length, 0, rec_gate_half_length, # position
                                                  0, 0, 0,              # orientation
                                                  1001,                 # payload
-                                                 half_side_length*2+3, half_side_length*2+3, 0.2)       # size x, size y, thickness
+                                                 rec_gate_half_length*2, rec_gate_half_length*2, 0.2)       # size x, size y, thickness
 
+split_gate_half_length = split_half_side_length+1 
+triangle_gate_half_length = rec_gate_half_length * 1.5
+tilt_angle = 5
+'''
 obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
-                                                 half_side_length*2, half_side_length*2+1.5, half_side_length+2, # position
-                                                 0, 0, 0,              # orientation
+                                                 rec_gate_half_length-split_gate_half_length*math.sin(tilt_angle*math.pi/180),
+                                                 triangle_gate_half_length+split_gate_half_length*math.cos(tilt_angle*math.pi/180),
+                                                 half_side_length+1, # position
+                                                 tilt_angle, 0, 0,              # orientation
                                                  1002,                 # payload
-                                                 half_side_length*2+3, half_side_length*2+3, 0.2)       # size x, size y, thickness
+                                                 split_gate_half_length*2, split_gate_half_length*2, 0.2)       # size x, size y, thickness
+'''
 
 obstacle_xml += generate_3D_rectangular_gate_xml(3,                    # id
-                                                 half_side_length*2, -half_side_length*2-1.5, half_side_length+2, # position
+                                                 rec_gate_half_length,
+                                                 #triangle_gate_half_length+split_gate_half_length,
+                                                 split_gate_half_length,
+                                                 half_side_length+1, # position
                                                  0, 0, 0,              # orientation
-                                                 1003,                 # payload
-                                                 half_side_length*2+3, half_side_length*2+3, 0.2)       # size x, size y, thickness
+                                                 1002,                 # payload
+                                                 split_half_side_length*2+2, split_half_side_length*2+2, 0.2)       # size x, size y, thickness
+
+tilt_angle=-75
+'''
+obstacle_xml += generate_3D_rectangular_gate_xml(4,                    # id
+                                                 rec_gate_half_length-split_gate_half_length*math.sin(tilt_angle*math.pi/180),
+                                                 triangle_gate_half_length+split_gate_half_length*math.cos(tilt_angle*math.pi/180),
+                                                 half_side_length+1, # position
+                                                 tilt_angle, 0, 0,              # orientation
+                                                 1002,                 # payload
+                                                 split_half_side_length*2+2, split_half_side_length*2+2, 0.2)       # size x, size y, thickness
+'''
+
+obstacle_xml += generate_3D_triangle_gate_xml(6,                    # id
+                                              rec_gate_half_length, -triangle_gate_half_length, half_side_length+1, # position
+                                              0, 0, 0,              # orientation
+                                              1003,                 # payload
+                                              triangle_gate_half_length*2, 0.2)       # size x, size y, thickness
 
 parameters = '''
     mode_2D="false"

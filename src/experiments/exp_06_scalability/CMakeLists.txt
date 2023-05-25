@@ -1,5 +1,6 @@
 configure_file( drone.in.lua                simu_code/drone.lua)
 configure_file( morphologyGenerateCube.lua  simu_code/morphologyGenerateCube.lua)
+configure_file( morphologyGenerateTetrahedron.lua  simu_code/morphologyGenerateTetrahedron.lua)
 configure_file( morphologyGenerateChain.lua simu_code/morphologyGenerateChain.lua)
 configure_file( morphology_8.lua            simu_code/morphology_8.lua)
 

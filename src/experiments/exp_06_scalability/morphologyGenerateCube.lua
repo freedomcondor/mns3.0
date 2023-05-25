@@ -3,7 +3,7 @@ local L = 1.5
 DeepCopy = require("DeepCopy")
 
 function generate_cube_morphology(n, split_n)
-	if n == 8 then
+	if n <= 8 then
 		return require("morphology_8")
 	end
 	side_n = math.ceil(n ^ (1/3))
@@ -86,7 +86,7 @@ function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, w
 				vector3(0, 0, L)
 			},
 			children = {
-				generate_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
+				generate_cube_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
 				generate_square(n, vector3(0, Y_offset, 0), quaternion(), X_offset, Y_offset),
 				sub_cube
 			}
@@ -94,7 +94,7 @@ function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, w
 	end
 end
 
-function generate_line(n, positionV3, orientationQ, drawLines)
+function generate_cube_line(n, positionV3, orientationQ, drawLines)
 	if n == 1 then
 		return 
 		{	robotTypeS = "drone",
@@ -111,7 +111,7 @@ function generate_line(n, positionV3, orientationQ, drawLines)
 			orientationQ = orientationQ,
 			drawLines = drawLines_full,
 			children = {
-				generate_line(n - 1, positionV3, orientationQ, drawLines)
+				generate_cube_line(n - 1, positionV3, orientationQ, drawLines)
 			}
 		}
 	end
@@ -138,8 +138,8 @@ function generate_square(n, positionV3, orientationQ, X_offset, Y_offset)
 				vector3(0, 0, L)
 			},
 			children = {
-				generate_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
-				generate_line(n - 1, vector3(0, Y_offset, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
+				generate_cube_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
+				generate_cube_line(n - 1, vector3(0, Y_offset, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
 				generate_square(n - 1, vector3(X_offset, Y_offset, 0), quaternion(), X_offset, Y_offset),
 			}
 		}
