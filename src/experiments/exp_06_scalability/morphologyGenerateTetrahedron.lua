@@ -56,6 +56,7 @@ function generate_triangle(n_nodes, n_side, positionV3, orientationQ)
 end
 
 function generate_tetrahedron_line(n, positionV3, orientationQ)
+	if n < 1 then return end
 	if n == 1 then
 		return 
 		{	robotTypeS = "drone",
@@ -64,14 +65,14 @@ function generate_tetrahedron_line(n, positionV3, orientationQ)
 			drawLines = drawLines,
 		}
 	else
-		return 
+		local node = 
 		{	robotTypeS = "drone",
 			positionV3 = positionV3,
 			orientationQ = orientationQ,
-			drawLines = drawLines_full,
 			children = {
-				generate_tetrahedron_line(n - 1, positionV3, orientationQ, drawLines)
+				generate_tetrahedron_line(n - 1, positionV3, orientationQ)
 			}
 		}
+		return node
 	end
 end

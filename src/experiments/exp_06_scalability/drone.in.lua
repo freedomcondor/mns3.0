@@ -161,9 +161,10 @@ function create_navigation_node(vns)
 		return marker
 	end
 
-	local obstacle_entrance = 1001
 	local obstacle_left = 1002
-	local obstacle_right = 1003
+	local obstacle_right = 1001
+
+	local start = true
 
 return function()
 	stateCount = stateCount + 1
@@ -186,18 +187,24 @@ return function()
 	end
 
 	-- find marker
-	local marker = find_marker(vns)
+	marker = find_marker(vns)
+	local lastScale = 0
 
 	-- state
 	-- init
 	if state == "init" then
-		if vns.parentR == nil and vns.api.stepCount > 100 then
+		if api.stepCount > 100 then
+			switchAndSendNewState(vns, "wait")
+		end
+	elseif state == "wait" then
+		if vns.parentR == nil and stateCount > 30 then
 			if vns.driver.all_arrive == true then
 				switchAndSendNewState(vns, "forward")
 			end
 		end
 	-- forward
 	elseif state == "forward" and vns.parentR == nil then
+		lastScale = vns.scalemanager.scale["drone"]
 		-- switch formations based on swarm size
 		if vns.scalemanager.scale["drone"] == n_drone then
 			vns.setMorphology(vns, structure_full)
@@ -207,7 +214,28 @@ return function()
 			vns.setMorphology(vns, structure_right)
 		end
 
-		if marker ~= nil then
+		local offset = vector3(0,0,0)
+		local forward_speed_max = 0.3
+		local vertical_speed_max = 0.3
+
+		-- move blindly forward
+		if start == true and marker == nil then
+			-- horizontal speed
+			-- move forward with speed, calculate into move_speed
+			local forward_speed_scalar = stateCount / 50
+			if forward_speed_scalar > 1 then forward_speed_scalar = 1 end
+			local move_speed = vector3(1,0,0) * forward_speed_max * forward_speed_scalar
+			vns.setGoal(vns, vector3(), quaternion())
+			vns.Spreader.emergency_after_core(vns, move_speed, vector3())
+
+		-- if I don't see the marker, but spliting, I still move accordingly
+		elseif start == false and (marker == nil or marker.positionV3.x < -0.5) then
+			switchAndSendNewState(vns, "end")
+
+		-- if I see marker, move forward
+		elseif marker ~= nil then
+			start = false
+
 			-- if full size and meet obstacle left or right, split
 			if vns.scalemanager.scale["drone"] == n_drone and 
 			   ((marker.type == obstacle_left and marker.positionV3.x > 0) or
@@ -217,12 +245,8 @@ return function()
 				return false, true
 			end
 
-			local offset = vector3(0,0,0)
-			local forward_speed_max = 0.3
-			local vertical_speed_max = 0.3
-			if vns.scalemanager.scale["drone"] == n_drone and marker.type == obstacle_entrance then
-				offset = vector3(-(n_side-1)*0.5 * 1.5, -(n_side-1)*0.5 * 1.5, 1)
-			elseif vns.scalemanager.scale["drone"] == n_left_drone and marker.type == obstacle_left then
+			-- forward with adjustments
+			if vns.scalemanager.scale["drone"] == n_left_drone and marker.type == obstacle_left then
 				offset = vector3(-(n_left_side-1)*0.5 * 1.5, -(n_left_side-1)*0.5 * 1.5, 1)
 			elseif vns.scalemanager.scale["drone"] == n_right_drone and marker.type == obstacle_right then
 				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5, 0, 1)
@@ -248,8 +272,7 @@ return function()
 			-- move forward with vertical speed and move speed
 			vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
 			vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
-		elseif vns.scalemanager.scale["drone"] == n_left_drone then
-			vns.Spreader.emergency_after_core(vns, vector3(0, -0.3, 0), vector3())
+
 		end
 
 	elseif state == "split" then
@@ -259,7 +282,7 @@ return function()
 				vns.Msg.send(vns.parentR.idS, "dismiss")
 				vns.deleteParent(vns)
 			end
-			vns.Connector.newVnsID(vns, 0.9, 200)
+			vns.Connector.newVnsID(vns, 0.9, 10000)
 		end	
 
 		if vns.parentR == nil then
@@ -295,12 +318,31 @@ return function()
 				vns.Spreader.emergency_after_core(vns, search_velocity, vector3())
 
 				if target:length() < 0.1 then
-					switchAndSendNewState(vns, "forward")	
+					switchAndSendNewState(vns, "wait")	
 				end
 			else
 				vns.setGoal(vns, vector3(), quaternion())
 				vns.Spreader.emergency_after_core(vns, search_velocity, vector3())
 			end
+		end
+	elseif state == "end" then
+		if vns.parentR == nil then
+			lastScale = vns.scalemanager.scale["drone"]
+			-- switch formations based on swarm size
+			if vns.scalemanager.scale["drone"] == n_drone then
+				vns.setMorphology(vns, structure_full)
+			elseif vns.scalemanager.scale["drone"] == n_left_drone then
+				vns.setMorphology(vns, structure_left)
+			elseif vns.scalemanager.scale["drone"] == n_right_drone then
+				vns.setMorphology(vns, structure_right)
+			end
+
+			if vns.scalemanager.scale["drone"] == n_left_drone then
+				vns.Spreader.emergency_after_core(vns, vector3(0, -0.3, 0), vector3())
+			end
+		end
+		if vns.scalemanager.scale["drone"] == n_left_drone then
+			vns.connector.lastid["drone1"] = nil
 		end
 	end
 
