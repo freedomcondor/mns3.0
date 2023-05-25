@@ -297,9 +297,9 @@ return function()
 
 				local side_length = (n_left_side - 1) * 1.5
 				offset = vector3(-side_length, -side_length * 0.5, 0.5)
-				search_velocity = vector3(0.0, 0.1, 0)
-			end
-			if vns.scalemanager.scale["drone"] == n_right_drone then
+				search_velocity = vector3(0.0, 0.3, 0)
+			else
+			--if vns.scalemanager.scale["drone"] == n_right_drone then
 				split_marker = find_marker(vns, obstacle_right, true)
 				vns.setMorphology(vns, structure_right)
 
@@ -311,15 +311,18 @@ return function()
 
 			if split_marker ~= nil then
 				local target = split_marker.positionV3 + offset:rotate(split_marker.orientationQ)
-				local slow_down = 1
-				local max_speed = 0.3
-				local search_velocity = target * (max_speed / slow_down)
-				if search_velocity:length() > slow_down * max_speed then search_velocity = search_velocity:normalize() * max_speed end
-				vns.setGoal(vns, vector3(), split_marker.orientationQ)
-				vns.Spreader.emergency_after_core(vns, search_velocity, vector3())
-
-				if target:length() < 0.1 then
-					switchAndSendNewState(vns, "wait")	
+				if target:length() > 0.7 then
+					local slow_down = 1
+					local max_speed = 0.3
+					local search_velocity = target * (max_speed / slow_down)
+					if search_velocity:length() > slow_down * max_speed then search_velocity = search_velocity:normalize() * max_speed end
+					vns.setGoal(vns, vector3(), split_marker.orientationQ)
+					vns.Spreader.emergency_after_core(vns, search_velocity, vector3())
+				else
+					vns.setGoal(vns, target, split_marker.orientationQ)
+					if target:length() < 0.2 then
+						switchAndSendNewState(vns, "wait")	
+					end
 				end
 			else
 				vns.setGoal(vns, vector3(), quaternion())

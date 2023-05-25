@@ -2,6 +2,22 @@ local L = 1.5
 
 DeepCopy = require("DeepCopy")
 
+local baseValueFunction = function(base, current, target)
+	local base_target_V3 = target - base
+	local base_current_V3 = current - base
+	local dot = base_current_V3:dot(base_target_V3:normalize())
+	if dot < 0 then 
+		return dot 
+	else
+		local x = dot
+		local x2 = dot ^ 2
+		local l = base_current_V3:length()
+		local y2 = l ^ 2 - x2
+		elliptic_distance2 = (1/4) * x2 + y2
+		return elliptic_distance2
+	end
+end
+
 function generate_cube_morphology(n, split_n)
 	if n <= 8 then
 		return require("morphology_8")
@@ -43,10 +59,10 @@ function generate_cube(n, positionV3, orientationQ, split_n)
 			},
 			split = split,
 			children = {
-			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, true, split_n),
+			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, false, false),
 			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
 			generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
-			--generate_cube(n - 1, vector3(L, L, L), quaternion()),
+			generate_cube(n - 1, vector3(L, L, L), quaternion(), split_n),
 		}}
 	end
 end
@@ -85,6 +101,7 @@ function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, w
 				vector3(0, L, 0),
 				vector3(0, 0, L)
 			},
+			calcBaseValue = baseValueFunction,
 			children = {
 				generate_cube_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
 				generate_square(n, vector3(0, Y_offset, 0), quaternion(), X_offset, Y_offset),
