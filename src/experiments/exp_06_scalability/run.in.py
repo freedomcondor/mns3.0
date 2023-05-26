@@ -44,20 +44,21 @@ half_side_length_split_main = (n_side_split_main-1) * L * 0.5
 arena_size = half_side_length_split_main * 6 + half_side_length * 6
 arena_z_center = half_side_length * 2 - 2
 
-A = half_side_length_split_ranger * 2 * 1.2
-B = half_side_length_split_ranger * 2 * 1.2
+A = half_side_length_split_ranger * 2 * 1.5
+B = half_side_length_split_ranger * 2 * 1.5
 if n_side_split_ranger == 2:
     B = B * 2
-C = half_side_length_split_main * 4
+C = half_side_length_split_main * 2 * 1.5
 
-H = C * 0.5 * 1.2
+H = (A + C + 1) * 0.5 
 
 
 offset = -half_side_length * 4
+yoffset = -half_side_length * 1
 drone_locations = generate_random_locations(n_drone,
-                                            offset -half_side_length,   -half_side_length,               # origin location
+                                            offset -half_side_length,   yoffset-half_side_length,               # origin location
                                             offset -half_side_length*1.2, offset+half_side_length*1.2,       # random x range
-                                            -half_side_length*1.2, half_side_length*1.2,                     # random y range
+                                            yoffset-half_side_length*1.2, yoffset + half_side_length*1.2,                     # random y range
                                             0.5, 1.5,           # near limit and far limit
                                             10000)              # attempt count
 
@@ -66,19 +67,19 @@ drone_xml = generate_drones(drone_locations, 1, 4.2)                  # from lab
 obstacle_xml = ""
 
 obstacle_xml += generate_3D_triangle_gate_xml(1,                    # id
-                                              0, -H, H, # position
+                                              0, -H*0.5, H, # position
                                               0, 0, 0,              # orientation
                                               1001,                 # payload
                                               C, 0.2,          # size x, size y, thickness
-                                              H*2, H*2)      
+                                              C+1, H*2)      
 
 size_y = half_side_length_split_ranger*3 
 obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
-                                                 0, H, H, # position
+                                                 0, H*0.5, H, # position
                                                  0, 0, 0,              # orientation
                                                  1002,                 # payload
                                                  A, B, 0.2,    # size x, size y, thickness
-                                                 H*2, H*2)
+                                                 A+1, H*2)
 
 
 
@@ -92,7 +93,6 @@ parameters = '''
     drone_label="1, 1000"
     obstacle_label="1001, 1050"
 
-    drone_default_start_height="3.0"
     safezone_drone_drone="3"
     dangerzone_drone="1"
 
@@ -105,9 +105,10 @@ parameters = '''
 
     n_drone="{}"
     n_left_drone="{}"
+    base_height="{}"
 
     drone_velocity_mode="true"
-'''.format(n_drone, n_drone_split_ranger)
+'''.format(n_drone, n_drone_split_ranger, H-C*0.25)
 
 # generate argos file
 generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 

@@ -20,8 +20,8 @@ function generate_tetrahedron(n_nodes, n_side, positionV3, orientationQ)
 	end
 
 	local n_nodes_tetrahedron_minus_1 = (1.0/6)*(n_side-1)*(n_side)*(n_side+1)
-	--local tetrahedron_child = generate_tetrahedron(n_nodes_tetrahedron_minus_1, n_side-1, vector3(L/math.sqrt(3), 0, L*math.sqrt(2)/math.sqrt(3)), quaternion())
-	local tetrahedron_child = generate_tetrahedron(n_nodes_tetrahedron_minus_1, n_side-1, vector3(L/math.sqrt(3), 0, L), quaternion())
+	local tetrahedron_child = generate_tetrahedron(n_nodes_tetrahedron_minus_1, n_side-1, vector3(L/math.sqrt(3), 0, 1.2*L*math.sqrt(2)/math.sqrt(3)), quaternion())
+	--local tetrahedron_child = generate_tetrahedron(n_nodes_tetrahedron_minus_1, n_side-1, vector3(L/math.sqrt(3), 0, L), quaternion())
 
 	local node = generate_triangle(n_nodes - n_nodes_tetrahedron_minus_1, n_side, positionV3, orientationQ)
 	if node.children == nil then node.children = {} end

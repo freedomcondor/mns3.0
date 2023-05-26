@@ -50,12 +50,13 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
+	local base_height = tonumber(robot.params.base_height)
 	if number % 3 == 1 then
-		api.parameters.droneDefaultStartHeight = 1
+		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = 3.0
+		api.parameters.droneDefaultStartHeight = base_height + 2
 	elseif number % 3 == 0 then
-		api.parameters.droneDefaultStartHeight = 5.0
+		api.parameters.droneDefaultStartHeight = base_height + 4
 	end
 	--api.debug.show_all = true
 end
@@ -291,7 +292,7 @@ return function()
 
 				local side_length = (n_left_side - 1) * 1.5
 				offset = vector3(-side_length, -side_length * 0.5, 0.5)
-				search_velocity = vector3(0.0, 0.3, 0)
+				search_velocity = vector3(0.2, 0.3, 0)
 			else
 			--if vns.scalemanager.scale["drone"] == n_right_drone then
 				split_marker = find_marker(vns, obstacle_right, true)
@@ -300,7 +301,7 @@ return function()
 				local side_length = (n_right_side - 1) * 1.5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
 				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5, 0, 1)
-				search_velocity = vector3(0.1, 0, 0)
+				search_velocity = vector3(0.1, 0.0, 0)
 			end
 
 			if split_marker ~= nil then
