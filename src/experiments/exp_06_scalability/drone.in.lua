@@ -16,13 +16,7 @@ local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
 local n_drone = tonumber(robot.params.n_drone)
-
-local n_left_drone = 0
-if n_drone == 27 then  n_left_drone = 8 end
-if n_drone == 64 then  n_left_drone = 27 end
-if n_drone == 125 then n_left_drone = 64 end
-if n_drone == 216 then n_left_drone = 125 end
-if n_drone == 512 then n_left_drone = 216 end
+local n_left_drone = tonumber(robot.params.n_left_drone)
 
 local n_right_drone = n_drone - n_left_drone
 n_side       = math.ceil(n_drone ^ (1/3))

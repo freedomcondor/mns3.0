@@ -453,7 +453,7 @@ def generate_target_xml(x, y, th, mark_type, obstacle_type, radius, tag_edge_dis
     return tag
 
 ########## 3D gate ##############################################################
-def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0, size_y=3.0, thickness = 0.2):
+def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0, size_y=3.0, thickness=0.2, margin_x=None, margin_y=None):
     bottom_position = "{}, {}, {}".format(0,            0,                  -size_y*0.5 - thickness*0.5)
     bottom_size =     "{}, {}, {}".format(thickness,    size_x + thickness, thickness)
 
@@ -472,6 +472,52 @@ def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=
 
     tag_position =    "{}, {}, {}".format(0,            0,                  thickness + 0.005)
 
+    margin = ""
+    margin_joints = ""
+    if margin_x != None and margin_y != None and margin_x > size_x and margin_y > size_y :
+      margin = '''
+        <link id="up_margin"     geometry="box" mass="1" position="{},{},{}" orientation="0,0,0" size="{},{},{}"/>
+        <link id="bottom_margin" geometry="box" mass="1" position="{},{},{}" orientation="0,0,0" size="{},{},{}"/>
+        <link id="left_margin" geometry="box" mass="1" position="{},{},{}" orientation="0,0,0" size="{},{},{}"/>
+        <link id="right_margin" geometry="box" mass="1" position="{},{},{}" orientation="0,0,0" size="{},{},{}"/>
+      '''.format(
+        0,               0,                  size_y*0.5 - thickness * 0.5, 
+        thickness,       margin_x,           (margin_y-size_y)*0.5+thickness*0.5,
+
+        0,               0,                  -margin_y*0.5, 
+        thickness,       margin_x,           (margin_y-size_y)*0.5+thickness*0.5,
+
+        0,               -size_x*0.5+thickness*0.5-((margin_x-size_x)*0.5+thickness*0.5)*0.5, -size_y*0.5+thickness*0.5,
+        thickness,       (margin_x-size_x)*0.5+thickness*0.5,     size_y-thickness,
+
+        0,               -(-size_x*0.5+thickness*0.5-((margin_x-size_x)*0.5+thickness*0.5)*0.5), -size_y*0.5+thickness*0.5,
+        thickness,       (margin_x-size_x)*0.5+thickness*0.5,     size_y-thickness
+      )
+
+      margin_joints = '''
+        <joint id="bottom_up_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="up_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+        <joint id="bottom_bottom_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="bottom_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+        <joint id="bottom_left_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="left_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+        <joint id="bottom_right_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="right_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+      '''.format(
+        0,              0,                   size_y,
+        0,              0,                   -(margin_y-size_y)*0.5+thickness*0.5,
+        0,              -size_x*0.5+thickness*0.5-((margin_x-size_x)*0.5+thickness*0.5)*0.5,                    thickness,
+        0,              -(-size_x*0.5+thickness*0.5-((margin_x-size_x)*0.5+thickness*0.5)*0.5),                 thickness
+      )
+
     tag = '''
     <!-- add obstacles -->
     <prototype id="3D_rectangular_gate{}" movable="false">
@@ -481,6 +527,7 @@ def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=
         <link id="up"     geometry="box" mass="1" position="{}" orientation="0,0,0" size="{}"/>
         <link id="left"   geometry="box" mass="1" position="{}" orientation="0,0,0" size="{}"/>
         <link id="right"  geometry="box" mass="1" position="{}" orientation="0,0,0" size="{}"/>
+        {}
       </links>
       <joints>
         <joint id="bottom_up" type="fixed">
@@ -495,6 +542,7 @@ def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=
           <parent link="bottom" position="{}" orientation="0,0,0"/>
           <child  link="right"  position="0,0,0" orientation="0,0,0"/>
         </joint>
+        {}
       </joints>
       <devices>
         <tags medium="tags">
@@ -509,12 +557,14 @@ def generate_3D_rectangular_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=
                up_position,     up_size,
                left_position,   left_size,
                right_position,  right_size,
+               margin,
                up_joint, left_joint, right_joint,
+               margin_joints,
                payload, tag_position
               )
     return tag
 
-def generate_3D_triangle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0, thickness = 0.2):
+def generate_3D_triangle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0, thickness=0.2, margin_x=None, margin_y=None):
     L = size_x
     l = size_x * 0.5
     d = l / math.sqrt(3)
@@ -533,6 +583,67 @@ def generate_3D_triangle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0
 
     tag_position =    "{}, {}, {}".format(0,            0,                  thickness + 0.005)
 
+    margin = ""
+    margin_joints = "" 
+
+    if margin_x != None and margin_y != None and margin_x > size_x and margin_y > d * 4 :
+      margin = '''
+        <link id="bottom_margin"  geometry="box" mass="1" position="{},{},{}" orientation="0,0,0" size="{},{},{}"/>
+        <link id="left_margin"  geometry="convex_hull" mass="1" position="0,0,0" orientation="0,0,0" > 
+          ({},{},{})({},{},{})({},{},{})({},{},{})({},{},{})
+          ({},{},{})({},{},{})({},{},{})({},{},{})({},{},{})
+        </link>
+        <link id="right_margin"  geometry="convex_hull" mass="1" position="0,0,0" orientation="0,0,0" > 
+          ({},{},{})({},{},{})({},{},{})({},{},{})({},{},{})
+          ({},{},{})({},{},{})({},{},{})({},{},{})({},{},{})
+        </link>
+      '''.format(
+        0,          0,         -margin_y*0.5, 
+        thickness,  margin_x,    margin_y*0.5-d+thickness*0.5,
+
+        -thickness*0.5,     l,                 -d,
+         thickness*0.5,     l,                 -d,
+        -thickness*0.5,     margin_y*0.5,      -d,
+         thickness*0.5,     margin_y*0.5,      -d,
+        -thickness*0.5,     margin_y*0.5,      margin_x*0.5,
+         thickness*0.5,     margin_y*0.5,      margin_x*0.5,
+        -thickness*0.5,     0,                 margin_x*0.5,
+         thickness*0.5,     0,                 margin_x*0.5,
+        -thickness*0.5,     0,                 d*2,
+         thickness*0.5,     0,                 d*2,
+
+        -thickness*0.5,     -l,                 -d,
+         thickness*0.5,     -l,                 -d,
+        -thickness*0.5,     -margin_y*0.5,      -d,
+         thickness*0.5,     -margin_y*0.5,      -d,
+        -thickness*0.5,     -margin_y*0.5,      margin_x*0.5,
+         thickness*0.5,     -margin_y*0.5,      margin_x*0.5,
+        -thickness*0.5,     -0,                 margin_x*0.5,
+         thickness*0.5,     -0,                 margin_x*0.5,
+        -thickness*0.5,     -0,                 d*2,
+         thickness*0.5,     -0,                 d*2,
+      )
+      margin_joints = '''
+        <joint id="bottom_bottom_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="bottom_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+
+        <joint id="bottom_left_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="left_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+
+        <joint id="bottom_right_margin" type="fixed">
+          <parent link="bottom" position="{},{},{}" orientation="0,0,0"/>
+          <child  link="right_margin"  position="0,0,0" orientation="0,0,0"/>
+        </joint>
+      '''.format(
+        0,        0,      -(margin_y*0.5-d-thickness*0.5),
+        0,        0,      d+thickness*0.5,
+        0,        0,      d+thickness*0.5,
+      )
+
     tag = '''
     <!-- add obstacles -->
     <prototype id="3D_triangle_gate{}" movable="false">
@@ -541,6 +652,7 @@ def generate_3D_triangle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0
         <link id="bottom" geometry="box" mass="1" position="{}" orientation="0,0,0" size="{}"/>
         <link id="left"   geometry="box" mass="1" position="{}" orientation="0,0,30" size="{}"/>
         <link id="right"  geometry="box" mass="1" position="{}" orientation="0,0,-30" size="{}"/>
+        {}
       </links>
       <joints>
         <joint id="bottom_left" type="fixed">
@@ -551,6 +663,7 @@ def generate_3D_triangle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0
           <parent link="bottom" position="{}" orientation="0,0,-30"/>
           <child  link="right"   position="0,0,0" orientation="0,0,0"/>
         </joint>
+        {}
       </joints>
       <devices>
         <tags medium="tags">
@@ -564,7 +677,9 @@ def generate_3D_triangle_gate_xml(id, x, y, z, rx, ry, rz, payload=0, size_x=5.0
                bottom_position, bottom_size,
                left_position,   left_size,
                right_position,  right_size,
+               margin,
                left_joint, right_joint,
+               margin_joints,
                payload, tag_position
               )
     return tag
