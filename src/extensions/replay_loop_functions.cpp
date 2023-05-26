@@ -118,14 +118,16 @@ namespace argos {
       }
 
       for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
-         std::string ID = s_tracked_entity.Entity->GetId();
-         std::string ParentID = mapParent[ID];
-         if (ParentID == "nil")
-            s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
-         else {
-            CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
-            CRelativePosition.Rotate(mapOrientation[ID].Inverse());
-            s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+         if (s_tracked_entity.DebugEntity != NULL) {
+            std::string ID = s_tracked_entity.Entity->GetId();
+            std::string ParentID = mapParent[ID];
+            if (ParentID == "nil")
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
+            else {
+               CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
+               CRelativePosition.Rotate(mapOrientation[ID].Inverse());
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+            }
          }
       }
    }

@@ -74,6 +74,12 @@ InputFolderNameFile = open("replay_input_folder.txt", "w")
 InputFolderNameFile.write(InputFolder)
 InputFolderNameFile.close()
 
+
+#----------------------------------------------------------------------------------------------
+# arena size
+arena_size_xml="200,200,100"
+arena_center_xml="0,0,45"
+
 '''
 #----------------------------------------------------------------------------------------------
 # generate argos file
@@ -85,6 +91,8 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/replayer_template.argos",
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
         ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, True)],
+        ["ARENA_SIZE",        arena_size_xml], 
+        ["ARENA_CENTER",      arena_center_xml], 
     ]
 )
 
