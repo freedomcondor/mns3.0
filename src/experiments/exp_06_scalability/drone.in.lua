@@ -329,7 +329,7 @@ return function()
 
 				local side_length = (n_right_side - 1) * 1.5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
-				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.6, 0, 1)
+				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.66, 0, 1)
 				search_velocity = vector3(0.1, 0.0, 0)
 			end
 
