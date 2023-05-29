@@ -10,6 +10,7 @@ local VNS = require("VNS")
 local BT = require("BehaviorTree")
 require("morphologyGenerateTetrahedron")
 require("morphologyGenerateCube")
+Transform = require("Transform")
 
 -- datas ----------------
 local bt
@@ -78,7 +79,9 @@ function reset()
 end
 
 function step()
-	--logger(robot.id, api.stepCount, "----------------------------")
+	if robot.id == "drone1" and api.stepCount % 100 == 0 then
+		logger(robot.id, api.stepCount, "----------------------------")
+	end
 	api.preStep()
 	vns.preStep(vns)
 
@@ -140,17 +143,43 @@ function create_navigation_node(vns)
 			priority_list = vns.collectivesensor.totalObstaclesList
 		end
 
+		local average_list = {}
 		for i, ob in ipairs(priority_list) do
-				local dirVec = vector3(1,0,0):rotate(ob.orientationQ)
-				local horizontal_shadow = ob.positionV3:dot(dirVec)
-				if horizontal_shadow > 0 and horizontal_shadow < dis then
-					marker = ob
-					dis = horizontal_shadow
+			-- check ob.type exist in average_list
+			local exist_flag = false
+			local exist_id = nil
+			for j, ob_ave in ipairs(average_list) do
+				if ob_ave.type == ob.type then
+					exist_flag = true
+					exist_id = j
+					break
 				end
-				if horizontal_shadow <= 0 and horizontal_shadow > dis_behind then
-					marker_behind = ob
-					dis_behind = horizontal_shadow
-				end
+			end
+
+			-- if new
+			if exist_flag == false then
+				table.insert(average_list, ob)
+				ob.accumulator = Transform.createAccumulator()
+				Transform.addAccumulator(ob.accumulator, ob)
+			else
+			-- if exist
+				Transform.addAccumulator(average_list[exist_id].accumulator, ob)
+			end
+		end
+
+		--for i, ob in ipairs(priority_list) do
+		for i, ob in ipairs(average_list) do
+			Transform.averageAccumulator(ob.accumulator, ob)
+			local dirVec = vector3(1,0,0):rotate(ob.orientationQ)
+			local horizontal_shadow = ob.positionV3:dot(dirVec)
+			if horizontal_shadow > 0 and horizontal_shadow < dis then
+				marker = ob
+				dis = horizontal_shadow
+			end
+			if horizontal_shadow <= 0 and horizontal_shadow > dis_behind then
+				marker_behind = ob
+				dis_behind = horizontal_shadow
+			end
 		end
 		if marker == nil then marker = marker_behind end
 		return marker
@@ -300,7 +329,7 @@ return function()
 
 				local side_length = (n_right_side - 1) * 1.5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
-				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5, 0, 1)
+				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.6, 0, 1)
 				search_velocity = vector3(0.1, 0.0, 0)
 			end
 
@@ -330,6 +359,9 @@ return function()
 			-- switch formations based on swarm size
 			if vns.scalemanager.scale["drone"] == n_drone then
 				vns.setMorphology(vns, structure_full)
+				if vns.driver.all_arrive == true then
+					logger("all_arrive in end", vns.api.stepCount)
+				end
 			elseif vns.scalemanager.scale["drone"] == n_left_drone then
 				vns.setMorphology(vns, structure_left)
 			elseif vns.scalemanager.scale["drone"] == n_right_drone then
