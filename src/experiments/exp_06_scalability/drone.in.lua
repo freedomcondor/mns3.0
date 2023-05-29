@@ -329,24 +329,29 @@ return function()
 
 				local side_length = (n_right_side - 1) * 1.5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
-				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.66, 0, 1)
+				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.7, 0, 1)
+				if n_drone == 27 then
+					offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.7, 0, 0.3)
+				end
 				search_velocity = vector3(0.1, 0.0, 0)
 			end
 
 			if split_marker ~= nil then
 				local target = split_marker.positionV3 + offset:rotate(split_marker.orientationQ)
-				if target:length() > 0.7 then
+				if target:length() > 0.3 then
 					local slow_down = 1
 					local max_speed = 0.3
 					local search_velocity = target * (max_speed / slow_down)
 					if search_velocity:length() > slow_down * max_speed then search_velocity = search_velocity:normalize() * max_speed end
-					vns.setGoal(vns, vector3(), split_marker.orientationQ)
+					--vns.setGoal(vns, vector3(), split_marker.orientationQ)
+					vns.setGoal(vns, vector3(), quaternion())
 					vns.Spreader.emergency_after_core(vns, search_velocity, vector3())
 				else
-					vns.setGoal(vns, target, split_marker.orientationQ)
-					if target:length() < 0.2 then
+					--vns.setGoal(vns, target, split_marker.orientationQ)
+					--if target:length() < 0.3 then
+						vns.setGoal(vns, target, split_marker.orientationQ)
 						switchAndSendNewState(vns, "wait")	
-					end
+					--end
 				end
 			else
 				vns.setGoal(vns, vector3(), quaternion())
