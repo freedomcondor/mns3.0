@@ -44,6 +44,13 @@ function VNS.Allocator.resetMorphology(vns)
 	vns.Allocator.setMorphology(vns, structure_left)
 end
 
+-- Analyze function -----
+function getCurrentTime()
+	local wallTimeS, wallTimeNS, CPUTimeS, CPUTimeNS = robot.radios.wifi.get_time()
+	--return CPUTimeS + CPUTimeNS * 0.000000001
+	return wallTimeS + wallTimeNS * 0.000000001
+end
+
 function init()
 	api.linkRobotInterface(VNS)
 	api.init()
@@ -62,6 +69,8 @@ function init()
 	--api.debug.show_all = true
 end
 
+local startTime = getCurrentTime()
+
 function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 1 end
@@ -76,11 +85,17 @@ function reset()
 			}}}
 		)
 	)
+
+	lastTime = startTime
 end
 
+
 function step()
-	if robot.id == "drone1" and api.stepCount % 100 == 0 then
-		logger(robot.id, api.stepCount, "----------------------------")
+	local MeasureStepPeriod = 50
+	if robot.id == "drone1" and api.stepCount % MeasureStepPeriod == 0 then
+		local currentTime = getCurrentTime()
+		logger(robot.id, api.stepCount, "----------------------------, runtime :", currentTime - startTime, "average : ", (currentTime - lastTime) / MeasureStepPeriod)
+		lastTime = currentTime
 	end
 	api.preStep()
 	vns.preStep(vns)
@@ -223,6 +238,7 @@ return function()
 	elseif state == "wait" then
 		if vns.parentR == nil and stateCount > 30 then
 			if vns.driver.all_arrive == true then
+				logger("--- NewState: forward")
 				switchAndSendNewState(vns, "forward")
 			end
 		end
@@ -254,6 +270,7 @@ return function()
 
 		-- if I don't see the marker, but spliting, I still move accordingly
 		elseif start == false and (marker == nil or marker.positionV3.x < -0.5) then
+			logger("--- NewState: end")
 			switchAndSendNewState(vns, "end")
 
 		-- if I see marker, move forward
@@ -265,6 +282,7 @@ return function()
 			   ((marker.type == obstacle_left and marker.positionV3.x > 0) or
 			    (marker.type == obstacle_right and marker.positionV3.x > 0)
 			   ) then
+				logger("--- NewState: split")
 				switchAndSendNewState(vns, "split")	
 				return false, true
 			end
@@ -350,6 +368,7 @@ return function()
 					--vns.setGoal(vns, target, split_marker.orientationQ)
 					--if target:length() < 0.3 then
 						vns.setGoal(vns, target, split_marker.orientationQ)
+						logger("--- NewState: wait")
 						switchAndSendNewState(vns, "wait")	
 					--end
 				end
