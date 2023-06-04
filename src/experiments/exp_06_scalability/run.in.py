@@ -55,10 +55,13 @@ H = (A + C + 1) * 0.5
 
 offset = -half_side_length * 4
 yoffset = -half_side_length * 1
+y_scale = 1.2
+if n_drone == 512 :
+    y_scale = 1.7
 drone_locations = generate_random_locations(n_drone,
                                             offset -half_side_length,   yoffset-half_side_length,               # origin location
                                             offset -half_side_length*1.2, offset+half_side_length*1.2,       # random x range
-                                            yoffset-half_side_length*1.2, yoffset + half_side_length*1.2,                     # random y range
+                                            yoffset-half_side_length*y_scale, yoffset + half_side_length*y_scale,                     # random y range
                                             0.5, 1.5,           # near limit and far limit
                                             10000)              # attempt count
 

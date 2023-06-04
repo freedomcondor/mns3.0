@@ -91,7 +91,7 @@ end
 
 
 function step()
-	local MeasureStepPeriod = 50
+	local MeasureStepPeriod = 20
 	if robot.id == "drone1" and api.stepCount % MeasureStepPeriod == 0 then
 		local currentTime = getCurrentTime()
 		logger(robot.id, api.stepCount, "----------------------------, runtime :", currentTime - startTime, "average : ", (currentTime - lastTime) / MeasureStepPeriod)
@@ -348,6 +348,7 @@ return function()
 				local side_length = (n_right_side - 1) * 1.5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
 				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.7, 0, 1)
+
 				if n_drone == 27 then
 					offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.7, 0, 0.3)
 				end
