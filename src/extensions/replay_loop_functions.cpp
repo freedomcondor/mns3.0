@@ -45,6 +45,7 @@ namespace argos {
       std::map<std::string, CVector3> mapPosition;
       std::map<std::string, CQuaternion> mapOrientation;
       std::map<std::string, std::string> mapParent;
+      bool bArrowsInLog = false;
 
       for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
          // read a line
@@ -115,18 +116,79 @@ namespace argos {
             std::string strParent = vecWordList[17];
             mapParent[ID] = strParent;
          }
+
+         if (vecWordList.size() > 18) {
+            bArrowsInLog = true;
+            UInt32 nCurrentIdx = 18;
+            while (nCurrentIdx < vecWordList.size()) {
+               std::string strDrawType = vecWordList[nCurrentIdx];
+               if (strDrawType == "ring") {
+                  CVector3 cVecMiddle = CVector3(
+                     std::stod(vecWordList[nCurrentIdx + 1]),
+                     std::stod(vecWordList[nCurrentIdx + 2]),
+                     std::stod(vecWordList[nCurrentIdx + 3])
+                  );
+                  Real fRadius = std::stod(vecWordList[nCurrentIdx + 4]);
+                  nCurrentIdx += 5;
+                  CColor cColor;
+                  if (std::isdigit(vecWordList[nCurrentIdx][0])) {
+                     cColor.Set(std::stod(vecWordList[nCurrentIdx]),
+                                std::stod(vecWordList[nCurrentIdx + 1]),
+                                std::stod(vecWordList[nCurrentIdx + 2])
+                     );
+                     nCurrentIdx += 3;
+                  }
+                  else {
+                     cColor.Set(vecWordList[nCurrentIdx]);
+                     nCurrentIdx ++;
+                  }
+                  s_tracked_entity.DebugEntity->GetRings().emplace_back(cVecMiddle, fRadius, cColor);
+               }
+               else if (strDrawType == "arrow") {
+                  CVector3 cVecBegin = CVector3(
+                     std::stod(vecWordList[nCurrentIdx + 1]),
+                     std::stod(vecWordList[nCurrentIdx + 2]),
+                     std::stod(vecWordList[nCurrentIdx + 3])
+                  );
+                  CVector3 cVecEnd = CVector3(
+                     std::stod(vecWordList[nCurrentIdx + 4]),
+                     std::stod(vecWordList[nCurrentIdx + 5]),
+                     std::stod(vecWordList[nCurrentIdx + 6])
+                  );
+                  nCurrentIdx += 7;
+                  CColor cColor;
+                  if (std::isdigit(vecWordList[nCurrentIdx][0])) {
+                     cColor.Set(std::stod(vecWordList[nCurrentIdx]),
+                                std::stod(vecWordList[nCurrentIdx + 1]),
+                                std::stod(vecWordList[nCurrentIdx + 2])
+                     );
+                     nCurrentIdx += 3;
+                  }
+                  else {
+                     cColor.Set(vecWordList[nCurrentIdx]);
+                     nCurrentIdx ++;
+                  }
+                  s_tracked_entity.DebugEntity->GetArrows().emplace_back(cVecBegin, cVecEnd, cColor);
+               }
+               else {
+                  nCurrentIdx ++;
+               }
+            }
+         }
       }
 
-      for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
-         if (s_tracked_entity.DebugEntity != NULL) {
-            std::string ID = s_tracked_entity.Entity->GetId();
-            std::string ParentID = mapParent[ID];
-            if (ParentID == "nil")
-               s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
-            else {
-               CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
-               CRelativePosition.Rotate(mapOrientation[ID].Inverse());
-               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+      if (bArrowsInLog == false) {
+         for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
+            if (s_tracked_entity.DebugEntity != NULL) {
+               std::string ID = s_tracked_entity.Entity->GetId();
+               std::string ParentID = mapParent[ID];
+               if (ParentID == "nil")
+                  s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
+               else {
+                  CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
+                  CRelativePosition.Rotate(mapOrientation[ID].Inverse());
+                  s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+               }
             }
          }
       }

@@ -49,6 +49,7 @@ end
 function init()
 	api.linkRobotInterface(VNS)
 	api.init()
+	api.debug.recordSwitch = true
 	vns = VNS.create("drone")
 	reset()
 
@@ -102,11 +103,12 @@ function step()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
-	vns.logLoopFunctionInfo(vns)
 
 	if vns.goal.positionV3:length() < vns.Parameters.driver_stop_zone * 2 then
 		api.debug.showMorphologyLines(vns, true)
 	end
+
+	vns.logLoopFunctionInfo(vns)
 end
 
 function destroy()
@@ -223,8 +225,8 @@ return function()
 		local index_base = structure_screen.idN
 		index = index - index_base + 1
 		if map_index[state][index] == 1 then
-			api.debug.drawRing("green", vector3(0,0,0), 0.3, true)
-			api.debug.drawRing("green", vector3(0,0,0.2), 0.3, true)
+			api.debug.drawRing("128, 0, 255", vector3(0,0,0), 0.3, true)
+			api.debug.drawRing("128, 0, 255", vector3(0,0,0.2), 0.3, true)
 		end
 
 		if vns.parentR == nil and stateCount > 30 then

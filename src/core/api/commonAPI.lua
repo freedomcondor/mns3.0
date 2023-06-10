@@ -115,6 +115,8 @@ end
 
 ---- Debug Draw -------------------------------
 api.debug = {}
+api.debug.recordSwitch = false
+api.debug.record = ""
 function api.debug.drawArrow(color, begin, finish, essential)
 	if api.debug.show_all == false then return end
 	if api.debug.show_all ~= true and essential ~= true then return end
@@ -127,12 +129,28 @@ function api.debug.drawArrow(color, begin, finish, essential)
 	-- draw
 	if tonumber(colorArray[1]) == nil then
 		robot.debug.draw_arrow(begin, finish, color)
+		if api.debug.recordSwitch == true then
+			api.debug.record = api.debug.record ..
+			                   "," .. "arrow" ..
+			                   "," .. tostring(begin) ..
+			                   "," .. tostring(finish) ..
+			                   "," .. color
+		end
 	else
 		robot.debug.draw_arrow(begin, finish,
 		                       tonumber(colorArray[1]),
 		                       tonumber(colorArray[2]),
 		                       tonumber(colorArray[3])
-	                          )
+		                      )
+		if api.debug.recordSwitch == true then
+			api.debug.record = api.debug.record ..
+			                   "," .. "arrow" ..
+			                   "," .. tostring(begin) ..
+			                   "," .. tostring(finish) ..
+			                   "," .. colorArray[1] ..
+			                   "," .. colorArray[2] ..
+			                   "," .. colorArray[3] 
+		end
 	end
 end
 
@@ -147,12 +165,29 @@ function api.debug.drawRing(color, middle, radius, essential)
 	end
 	if tonumber(colorArray[1]) == nil then
 		robot.debug.draw_ring(middle, radius, color) -- 0,0,255 (blue)
+		if api.debug.recordSwitch == true then
+			api.debug.record = api.debug.record ..
+			                   "," .. "ring" ..
+			                   "," .. tostring(middle) ..
+			                   "," .. tostring(radius) ..
+			                   "," .. color
+		end
 	else
 		robot.debug.draw_ring(middle, radius,
 		                       tonumber(colorArray[1]),
 		                       tonumber(colorArray[2]),
 		                       tonumber(colorArray[3])
-	                          )
+		                     )
+		if api.debug.recordSwitch == true then
+			api.debug.record = api.debug.record ..
+			                   "," .. "ring" ..
+			                   "," .. tostring(middle) ..
+			                   "," .. tostring(radius) ..
+			                   "," .. colorArray[1] ..
+			                   "," .. colorArray[2] ..
+			                   "," .. colorArray[3] 
+		end
+	
 	end
 end
 
@@ -336,6 +371,8 @@ end
 function api.preStep()
 	api.stepCount = api.stepCount + 1
 	api.processTime()
+
+	api.debug.record = ""
 end
 
 function api.postStep()

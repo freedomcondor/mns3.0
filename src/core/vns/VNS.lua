@@ -351,6 +351,10 @@ function VNS.logLoopFunctionInfo(vns)
 		str = str .. "," .. tostring(nil)
 	end
 
+	if vns.api.debug.recordSwitch == true then
+		str = str .. vns.api.debug.record
+	end
+
 	robot.debug.write(str)
 end
 
