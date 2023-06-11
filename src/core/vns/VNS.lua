@@ -52,7 +52,7 @@ VNS.Modules = {
 --		idN
 --		robotTypeS
 --		scale
---		
+--
 --		parentR
 --		childrenRT
 --
@@ -63,7 +63,7 @@ function VNS.create(myType)
 
 	-- a robot =  {
 	--     idS,
-	--     positionV3, 
+	--     positionV3,
 	--     orientationQ,
 	--     robotTypeS = "drone",
 	-- }
@@ -201,13 +201,13 @@ function VNS.debug.logInfo(vns, option, indent_str)
 	if option == nil then option = {ALL = true} end
 	if indent_str == nil then indent_str = "" end
 
-	logger(indent_str .. robot.id, vns.api.stepCount, "-----------------------") 
+	logger(indent_str .. robot.id, vns.api.stepCount, "-----------------------")
 	vns.debug.logVNSInfo(vns, option, indent_str)
-	logger(indent_str .. "    parent : ") 
+	logger(indent_str .. "    parent : ")
 	if vns.parentR ~= nil then
 		vns.debug.logRobot(vns.parentR, option, indent_str .. "        ")
 	end
-	logger(indent_str .. "    children : ") 
+	logger(indent_str .. "    children : ")
 	for _, childR in pairs(vns.childrenRT) do
 		vns.debug.logRobot(childR, option, indent_str .. "        ")
 	end
@@ -218,32 +218,32 @@ function VNS.debug.logVNSInfo(vns, option, indent_str)
 	if indent_str == nil then indent_str = "" end
 
 	if option.ALL == true or option.idN == true then
-		logger(indent_str .. "    idN              = ", vns.idN) 
+		logger(indent_str .. "    idN              = ", vns.idN)
 	end
 	if option.ALL == true or option.idS == true then
-		logger(indent_str .. "    idS              = ", vns.idS) 
+		logger(indent_str .. "    idS              = ", vns.idS)
 	end
 	if option.ALL == true or option.robotTypeS   == true then
-		logger(indent_str .. "    robotTypeS       = ", vns.robotTypeS) 
+		logger(indent_str .. "    robotTypeS       = ", vns.robotTypeS)
 	end
 	if option.ALL == true or option.target == true and vns.allocator.target ~= nil then
-		logger(indent_str .. "    allocator.target = ", vns.allocator.target.idN) 
+		logger(indent_str .. "    allocator.target = ", vns.allocator.target.idN)
 	end
 	if option.ALL == true or option.goal == true then
-		logger(indent_str .. "    goal.positionV3  = ", vns.goal.positionV3) 
-		logger(indent_str .. "         orientationQ : X = ", vector3(1,0,0):rotate(vns.goal.orientationQ)) 
-		logger(indent_str .. "                        Y = ", vector3(0,1,0):rotate(vns.goal.orientationQ)) 
-		logger(indent_str .. "                        Z = ", vector3(0,0,1):rotate(vns.goal.orientationQ)) 
-		logger(indent_str .. "         transV3     = ", vns.goal.transV3) 
-		logger(indent_str .. "         rotateV3    = ", vns.goal.rotateV3) 
+		logger(indent_str .. "    goal.positionV3  = ", vns.goal.positionV3)
+		logger(indent_str .. "         orientationQ : X = ", vector3(1,0,0):rotate(vns.goal.orientationQ))
+		logger(indent_str .. "                        Y = ", vector3(0,1,0):rotate(vns.goal.orientationQ))
+		logger(indent_str .. "                        Z = ", vector3(0,0,1):rotate(vns.goal.orientationQ))
+		logger(indent_str .. "         transV3     = ", vns.goal.transV3)
+		logger(indent_str .. "         rotateV3    = ", vns.goal.rotateV3)
 	end
-	if option.ALL == true or option.scale == true then 
+	if option.ALL == true or option.scale == true then
 		logger(indent_str .. "    scale       : ")
 		for typeS, number in pairs(vns.scalemanager.scale) do
 			logger(indent_str .. "                   " .. typeS, number)
 		end
 	end
-	if option.ALL == true or option.connector == true then 
+	if option.ALL == true or option.connector == true then
 		logger(indent_str .. "    connector.waitingRobots : ")
 		for idS, robotR in pairs(vns.connector.waitingRobots) do
 			logger(indent_str .. "                           " .. idS, robotR.waiting_count)
@@ -261,17 +261,17 @@ function VNS.debug.logRobot(robotR, option, indent_str)
 
 	logger(indent_str .. robotR.idS)
 	if option.ALL == true or option.robotTypeS   == true then
-		logger(indent_str .. "    robotTypeS       = ", robotR.robotTypeS) 
+		logger(indent_str .. "    robotTypeS       = ", robotR.robotTypeS)
 	end
 	if option.ALL == true or option.positionV3   == true then
-		logger(indent_str .. "    positionV3       = ", robotR.positionV3) 
+		logger(indent_str .. "    positionV3       = ", robotR.positionV3)
 	end
 	if option.ALL == true or option.orientationQ == true then
 		logger(indent_str .. "    orientationQ : X = ", vector3(1,0,0):rotate(robotR.orientationQ))
 		logger(indent_str .. "                   Y = ", vector3(0,1,0):rotate(robotR.orientationQ))
 		logger(indent_str .. "                   Z = ", vector3(0,0,1):rotate(robotR.orientationQ))
 	end
-	if option.ALL == true or option.scale == true then 
+	if option.ALL == true or option.scale == true then
 		logger(indent_str .. "    scale       : ")
 		for typeS, number in pairs(robotR.scalemanager.scale) do
 			logger(indent_str .. "                   " .. typeS, number)
@@ -281,11 +281,11 @@ function VNS.debug.logRobot(robotR, option, indent_str)
 		logger(indent_str .. "    connector.unseen_count    = ", robotR.connector.unseen_count)
 		logger(indent_str .. "             .heartbeat_count = ", robotR.connector.heartbeat_count)
 	end
-	-- parent doesn't have these: 
-	if (option.ALL == true or option.assigner == true) and robotR.assigner.targetS ~= nil then 
+	-- parent doesn't have these:
+	if (option.ALL == true or option.assigner == true) and robotR.assigner.targetS ~= nil then
 		logger(indent_str .. "    assigner.targetS = ", robotR.assigner.targetS)
 	end
-	if (option.ALL == true or option.allocator == true) and robotR.allocator ~= nil then 
+	if (option.ALL == true or option.allocator == true) and robotR.allocator ~= nil then
 		if robotR.allocator.match ~= nil then
 			logger(indent_str .. "    allocator      = ")
 			for _, branch in ipairs(robotR.allocator.match) do
@@ -383,10 +383,10 @@ function VNS.create_vns_core_node(vns, option)
 		option.specific_name = vns.Parameters.stabilizer_preference_brain
 		option.specific_time = vns.Parameters.stabilizer_preference_brain_time
 	end
-	return 
+	return
 	{type = "sequence", children = {
 		--vns.create_preconnector_node(vns),
-		vns.Connector.create_connector_node(vns, 
+		vns.Connector.create_connector_node(vns,
 			{	no_recruit = option.connector_no_recruit,
 				no_parent_ack = option.connector_no_parent_ack,
 				specific_name = option.specific_name,
@@ -430,7 +430,7 @@ function VNS.create_vns_node(vns, option)
 		vns.Driver.create_driver_node(vns, {waiting = option.driver_waiting})
 	)
 
-	return { 
+	return {
 		type = "sequence", children = children_node
 	}
 end
