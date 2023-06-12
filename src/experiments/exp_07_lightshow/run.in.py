@@ -8,7 +8,7 @@ import os
 
 # abuse experiment length for drone numbers
 if Experiment_length == None :
-    Experiment_length = 64
+    Experiment_length = 16
 n_drone = Experiment_length
 Experiment_length = n_drone * 200
 
@@ -19,7 +19,7 @@ L = 1.5
 
 half_side_length = (n_side-1) * L * 0.5
 
-arena_size = half_side_length * 10
+arena_size = half_side_length * 30
 arena_z_center = arena_size / 2 - 2
 
 offset = 0

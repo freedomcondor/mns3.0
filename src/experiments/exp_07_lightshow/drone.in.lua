@@ -10,6 +10,7 @@ local VNS = require("VNS")
 local BT = require("BehaviorTree")
 require("morphologyGenerateScreen")
 require("morphologyGenerateCube")
+require("morphologyGenerateMan")
 Transform = require("Transform")
 
 -- datas ----------------
@@ -23,20 +24,34 @@ n_screen_side       = math.ceil(n_drone ^ (1/2))
 local structure_screen = generate_screen_square(n_screen_side)
 local structure_cube = generate_cube(n_cube_side)
 
+local structure_man = generate_man(
+	quaternion(math.pi/6, vector3(0,0,1)),
+	quaternion(math.pi/8, vector3(0,0,1)),
+	quaternion(math.pi/8, vector3(0,1,0))
+)
+
+local structure_man_2 = generate_man(
+	quaternion(-math.pi/6, vector3(0,0,1)),
+	quaternion(-math.pi/8, vector3(0,0,1)),
+	quaternion(-math.pi/8, vector3(0,1,0))
+)
+
 local gene = {
 	robotTypeS = "drone",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
-		structure_screen,
-		structure_cube,
+		--structure_screen,
+		--structure_cube,
+		structure_man,
+		structure_man_2,
 	}
 }
 --]]
 
 -- called when a child lost its parent
 function VNS.Allocator.resetMorphology(vns)
-	vns.Allocator.setMorphology(vns, structure_full)
+	vns.Allocator.setMorphology(vns, structure_man)
 end
 
 -- Analyze function -----
@@ -54,7 +69,7 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	local base_height = api.parameters.droneDefaultStartHeight
+	local base_height = api.parameters.droneDefaultStartHeight + 8
 	if number % 3 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
@@ -71,7 +86,8 @@ function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, gene)
-	vns.setMorphology(vns, structure_screen)
+	--vns.setMorphology(vns, structure_screen)
+	vns.setMorphology(vns, structure_man)
 
 	bt = BT.create(
 		vns.create_vns_node(vns,
@@ -100,7 +116,7 @@ function step()
 
 	vns.postStep(vns)
 	api.postStep()
-	--api.debug.showVirtualFrame(true)
+	api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 
@@ -118,6 +134,7 @@ end
 
 function create_navigation_node(vns)
 	state = "init"
+	waitNextState = "init"
 	stateCount = 0
 
 	local function sendChilrenNewState(vns, newState)
@@ -210,16 +227,17 @@ return function()
 	-- init
 	if state == "init" then
 		if api.stepCount > 100 then
+			waitNextState = "man2"
 			switchAndSendNewState(vns, "wait")
 		end
 	elseif state == "wait" then
 		if vns.parentR == nil and stateCount > 30 then
 			if vns.driver.all_arrive == true then
-				logger("--- NewState: 3")
-				switchAndSendNewState(vns, 3)
+				logger("--- NewState: ", waitNextState)
+				switchAndSendNewState(vns, waitNextState)
 			end
 		end
-	-- forward
+	-- count Down
 	elseif state == 3 or state == 2 or state == 1 then
 		local index = vns.allocator.target.idN
 		local index_base = structure_screen.idN
@@ -238,6 +256,16 @@ return function()
 		end
 	elseif state == "cube" and vns.parent == nil then
 		vns.setMorphology(vns, structure_cube)
+
+	-- man
+	elseif state == "man" and vns.parent == nil then
+		vns.setMorphology(vns, structure_man)
+		waitNextState = "man2"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "man2" and vns.parent == nil then
+		vns.setMorphology(vns, structure_man_2)
+		waitNextState = "man"
+		switchAndSendNewState(vns, "wait")
 	end
 
 end end
