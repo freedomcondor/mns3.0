@@ -10,7 +10,6 @@ local VNS = require("VNS")
 local BT = require("BehaviorTree")
 require("morphologyGenerateScreen")
 require("morphologyGenerateCube")
-require("morphologyGenerateMan")
 Transform = require("Transform")
 
 -- datas ----------------
@@ -21,19 +20,31 @@ local n_drone = tonumber(robot.params.n_drone)
 n_cube_side       = math.ceil(n_drone ^ (1/3))
 n_screen_side       = math.ceil(n_drone ^ (1/2))
 
+if n_drone == 16 then
+	require("morphologyGenerateLittleMan")
+else
+	require("morphologyGenerateMan")
+end
+
 local structure_screen = generate_screen_square(n_screen_side)
 local structure_cube = generate_cube(n_cube_side)
 
 local structure_man = generate_man(
 	quaternion(math.pi/6, vector3(0,0,1)),
-	quaternion(math.pi/8, vector3(0,0,1)),
-	quaternion(math.pi/8, vector3(0,1,0))
+	quaternion(math.pi/10, vector3(0,0,1)),
+	quaternion(math.pi/10, vector3(0,1,0))
 )
 
 local structure_man_2 = generate_man(
 	quaternion(-math.pi/6, vector3(0,0,1)),
-	quaternion(-math.pi/8, vector3(0,0,1)),
-	quaternion(-math.pi/8, vector3(0,1,0))
+	quaternion(0, vector3(0,0,1)),
+	quaternion(0, vector3(0,1,0))
+)
+
+local structure_man_3 = generate_man(
+	quaternion(-math.pi/6, vector3(0,0,1)),
+	quaternion(-math.pi/10, vector3(0,0,1)),
+	quaternion(-math.pi/10, vector3(0,1,0))
 )
 
 local gene = {
@@ -45,6 +56,7 @@ local gene = {
 		--structure_cube,
 		structure_man,
 		structure_man_2,
+		structure_man_3,
 	}
 }
 --]]
@@ -69,13 +81,13 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	local base_height = api.parameters.droneDefaultStartHeight + 8
-	if number % 3 == 1 then
+	local base_height = api.parameters.droneDefaultStartHeight + 5
+	if number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = base_height + 2
-	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height + 4
+	elseif number % 3 == 1 then
+		api.parameters.droneDefaultStartHeight = base_height + 8
 	end
 	--api.debug.show_all = true
 end
@@ -263,6 +275,14 @@ return function()
 		waitNextState = "man2"
 		switchAndSendNewState(vns, "wait")
 	elseif state == "man2" and vns.parent == nil then
+		vns.setMorphology(vns, structure_man_2)
+		waitNextState = "man3"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "man3" and vns.parent == nil then
+		vns.setMorphology(vns, structure_man_3)
+		waitNextState = "man2_back"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "man2_back" and vns.parent == nil then
 		vns.setMorphology(vns, structure_man_2)
 		waitNextState = "man"
 		switchAndSendNewState(vns, "wait")
