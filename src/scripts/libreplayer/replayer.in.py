@@ -66,7 +66,7 @@ robotNames = findRobotLogs(InputFolder, "pipuck")
 pipuck_xml = ""
 for robotName in robotNames:
 	id = re.findall(r'\d+', robotName)[0]
-	pipuck_xml += generate_drone_xml(id, 0, 0, 0)
+	pipuck_xml += generate_pipuck_xml(id, 0, 0, 0)
 
 #----------------------------------------------------------------------------------------------
 # write input folder to file so that replay_loop_functions can read it
