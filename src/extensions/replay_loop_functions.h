@@ -5,7 +5,8 @@ namespace argos {
    class CDebugEntity;
 }
 
-#include <fstream>
+//#include <fstream>
+#include <stdlib.h>
 
 #include <argos3/core/simulator/loop_functions.h>
 #include <argos3/plugins/robots/drone/simulator/drone_entity.h>
@@ -34,12 +35,15 @@ namespace argos {
                         std::string str_log_folder) :
             Entity(pc_entity),
             EmbodiedEntity(pc_embodied_entity),
-            DebugEntity(pc_debug_entity),
-            LogFile(str_log_folder + "/" + pc_entity->GetId() + ".log") {}
+            //LogFile(str_log_folder + "/" + pc_entity->GetId() + ".log") {}
+            DebugEntity(pc_debug_entity) {
+               LogFile = fopen((str_log_folder + "/" + pc_entity->GetId() + ".log").c_str(), "r");
+            }
          CEntity* Entity;
          CEmbodiedEntity* EmbodiedEntity;
          CDebugEntity* DebugEntity;
-         std::ifstream LogFile;
+         //std::ifstream LogFile; // too slow
+         FILE *LogFile;
       };
 
       std::vector<STrackedEntity> m_vecTrackedEntities;

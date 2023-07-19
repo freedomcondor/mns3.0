@@ -49,9 +49,17 @@ namespace argos {
 
       for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
          // read a line
-         std::string strLine;
-         if (!std::getline(s_tracked_entity.LogFile, strLine))
+         //std::string strLine;
+         //if (!std::getline(s_tracked_entity.LogFile, strLine))
+         //   exit(0);
+         int bufferLength = 4096;
+         char buff[bufferLength];
+         if (!fgets(buff, bufferLength, s_tracked_entity.LogFile))
             exit(0);
+         std::string strLine = buff;
+         // strip \n from end
+         strLine.erase(std::remove(strLine.begin(), strLine.end(), '\n'), strLine.end());
+
          // split by ,
          std::vector<std::string> vecWordList;
          std::stringstream strstreamLineStream(strLine);
