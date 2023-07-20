@@ -42,6 +42,7 @@ function IntersectionDetector.step(vns)
 			robotR.parentIdS = msgM.dataT.parentIdS
 			robotR.parentPositionV3 = robotR.positionV3 + vector3(msgM.dataT.parentPositionV3):rotate(robotR.orientationQ)
 			robotR.goalPositionV3 = robotR.positionV3 + vector3(msgM.dataT.goalPositionV3):rotate(robotR.orientationQ)
+			robotR.depth = msgM.dataT.depth
 		end
 	end
 
@@ -88,7 +89,8 @@ function IntersectionDetector.step(vns)
 								vns.intersectionDetector.intersectionList[idS].count
 							if vns.intersectionDetector.intersectionList[idS].count >= 15 then
 								-- need to break some link
-								if vns.parentR.positionV3:length() > (robotR.parentPositionV3 - robotR.positionV3):length() then
+								if vns.parentR.positionV3:length() > (robotR.parentPositionV3 - robotR.positionV3):length() and
+								   vns.scalemanager.depth < robotR.depth then
 									if vns.connector.greenLight ~= nil then
 										if robotR.positionV3:length() <
 										   vns.intersectionDetector.seenForeignRobots[vns.connector.greenLight].positionV3:length() then
@@ -132,6 +134,7 @@ function IntersectionDetector.step(vns)
 			parentIdS = send_parentIdS,
 			parentPositionV3 = vns.api.virtualFrame.V3_VtoR(send_parentPositionV3),
 			goalPositionV3 = vns.api.virtualFrame.V3_VtoR(send_goalPositionV3),
+			depth = vns.scalemanager.depth,
 		})
 	end
 end
