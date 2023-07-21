@@ -98,10 +98,18 @@ index 331b2d7d..40a451aa 100644
                         UInt32 un_end_placement,
                         Real f_time_fraction);
 diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
-index fe70c6df..d5d1057f 100644
+index fe70c6df..21f75fb3 100644
 --- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
 +++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
-@@ -879,20 +879,23 @@ namespace argos {
+@@ -322,6 +322,7 @@ namespace argos {
+       m_sSelectionInfo.Entity = &c_entity;
+       emit EntitySelected(&c_entity);
+       m_cUserFunctions.EntitySelected(c_entity);
++      std::cerr << c_entity.GetId() << " selected" << std::endl;
+       update();
+    }
+ 
+@@ -879,20 +880,23 @@ namespace argos {
               * Camera movement
               */
              if(pc_event->buttons() == Qt::LeftButton) {
@@ -129,7 +137,7 @@ index fe70c6df..d5d1057f 100644
                 m_cMouseGrabPos = pc_event->pos();
                 update();
              }
-@@ -907,7 +910,18 @@ namespace argos {
+@@ -907,7 +911,18 @@ namespace argos {
     /****************************************/
  
     void CQTOpenGLWidget::wheelEvent(QWheelEvent *pc_event) {
@@ -149,7 +157,7 @@ index fe70c6df..d5d1057f 100644
           /* Treat selected entity as an embodied entity */
           auto* pcEntity = dynamic_cast<CEmbodiedEntity*>(m_sSelectionInfo.Entity);
           if(pcEntity == nullptr) {
-@@ -922,14 +936,39 @@ namespace argos {
+@@ -922,14 +937,39 @@ namespace argos {
           }
           /*
            * If we get here, pcEntity is set to a non-NULL value
