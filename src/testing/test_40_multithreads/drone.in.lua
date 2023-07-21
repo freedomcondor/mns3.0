@@ -17,6 +17,14 @@ local bt
 
 local structure = require(robot.params.structure or "morphology_20")
 
+-- Analyze function -----
+function getCurrentTime()
+	local wallTimeS, wallTimeNS, CPUTimeS, CPUTimeNS = robot.radios.wifi.get_time()
+	--return CPUTimeS + CPUTimeNS * 0.000000001
+	return wallTimeS + wallTimeNS * 0.000000001
+end
+
+--[[
 function getCurrentTime()
 	local tmpfile = robot.id .. '_time_tmp.dat'
 
@@ -35,10 +43,14 @@ function getCurrentTime()
 	f:close()
 	return time
 end
+--]]
 
 if robot.id == "drone1" then
 	lastTime = getCurrentTime()
 end
+
+time_accumulator = 0
+time_accumulator_count = 0
 
 function init()
 	api.linkRobotInterface(VNS)
@@ -68,7 +80,10 @@ end
 function step()
 	if robot.id == "drone1" then
 		local currentTime = getCurrentTime()
-		logger("-------------------------------------------------------------------------", currentTime - lastTime)
+		local interval = currentTime - lastTime
+		time_accumulator = time_accumulator + interval
+		time_accumulator_count = time_accumulator_count + 1
+		logger("-------------------------------------------------------------------------", interval, "average = ", time_accumulator / time_accumulator_count)
 		lastTime = currentTime
 	end
 

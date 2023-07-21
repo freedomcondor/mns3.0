@@ -66,13 +66,6 @@ function VNS.Allocator.resetMorphology(vns)
 	vns.Allocator.setMorphology(vns, structure_man)
 end
 
--- Analyze function -----
-function getCurrentTime()
-	local wallTimeS, wallTimeNS, CPUTimeS, CPUTimeNS = robot.radios.wifi.get_time()
-	--return CPUTimeS + CPUTimeNS * 0.000000001
-	return wallTimeS + wallTimeNS * 0.000000001
-end
-
 function init()
 	api.linkRobotInterface(VNS)
 	api.init()
@@ -91,8 +84,6 @@ function init()
 	end
 	--api.debug.show_all = true
 end
-
-local startTime = getCurrentTime()
 
 function reset()
 	vns.reset(vns)
@@ -115,12 +106,6 @@ end
 
 
 function step()
-	local MeasureStepPeriod = 20
-	if robot.id == "drone1" and api.stepCount % MeasureStepPeriod == 0 then
-		local currentTime = getCurrentTime()
-		logger(robot.id, api.stepCount, "----------------------------, runtime :", currentTime - startTime, "average : ", (currentTime - lastTime) / MeasureStepPeriod)
-		lastTime = currentTime
-	end
 	api.preStep()
 	vns.preStep(vns)
 
