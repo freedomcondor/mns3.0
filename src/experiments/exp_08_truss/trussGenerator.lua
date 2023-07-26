@@ -14,49 +14,47 @@ local baseValueFunction = function(base, current, target)
 	end
 end
 
-function create_horizontal_truss_node_1(L, positionV3, orientationQ, horizontal_line)
+function create_horizontal_truss_node_2(L, positionV3, orientationQ)
 return {
 	robotTypeS = "drone",
 	positionV3 = positionV3 or vector3(),
 	orientationQ = orientationQ or quaternion(),
-	drawLines = {vector3(L, 0, 0)},
+	drawLines = {
+		vector3(L, 0, 0),
+		vector3(L*0.5, -L*0.5, L*1.5),
+		vector3(L*0.5, -L*0.5, -L*1.5),
+		vector3(0, -L, 0),
+	},
 	children = {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(0, -L, 0),
 		orientationQ = quaternion(),
 		priority = 0.1,
-		--[[
 		drawLines = {
-			vector3(L*0.5, -L*0.5, -L*1.5),
-			vector3(-L*0.5, -L*0.5, -L*1.5),
-			vector3(0, -L, 0),
-			horizontal_line,
+			vector3(L, 0, 0),
+			vector3(L*0.5, L*0.5, L*1.5),
+			vector3(L*0.5, L*0.5, -L*1.5),
 		},
-		--]]
 	},
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*0.5, -L*0.5, L*1.5),
 		orientationQ = quaternion(),
 		priority = 0.01,
-		--[[
 		drawLines = {
 			vector3(L*0.5, L*0.5, -L*1.5),
-			vector3(-L*0.5, L*0.5, -L*1.5),
-			horizontal_line,
+			vector3(L*0.5, -L*0.5, -L*1.5),
+			vector3(L, 0, 0),
 		},
-		--]]
 	},
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*0.5, -L*0.5, -L*1.5),
 		orientationQ = quaternion(),
 		priority = 0.01,
-		--[[
 		drawLines = {
-			vector3(L*0.5, L*0.5, -L*1.5),
-			vector3(-L*0.5, L*0.5, -L*1.5),
-			horizontal_line,
+			vector3(L*0.5, L*0.5,  L*1.5),
+			vector3(L*0.5, -L*0.5, L*1.5),
+			vector3(L, 0, 0),
 		},
-		--]]
 	},
 }}
 end
@@ -80,7 +78,7 @@ return {
 			vector3(L*0.5, -L*0.5, L*1.5),
 			vector3(-L*0.5, -L*0.5, L*1.5),
 			vector3(0, -L, 0),
-			horizontal_line,
+			vector3(L, 0, 0),
 		},
 		calcBaseValue = baseValueFunction,
 		children = {
@@ -88,7 +86,7 @@ return {
 			positionV3 = vector3(-L*0.5, -L*0.5, L*1.5),
 			orientationQ = quaternion(),
 			drawLines = {
-				horizontal_line,
+				vector3(L, 0, 0),
 			},
 		},
 	}},
@@ -102,20 +100,15 @@ return {
 
 			vector3(L*0.5, L*0.5, L*1.5),
 			vector3(-L*0.5, L*0.5, L*1.5),
-			horizontal_line,
+
+			vector3(L, 0, 0),
 		},
 	},
 }}
 end
 
 function create_horizontal_truss_chain(n, L, node_relative_positionV3, node_relative_orientationQ, start_positionV3, start_orientationQ)
-	local horizontal_line = vector3(L, 0, 0)
-	--[[
-	if n == 2 then
-		horizontal_line = nil
-	end
-	--]]
-	local new_node = create_horizontal_truss_node(L, start_positionV3 or node_relative_positionV3, start_orientationQ or node_relative_orientationQ, horizontal_line)
+	local new_node = create_horizontal_truss_node_2(L, start_positionV3 or node_relative_positionV3, start_orientationQ or node_relative_orientationQ)
 	if n ~= 1 then
 		local sub_nodes, tail
 		sub_nodes, tail = create_horizontal_truss_chain(n-1, L,
