@@ -15,3 +15,5 @@ add_subdirectory(test_31_learner)
 add_subdirectory(test_32_learner_inter_robots)
 
 add_subdirectory(test_40_multithreads)
+
+add_subdirectory(test_50_truss_reference)

@@ -11,6 +11,7 @@ VNS.Connector = require("Connector")
 VNS.ScaleManager = require("ScaleManager")
 VNS.Assigner = require("Assigner")
 VNS.Allocator = require("Allocator")
+VNS.TrussReferencer = require("TrussReferencer")
 VNS.Avoider = require("Avoider")
 VNS.Spreader = require("Spreader")
 VNS.BrainKeeper = require("BrainKeeper")
@@ -33,6 +34,7 @@ VNS.Modules = {
 	VNS.Stabilizer,
 
 	VNS.Allocator,
+	VNS.TrussReferencer,
 	VNS.IntersectionDetector,
 
 	VNS.Avoider,
@@ -397,6 +399,7 @@ function VNS.create_vns_core_node(vns, option)
 		vns.ScaleManager.create_scalemanager_node(vns),
 		vns.Stabilizer.create_stabilizer_node(vns),
 		vns.Allocator.create_allocator_node(vns),
+		vns.TrussReferencer.create_trussreferencer_node(vns),
 		vns.IntersectionDetector.create_intersectiondetector_node(vns),
 		vns.Avoider.create_avoider_node(vns, {
 			drone_pipuck_avoidance = option.drone_pipuck_avoidance

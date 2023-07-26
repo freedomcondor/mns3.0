@@ -10,7 +10,7 @@ import os
 if Experiment_length == None :
     Experiment_length = 16
 n_drone = Experiment_length
-Experiment_length = n_drone * 200
+Experiment_length = 0
 
 # calculate side
 n_side = n_drone ** (1.0/3)
@@ -38,23 +38,29 @@ drone_locations = generate_random_locations(n_drone,
 
 drone_xml = generate_drones(drone_locations, 1, 4.2)                  # from label 1 generate drone xml tags, communication range 4.2
 
-obstacle_xml = ""
+obstacle_xml = generate_3D_rectangular_gate_xml(1,                     # id
+                                                5, 0, 3, # position
+                                                0,0,0, # orientation
+                                                102,                    # payload
+                                                5, 5, 0.1)              # size x, y, thickness
+
 
 parameters = '''
     mode_2D="false"
     drone_real_noise="false"
     drone_tilt_sensor="true"
 
-    drone_label="1, 1000"
+    drone_label="1, 99"
+    obstacle_label="100, 103"
 
-    safezone_drone_drone="3"
-    dangerzone_drone="1"
+    safezone_drone_drone="5"
+    dangerzone_drone="0.5"
 
     second_report_sight="false"
 
     driver_default_speed="0.5"
     driver_slowdown_zone="0.7"
-    driver_stop_zone="0.15"
+    driver_stop_zone="0.20"
     driver_arrive_zone="0.7"
 
     n_drone="{}"
@@ -71,12 +77,12 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["ARENA_SIZE",        str(arena_size)],
         ["ARENA_Z_CENTER",    str(arena_z_center)],
-        ["OBSTACLES",         obstacle_xml],
+#        ["OBSTACLES",         obstacle_xml],
         ["DRONES",            drone_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, {"velocity_mode":True})],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True)],
     ]
 )
 

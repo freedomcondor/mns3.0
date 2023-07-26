@@ -17,8 +17,8 @@ local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
 local n_drone = tonumber(robot.params.n_drone)
-local gene = create_truss_chain(n_drone, 1.5, vector3(), quaternion(), vector3(1.5, 0,0))
-
+local nodes = n_drone / 4
+local gene = create_horizontal_truss_chain(nodes, 1.5, vector3(1.5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
 -- called when a child lost its parent
 --[[
 function VNS.Allocator.resetMorphology(vns)
@@ -34,13 +34,13 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	local base_height = api.parameters.droneDefaultStartHeight
-	if number % 3 == 0 then
+	local base_height = api.parameters.droneDefaultStartHeight + 2
+	if number % 3 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = base_height + 4
-	elseif number % 3 == 1 then
-		api.parameters.droneDefaultStartHeight = base_height + 8
+		api.parameters.droneDefaultStartHeight = base_height + 3
+	elseif number % 3 == 0 then
+		api.parameters.droneDefaultStartHeight = base_height + 6
 	end
 	--api.debug.show_all = true
 end
@@ -50,9 +50,16 @@ function reset()
 	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, gene)
 
-	bt = BT.create(vns.create_vns_node(vns))
+	bt = BT.create(
+		vns.create_vns_node(vns,
+			{navigation_node_post_core = {type = "sequence", children = {
+				vns.CollectiveSensor.create_collectivesensor_node_reportAll(vns),
+				create_navigation_node(vns),
+			}}}
+		)
+	)
+	api.debug.show_all = true
 end
-
 
 function step()
 	api.preStep()
@@ -77,3 +84,30 @@ function destroy()
 	vns.destroy()
 	api.destroy()
 end
+
+function create_navigation_node(vns)
+	local function find_marker()
+		for i, ob in ipairs(vns.collectivesensor.totalObstaclesList) do
+			return ob
+		end
+	end
+return function()
+	-- fail safe
+	--[[
+	if vns.scalemanager.scale["drone"] == 1 and
+	   vns.api.actuator.flight_preparation.state == "navigation" then
+		vns.Spreader.emergency_after_core(vns, vector3(0,0,0.5), vector3())
+		return false, true
+	end
+	--]]
+
+	if vns.parentR == nil then
+		local marker = find_marker()
+		if marker ~= nil then
+			local dis = 1
+			local target = marker.positionV3 + vector3(-dis, -dis, dis):rotate(marker.orientationQ)
+			vns.setGoal(vns, target, marker.orientationQ)
+		end
+	end
+	return false, true
+end end

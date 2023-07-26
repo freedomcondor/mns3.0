@@ -1,0 +1,74 @@
+-- TrussReferencer -----------------------------------------
+------------------------------------------------------
+logger.register("TrussReferencer")
+
+local Transform = require("Transform")
+
+local TrussReferencer = {}
+
+function TrussReferencer.create(vns)
+	vns.trussReferencer = {}
+end
+
+function TrussReferencer.reset(vns)
+end
+
+function TrussReferencer.preStep(vns)
+end
+
+function TrussReferencer.step(vns)
+	local safe_zone = vns.Parameters.safezone_drone_drone
+
+	-- receive truss information
+	if vns.allocator.target ~= nil and vns.allocator.target.idN >= 1 then
+		local goalAcc = Transform.createAccumulator()
+		Transform.addAccumulator(goalAcc, vns.goal)
+
+		local myGlobalTransform = {positionV3 = vns.allocator.target.globalPositionV3,
+		                           orientationQ =vns.allocator.target.globalOrientationQ,
+		                          } 
+		for idS, robotR in pairs(vns.connector.seenRobots) do
+			for _, msgM in ipairs(vns.Msg.getAM(idS, "truss")) do if msgM.dataT.vnsID == vns.idS then
+				local yourTargetID = msgM.dataT.targetID
+				local yourGlobalTransform = {positionV3 = vns.allocator.gene_index[yourTargetID].globalPositionV3,
+				                             orientationQ = vns.allocator.gene_index[yourTargetID].globalOrientationQ,
+				                            }
+				local targetTransform = Transform.AxCisB(yourGlobalTransform, myGlobalTransform)
+				local yourGoal = Transform.AxBisC(robotR, msgM.dataT.goal)
+				local myGoal = Transform.AxBisC(yourGoal, targetTransform)
+				Transform.addAccumulator(goalAcc, myGoal)
+			end
+		end end
+
+		if vns.parentR ~= nil and
+		   vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
+			Transform.averageAccumulator(goalAcc, vns.goal)
+		end
+	end
+
+	if vns.allocator.target ~= nil and
+	   vns.allocator.target.idN >= 1 and
+	   vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
+		for idS, robotR in pairs(vns.connector.seenRobots) do
+			if robotR.positionV3:length() < safe_zone then
+				vns.Msg.send(idS, "truss", {targetID = vns.allocator.target.idN,
+				                            goal = {positionV3 = vns.api.virtualFrame.V3_VtoR(vns.goal.positionV3),
+				                                    orientationQ = vns.api.virtualFrame.Q_VtoR(vns.goal.orientationQ)
+				                                   },
+				                            vnsID = vns.idS,
+				                           }
+				            )
+			end
+		end
+	end
+end
+
+------ behaviour tree ---------------------------------------
+function TrussReferencer.create_trussreferencer_node(vns)
+	return function()
+		TrussReferencer.step(vns)
+		return false, true
+	end
+end
+
+return TrussReferencer
