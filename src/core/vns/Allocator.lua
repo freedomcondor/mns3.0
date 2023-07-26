@@ -5,6 +5,7 @@ logger.register("Allocator")
 local MinCostFlowNetwork = require("MinCostFlowNetwork")
 local DeepCopy = require("DeepCopy")
 local BaseNumber = require("BaseNumber")
+local Transform = require("Transform")
 
 local Allocator = {}
 
@@ -357,6 +358,7 @@ function Allocator.step(vns)
 						number = vns.allocator.target.scale,
 						positionV3 = vns.api.virtualFrame.V3_VtoR(vns.goal.positionV3),
 						orientationQ = vns.api.virtualFrame.Q_VtoR(vns.goal.orientationQ),
+						priority = vns.allocator.target.priority
 					}
 					send_branches.second_level = second_level
 					vns.Msg.send(idS, "branches", {branches = send_branches})
@@ -384,7 +386,8 @@ function Allocator.step(vns)
 				-- calcBaseValue function
 				calcBaseValue = branch.calcBaseValue,
 				-- Stabilizer hack -----------------------
-				reference = branch.reference
+				reference = branch.reference,
+				priority = branch.priority,
 			}
 
 			-- do not drift if self align switch is on
@@ -584,6 +587,9 @@ function Allocator.multi_branch_allocate(vns, branches)
 			local relativeVector = sourceList[i].index.positionV3 - targetPosition
 			if vns.api.parameters.mode_2D == true then relativeVector.z = 0 end
 			originCost[i][j] = relativeVector:length()
+			if targetList[j].index.priority ~= nil then
+				originCost[i][j] = originCost[i][j] * targetList[j].index.priority
+			end
 		end
 	end
 
@@ -665,6 +671,7 @@ function Allocator.multi_branch_allocate(vns, branches)
 					number = targetItem.number,
 					positionV3 = vns.api.virtualFrame.V3_VtoR(target_branch.index.positionV3),
 					orientationQ = vns.api.virtualFrame.Q_VtoR(target_branch.index.orientationQ),
+					priority = target_branch.priority
 				}
 			end
 			send_branches.second_level = true
@@ -704,6 +711,7 @@ function Allocator.multi_branch_allocate(vns, branches)
 				number = sourceList[i].to[1].number,
 				positionV3 = vns.api.virtualFrame.V3_VtoR(target_branch.positionV3),
 				orientationQ = vns.api.virtualFrame.Q_VtoR(target_branch.orientationQ),
+				priority = target_branch.priority
 			}
 			-- if I'm a first level split node, send a temporary goal for grand parent location
 			if branches.second_level ~= true then
@@ -824,6 +832,9 @@ function Allocator.allocate(vns, branches)
 			local relativeVector = sourceList[i].index.positionV3 - targetPosition
 			if vns.api.parameters.mode_2D == true then relativeVector.z = 0 end
 			originCost[i][j] = relativeVector:length()
+			if targetList[j].index.priority ~= nil then
+				originCost[i][j] = originCost[i][j] * targetList[j].index.priority
+			end
 		end
 	end
 
@@ -876,6 +887,7 @@ function Allocator.allocate(vns, branches)
 					number = targetItem.number,
 					positionV3 = vns.api.virtualFrame.V3_VtoR(target_branch.index.positionV3),
 					orientationQ = vns.api.virtualFrame.Q_VtoR(target_branch.index.orientationQ),
+					priority = target_branch.priority
 				}
 			end
 			send_branches.second_level = branches.second_level
@@ -902,6 +914,7 @@ function Allocator.allocate(vns, branches)
 				number = sourceList[i].to[1].number,
 				positionV3 = vns.api.virtualFrame.V3_VtoR(target_branch.positionV3),
 				orientationQ = vns.api.virtualFrame.Q_VtoR(target_branch.orientationQ),
+				priority = target_branch.priority
 			}
 			send_branches.second_level = branches.second_level
 			send_branches.self_align = target_branch.self_align
@@ -954,6 +967,7 @@ function Allocator.allocate(vns, branches)
 				number = sourceList[i].to[1].number,
 				positionV3 = vns.api.virtualFrame.V3_VtoR(target_branch.positionV3),
 				orientationQ = vns.api.virtualFrame.Q_VtoR(target_branch.orientationQ),
+				priority = target_branch.priority
 			}
 			send_branches.second_level = branches.second_level
 			-- stop children handing over for extre children
@@ -1171,17 +1185,27 @@ function Allocator.calcMorphScale(vns, morph)
 	Allocator.calcMorphParentScale(vns, morph)
 end
 
-function Allocator.calcMorphChildrenScale(vns, morph, level)
+function Allocator.calcMorphChildrenScale(vns, morph, level, parentTransform)
+	-- calc global transform
+	if parentTransform == nil then
+		parentTransform = {positionV3 = vector3(), orientationQ = quaternion()}
+	end
+	local globalTransform = Transform.AxBisC(parentTransform, morph)
+	morph.globalPositionV3 = globalTransform.positionV3
+	morph.globalOrientationQ = globalTransform.orientationQ
+
+	-- calc ID count
 	vns.allocator.morphIdCount = vns.allocator.morphIdCount + 1
 	morph.idN = vns.allocator.morphIdCount 
 	level = level or 1
 	morph.level = level
 	vns.allocator.gene_index[morph.idN] = morph
 
+	-- sum scale
 	local sum = vns.ScaleManager.Scale:new()
 	if morph.children ~= nil then
 		for i, branch in ipairs(morph.children) do
-			sum = sum + Allocator.calcMorphChildrenScale(vns, branch, level + 1)
+			sum = sum + Allocator.calcMorphChildrenScale(vns, branch, level + 1, globalTransform)
 		end
 	end
 	if sum[morph.robotTypeS] == nil then
