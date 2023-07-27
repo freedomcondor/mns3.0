@@ -108,7 +108,7 @@ return {
 end
 
 function create_horizontal_truss_chain(n, L, node_relative_positionV3, node_relative_orientationQ, start_positionV3, start_orientationQ)
-	local new_node = create_horizontal_truss_node_2(L, start_positionV3 or node_relative_positionV3, start_orientationQ or node_relative_orientationQ)
+	local new_node = create_horizontal_truss_node(L, start_positionV3 or node_relative_positionV3, start_orientationQ or node_relative_orientationQ)
 	if n ~= 1 then
 		local sub_nodes, tail
 		sub_nodes, tail = create_horizontal_truss_chain(n-1, L,

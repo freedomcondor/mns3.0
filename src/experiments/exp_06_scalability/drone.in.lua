@@ -66,7 +66,7 @@ function init()
 	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height + 4
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 local startTime = getCurrentTime()
@@ -91,12 +91,14 @@ end
 
 
 function step()
+	--[[
 	local MeasureStepPeriod = 20
 	if robot.id == "drone1" and api.stepCount % MeasureStepPeriod == 0 then
 		local currentTime = getCurrentTime()
 		logger(robot.id, api.stepCount, "----------------------------, runtime :", currentTime - startTime, "average : ", (currentTime - lastTime) / MeasureStepPeriod)
 		lastTime = currentTime
 	end
+	--]]
 	api.preStep()
 	vns.preStep(vns)
 
