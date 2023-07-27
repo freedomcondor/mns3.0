@@ -67,20 +67,22 @@ function Transform.createAccumulator()
 	}
 end
 
-function Transform.addAccumulator(accumulator, transform)
-	accumulator.n = accumulator.n + 1
-	accumulator.positionV3 = accumulator.positionV3 + transform.positionV3
-	accumulator.orientation_X_V3 = accumulator.orientation_X_V3 + vector3(1,0,0):rotate(transform.orientationQ)
-	accumulator.orientation_Y_V3 = accumulator.orientation_Y_V3 + vector3(0,1,0):rotate(transform.orientationQ)
-	accumulator.orientation_Z_V3 = accumulator.orientation_Z_V3 + vector3(0,0,1):rotate(transform.orientationQ)
+function Transform.addAccumulator(accumulator, transform, weight)
+	local weight = weight or 1
+	accumulator.n = accumulator.n + weight
+	accumulator.positionV3 = accumulator.positionV3 + transform.positionV3 * weight
+	accumulator.orientation_X_V3 = accumulator.orientation_X_V3 + vector3(1,0,0):rotate(transform.orientationQ) * weight
+	accumulator.orientation_Y_V3 = accumulator.orientation_Y_V3 + vector3(0,1,0):rotate(transform.orientationQ) * weight
+	accumulator.orientation_Z_V3 = accumulator.orientation_Z_V3 + vector3(0,0,1):rotate(transform.orientationQ) * weight
 end
 
-function Transform.subAccumulator(accumulator, transform)
-	accumulator.n = accumulator.n - 1
-	accumulator.positionV3 = accumulator.positionV3 - transform.positionV3
-	accumulator.orientation_X_V3 = accumulator.orientation_X_V3 - vector3(1,0,0):rotate(transform.orientationQ)
-	accumulator.orientation_Y_V3 = accumulator.orientation_Y_V3 - vector3(0,1,0):rotate(transform.orientationQ)
-	accumulator.orientation_Z_V3 = accumulator.orientation_Z_V3 - vector3(0,0,1):rotate(transform.orientationQ)
+function Transform.subAccumulator(accumulator, transform, weight)
+	local weight = weight or 1
+	accumulator.n = accumulator.n - weight
+	accumulator.positionV3 = accumulator.positionV3 - transform.positionV3 * weight
+	accumulator.orientation_X_V3 = accumulator.orientation_X_V3 - vector3(1,0,0):rotate(transform.orientationQ) * weight
+	accumulator.orientation_Y_V3 = accumulator.orientation_Y_V3 - vector3(0,1,0):rotate(transform.orientationQ) * weight
+	accumulator.orientation_Z_V3 = accumulator.orientation_Z_V3 - vector3(0,0,1):rotate(transform.orientationQ) * weight
 end
 
 function Transform.averageAccumulator(accumulator, transform)
