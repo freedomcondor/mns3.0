@@ -18,12 +18,11 @@ end
 
 function TrussReferencer.step(vns)
 	local safe_zone = vns.Parameters.safezone_drone_drone
-	local arrive_scaler = vns.scalemanager.scale:totalNumber() / 3
 
 	-- receive truss information
 	if vns.allocator.target ~= nil and vns.allocator.target.idN >= 1 then
 		local goalAcc = Transform.createAccumulator()
-		Transform.addAccumulator(goalAcc, vns.goal, 3)
+		Transform.addAccumulator(goalAcc, vns.goal)
 
 		local myGlobalTransform = {positionV3 = vns.allocator.target.globalPositionV3,
 		                           orientationQ =vns.allocator.target.globalOrientationQ,
@@ -39,19 +38,17 @@ function TrussReferencer.step(vns)
 				local yourGoal = Transform.AxBisC(robotR, msgM.dataT.goal)
 				local myGoal = Transform.AxBisC(yourGoal, targetTransform)
 
-				if msgM.dataT.arrival == false then
-					Transform.addAccumulator(goalAcc, myGoal, 1.0/arrive_scaler)
-				else
+				if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
 					Transform.addAccumulator(goalAcc, myGoal)
-				end
 
-				---[[
-				local color = "255,255,0,0"
-				vns.api.debug.drawArrow(color,
-										vns.api.virtualFrame.V3_VtoR(vector3(0,0,0)),
-										vns.api.virtualFrame.V3_VtoR(robotR.positionV3)
-									   )
-				--]]
+					---[[
+					local color = "255,255,0,0"
+					vns.api.debug.drawArrow(color,
+											vns.api.virtualFrame.V3_VtoR(vector3(0,0,0)),
+											vns.api.virtualFrame.V3_VtoR(robotR.positionV3)
+										   )
+					--]]
+				end
 			end
 		end end
 
@@ -62,20 +59,17 @@ function TrussReferencer.step(vns)
 
 	if vns.allocator.target ~= nil and
 	   vns.allocator.target.idN >= 1 then
-		local arrival = false
 		if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
-			arrival = true
-		end
-		for idS, robotR in pairs(vns.connector.seenRobots) do
-			if robotR.positionV3:length() < safe_zone then
-				vns.Msg.send(idS, "truss", {targetID = vns.allocator.target.idN,
-				                            goal = {positionV3 = vns.api.virtualFrame.V3_VtoR(vns.goal.positionV3),
-				                                    orientationQ = vns.api.virtualFrame.Q_VtoR(vns.goal.orientationQ)
-				                                   },
-				                            vnsID = vns.idS,
-				                            arrival = arrival,
-				                           }
-				            )
+			for idS, robotR in pairs(vns.connector.seenRobots) do
+				if robotR.positionV3:length() < safe_zone then
+					vns.Msg.send(idS, "truss", {targetID = vns.allocator.target.idN,
+					                            goal = {positionV3 = vns.api.virtualFrame.V3_VtoR(vns.goal.positionV3),
+					                                    orientationQ = vns.api.virtualFrame.Q_VtoR(vns.goal.orientationQ)
+					                                   },
+					                            vnsID = vns.idS,
+					                           }
+					            )
+				end
 			end
 		end
 	end

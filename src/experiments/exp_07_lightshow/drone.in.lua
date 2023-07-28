@@ -52,18 +52,19 @@ local gene = {
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
-		--structure_screen,
-		--structure_cube,
-		structure_man,
-		structure_man_2,
-		structure_man_3,
+		structure_screen,
+		structure_cube,
+		--structure_man,
+		--structure_man_2,
+		--structure_man_3,
 	}
 }
 --]]
 
 -- called when a child lost its parent
 function VNS.Allocator.resetMorphology(vns)
-	vns.Allocator.setMorphology(vns, structure_man)
+	--vns.Allocator.setMorphology(vns, structure_man)
+	vns.Allocator.setMorphology(vns, structure_screen)
 end
 
 function init()
@@ -75,22 +76,22 @@ function init()
 
 	number = tonumber(string.match(robot.id, "%d+"))
 	local base_height = api.parameters.droneDefaultStartHeight + 5
-	if number % 3 == 0 then
+	if number % 3 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
 		api.parameters.droneDefaultStartHeight = base_height + 4
-	elseif number % 3 == 1 then
+	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height + 8
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, gene)
-	--vns.setMorphology(vns, structure_screen)
-	vns.setMorphology(vns, structure_man)
+	vns.setMorphology(vns, structure_screen)
+	--vns.setMorphology(vns, structure_man)
 
 	bt = BT.create(
 		vns.create_vns_node(vns,
@@ -224,7 +225,8 @@ return function()
 	-- init
 	if state == "init" then
 		if api.stepCount > 100 then
-			waitNextState = "man2"
+			--waitNextState = "man2"
+			waitNextState = 3
 			switchAndSendNewState(vns, "wait")
 		end
 	elseif state == "wait" then
