@@ -56,7 +56,7 @@ parameters = '''
     safezone_drone_drone="5"
     dangerzone_drone="0.5"
 
-    second_report_sight="false"
+    second_report_sight="true"
 
     driver_default_speed="0.5"
     driver_slowdown_zone="0.7"
