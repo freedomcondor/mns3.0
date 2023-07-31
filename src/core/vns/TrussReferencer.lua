@@ -41,7 +41,7 @@ function TrussReferencer.step(vns)
 				if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
 					Transform.addAccumulator(goalAcc, myGoal)
 
-					---[[
+					--[[
 					local color = "255,255,0,0"
 					vns.api.debug.drawArrow(color,
 											vns.api.virtualFrame.V3_VtoR(vector3(0,0,0)),
