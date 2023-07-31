@@ -80,7 +80,7 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	local base_height = api.parameters.droneDefaultStartHeight + 6
+	local base_height = api.parameters.droneDefaultStartHeight + 10
 	if number % 3 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height + 6
 	elseif number % 3 == 2 then
@@ -105,7 +105,7 @@ function reset()
 			}}}
 		)
 	)
-	api.debug.show_all = true
+	--api.debug.show_all = true
 end
 
 function step()

@@ -45,7 +45,6 @@ function create_body(option)
 
 	local L = 1.5
 	local node = DeepCopy(morphology_12)
-	local spine, tail = create_beam(3, L, L, vector3(0, 0, -L), quaternion(math.pi/2, vector3(0,1,0)))
 	table.insert(node.children, create_shoulder(vector3(L*0.25, L*0.25, -L*0.5),
 	                                            quaternion(math.pi/2, vector3(0,0,1)),
 	                                            -left_shoulder_Z, left_shoulder_Y,          -- shoulder Z and Y
@@ -55,10 +54,31 @@ function create_body(option)
 	table.insert(node.children, create_shoulder(vector3(L*0.25, -L*0.25, -L*0.5),
 	                                            quaternion(-math.pi/2, vector3(0,0,1)),
 	                                            right_shoulder_Z, right_shoulder_Y,
-	                                            right_fore_arm_Z, right_fore_arm_Y
-	                                           )
+	                                            right_fore_arm_Z, right_fore_arm_Y)
 	            )
+
+	local spine, tail = create_beam(2, L, L, vector3(0, 0, -L), quaternion(math.pi/2, vector3(0,1,0)))
 	table.insert(node.children, spine)
+	tail.children = {}
+	table.insert(tail.children,
+	             create_arm(L, L,
+	                        vector3(0, L * 0.5, L * 0.5),
+	                        quaternion(-math.pi/2, vector3(1,0,0)) *
+	                        quaternion(-2.5 * math.pi/180, vector3(0,0,1)) *    -- + front?
+	                        quaternion(-15 * math.pi/180, vector3(0,1,0)),      -- + inside
+	                        5, 10
+	                       )
+	            )
+
+	table.insert(tail.children,
+	             create_arm(L, L,
+	                        vector3(0, -L * 0.5, L * 0.5),
+	                        quaternion(math.pi/2, vector3(1,0,0)) *
+	                        quaternion(2.5 * math.pi/180, vector3(0,0,1)) *    -- + front?
+	                        quaternion(-15 * math.pi/180, vector3(0,1,0)),      -- + inside
+	                        -5, 10
+	                       )
+	            )
 
 	return node
 end
