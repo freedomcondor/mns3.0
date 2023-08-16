@@ -54,7 +54,12 @@ local man5 = DeepCopy(man3)
 local man6 = DeepCopy(man2)
 
 --local jet = create_jet()
-local truck = create_truck()
+local truck1 = create_truck(10)
+local truck2 = create_truck(20)
+local truck3 = create_truck(30)
+local truck4 = create_truck(40)
+local truck5 = create_truck(50)
+local truck6 = create_truck(60)
 
 local gene = {
 	robotTypeS = "drone",
@@ -68,14 +73,19 @@ local gene = {
 		man5,
 		man6,
 --		jet,
-		truck,
+		truck1,
+		truck2,
+		truck3,
+		truck4,
+		truck5,
+		truck6,
 	}
 }
 
 -- called when a child lost its parent
 ---[[
 function VNS.Allocator.resetMorphology(vns)
-	vns.Allocator.setMorphology(vns, man1)
+	vns.Allocator.setMorphology(vns, truck1)
 end
 --]]
 
@@ -107,7 +117,7 @@ function reset()
 	vns.setGene(vns, gene)
 --	vns.setMorphology(vns, man1)
 --	vns.setMorphology(vns, jet)
-	vns.setMorphology(vns, truck)
+	vns.setMorphology(vns, truck1)
 
 	bt = BT.create(
 		vns.create_vns_node(vns,
@@ -209,7 +219,7 @@ return function()
 		if api.stepCount > 300 then
 --			waitNextState = "man1"
 --			waitNextState = "jet"
-			waitNextState = "truck"
+			waitNextState = "truck1"
 			switchAndSendNewState(vns, "wait")
 		end
 	elseif state == "wait" then
@@ -219,6 +229,31 @@ return function()
 				switchAndSendNewState(vns, waitNextState)
 			end
 		end
+	elseif state == "truck1" and vns.parentR == nil then
+		vns.setMorphology(vns, truck2)
+		waitNextState = "truck2"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck2" and vns.parentR == nil then
+		vns.setMorphology(vns, truck3)
+		waitNextState = "truck3"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck3" and vns.parentR == nil then
+		vns.setMorphology(vns, truck4)
+		waitNextState = "truck4"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck4" and vns.parentR == nil then
+		vns.setMorphology(vns, truck5)
+		waitNextState = "truck5"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck5" and vns.parentR == nil then
+		vns.setMorphology(vns, truck6)
+		waitNextState = "truck6"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck6" and vns.parentR == nil then
+		vns.setMorphology(vns, man1)
+		waitNextState = "man1"
+		switchAndSendNewState(vns, "wait")
+
 	elseif state == "man1" and vns.parentR == nil then
 		vns.setMorphology(vns, man2)
 		waitNextState = "man2"
@@ -243,8 +278,6 @@ return function()
 		vns.setMorphology(vns, man1)
 		waitNextState = "man1"
 		switchAndSendNewState(vns, "wait")
-	elseif state == "jet" and vns.parentR == nil then
-		-- do nothing
 	end
 	return false, true
 end end
