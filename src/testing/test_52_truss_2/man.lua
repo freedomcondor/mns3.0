@@ -31,6 +31,43 @@ function create_arm(L, thick, positionV3, orientationQ, angleZ, angleY)
 	return node
 end
 
+function create_chest(positionV3, orientationQ)
+	L = 1.5
+	scale = 0.75
+	return 
+	{	robotTypeS = "drone",
+		positionV3 = positionV3 or vector3(L * 0.5, 0, -L*scale*1.5),
+		orientationQ = orientationQ or quaternion(),
+		children = {
+		{	robotTypeS = "drone",
+			positionV3 = vector3(0, L * scale, -L*scale*0.5),
+			orientationQ = quaternion(),
+			children = {
+			{	robotTypeS = "drone",
+				positionV3 = vector3(0, L * scale, 0),
+				orientationQ = quaternion(),
+			},
+			{	robotTypeS = "drone",
+				positionV3 = vector3(-L*0.5, L*0.5*scale, 0),
+				orientationQ = quaternion(),
+			},
+		}},
+		{	robotTypeS = "drone",
+			positionV3 = vector3(0, -L * scale, -L*scale*0.5),
+			orientationQ = quaternion(),
+			children = {
+			{	robotTypeS = "drone",
+				positionV3 = vector3(0, -L * scale, 0),
+				orientationQ = quaternion(),
+			},
+			{	robotTypeS = "drone",
+				positionV3 = vector3(-L*0.5, -L*0.5*scale, 0),
+				orientationQ = quaternion(),
+			},
+		}}
+	}}
+end
+
 function create_body(option)
 	local option = option or {}
 	local left_shoulder_Z = option.left_shoulder_Z or -15   -- + front
@@ -45,6 +82,8 @@ function create_body(option)
 
 	local L = 1.5
 	local node = DeepCopy(morphology_12)
+	table.insert(node.children, create_chest())
+
 	table.insert(node.children, create_shoulder(vector3(L*0.25, L*0.25, -L*0.5),
 	                                            quaternion(math.pi/2, vector3(0,0,1)),
 	                                            -left_shoulder_Z, left_shoulder_Y,          -- shoulder Z and Y

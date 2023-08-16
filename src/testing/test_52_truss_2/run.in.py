@@ -50,8 +50,8 @@ parameters = '''
     drone_real_noise="false"
     drone_tilt_sensor="true"
 
-    drone_label="1, 99"
-    obstacle_label="100, 103"
+    drone_label="1, 150"
+    obstacle_label="1000, 1003"
 
     safezone_drone_drone="5"
     dangerzone_drone="0.5"

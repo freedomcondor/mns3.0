@@ -12,6 +12,8 @@ Transform = require("Transform")
 
 local DeepCopy = require("DeepCopy")
 require("man")
+--require("jet")
+require("truck")
 
 -- datas ----------------
 local bt
@@ -51,6 +53,9 @@ local man4 = create_body{
 local man5 = DeepCopy(man3)
 local man6 = DeepCopy(man2)
 
+--local jet = create_jet()
+local truck = create_truck()
+
 local gene = {
 	robotTypeS = "drone",
 	positionV3 = vector3(),
@@ -62,6 +67,8 @@ local gene = {
 		man4,
 		man5,
 		man6,
+--		jet,
+		truck,
 	}
 }
 
@@ -94,8 +101,13 @@ end
 function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 1 end
+
+	--if vns.idS == "drone1" then vns.api.virtualFrame.logicOrientationQ = quaternion(-math.pi/12, vector3(0,1,0)) end
+
 	vns.setGene(vns, gene)
-	vns.setMorphology(vns, man1)
+--	vns.setMorphology(vns, man1)
+--	vns.setMorphology(vns, jet)
+	vns.setMorphology(vns, truck)
 
 	bt = BT.create(
 		vns.create_vns_node(vns,
@@ -123,6 +135,15 @@ function step()
 	if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone * 4 then
 		api.debug.showMorphologyLines(vns, true)
 	end
+
+	--[[
+	if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone * 4 then
+		local r = 0.15
+		api.debug.drawRing("255, 255, 255", vector3(0,0,0), r, true)
+		api.debug.drawRing("255, 255, 255", vector3(0,0,0.1), r, true)
+		api.debug.drawRing("255, 255, 255", vector3(0,0,0.2), r, true)
+	end
+	--]]
 
 	vns.logLoopFunctionInfo(vns)
 end
@@ -186,7 +207,9 @@ return function()
 
 	if state == "init" then
 		if api.stepCount > 300 then
-			waitNextState = "man1"
+--			waitNextState = "man1"
+--			waitNextState = "jet"
+			waitNextState = "truck"
 			switchAndSendNewState(vns, "wait")
 		end
 	elseif state == "wait" then
@@ -220,7 +243,8 @@ return function()
 		vns.setMorphology(vns, man1)
 		waitNextState = "man1"
 		switchAndSendNewState(vns, "wait")
-
+	elseif state == "jet" and vns.parentR == nil then
+		-- do nothing
 	end
 	return false, true
 end end
