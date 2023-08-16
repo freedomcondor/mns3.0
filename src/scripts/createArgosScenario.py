@@ -116,11 +116,16 @@ def generate_pipuck_controller(params) :
 
     return text
 
-def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False, replay=False) :
+def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False, background_color=None, replay=False) :
     if lua_editor :
         lua_editor = "true"
     else :
         lua_editor = "false"
+
+    background_color_str = ""
+    if background_color != None :
+      background_color_str = "background_color=\"" + background_color + "\""
+
       
     loop_functions_lib = "libmy_extensions"
     loop_functions_label = "my_loop_functions"
@@ -159,7 +164,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False
   <!-- * Visualization  * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl lua_editor="{}" show_boundary="false">
+    <qt-opengl lua_editor="{}" show_boundary="false" {}>
       <user_functions library="{}/libmy_qtopengl_extensions"
                       label="my_qtopengl_user_functions" />
       <camera>
@@ -169,7 +174,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False
       </camera>
     </qt-opengl>
   </visualization>
-    '''.format(cmake_binary_dir, loop_functions_lib, loop_functions_label, lua_editor, cmake_binary_dir)
+    '''.format(cmake_binary_dir, loop_functions_lib, loop_functions_label, lua_editor, background_color_str, cmake_binary_dir)
 
     return text
 

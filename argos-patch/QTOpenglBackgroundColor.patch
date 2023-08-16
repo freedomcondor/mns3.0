@@ -1,0 +1,67 @@
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_main_window.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_main_window.cpp
+index 24e4708f..5d665acb 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_main_window.cpp
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_main_window.cpp
+@@ -470,6 +470,10 @@ namespace argos {
+       bool bShowBoundary;
+       GetNodeAttributeOrDefault(t_tree, "show_boundary", bShowBoundary, true);
+       m_pcOpenGLWidget->SetShowBoundary(bShowBoundary);
++      /* get back ground color */
++      CColor cBackgroundColor;
++      GetNodeAttributeOrDefault(t_tree, "background_color", cBackgroundColor, CColor(0, 128, 128, 255)); // default dark cyan
++      m_pcOpenGLWidget->SetBackgroundColor(cBackgroundColor);
+       /* Set the window as the central widget */
+       auto* pcQTOpenGLLayout = new CQTOpenGLLayout();
+       pcQTOpenGLLayout->addWidget(m_pcOpenGLWidget);
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
+index 21f75fb3..fe755fd4 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
+@@ -91,7 +91,11 @@ namespace argos {
+       /* Initializes the openGL functions */
+       initializeOpenGLFunctions();
+       /* Set clear color */
+-      glClearColor(0, .5, .5, 255); // dark cyan
++      Real f1over255 = 1.0 / 255;
++      glClearColor(m_cBackgroundColor.GetRed() * f1over255,
++                   m_cBackgroundColor.GetGreen() * f1over255,
++                   m_cBackgroundColor.GetBlue() * f1over255,
++                   m_cBackgroundColor.GetAlpha());
+       /* Set up the texture parameters for the floor plane
+          (here we refer to the standard floor, not the floor entity) */
+       m_pcGroundTexture = new QOpenGLTexture(QImage(m_cMainWindow.GetTextureDir() + "/ground.png"));
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.h b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.h
+index f3cc88e0..0df235cd 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.h
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.h
+@@ -22,6 +22,7 @@ namespace argos {
+ #include <argos3/plugins/simulator/visualizations/qt-opengl/qtopengl_camera.h>
+ #include <argos3/core/simulator/entity/entity.h>
+ #include <argos3/core/utility/datatypes/datatypes.h>
++#include <argos3/core/utility/datatypes/color.h>
+ #include <QOpenGLWidget>
+ #include <QOpenGLFunctions>
+ #include <QOpenGLTexture>
+@@ -240,6 +241,13 @@ namespace argos {
+          m_bShowBoundary = b_show_boundary;
+       }
+ 
++      /**
++       * Sets background color.
++       */
++      inline void SetBackgroundColor(CColor& color) {
++         m_cBackgroundColor = color;
++      }
++
+    signals:
+ 
+       /**
+@@ -421,6 +429,8 @@ namespace argos {
+ 
+       /** Mapping between keys and motion direction */
+       QMap<EDirection, int> m_mapPressedKeys;
++
++      CColor m_cBackgroundColor;
+    };
+ 
+ }
