@@ -8,44 +8,58 @@ pairs = require("AlphaPairs")
 local api = require("droneAPI")
 local VNS = require("VNS")
 local BT = require("BehaviorTree")
-require("morphologyGenerateScreen")
-require("morphologyGenerateCube")
 Transform = require("Transform")
+
+require("screenGenerator")
+require("manGenerator")
+require("truckGenerator")
 
 -- datas ----------------
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
 local n_drone = tonumber(robot.params.n_drone)
-n_cube_side       = math.ceil(n_drone ^ (1/3))
 n_screen_side       = math.ceil(n_drone ^ (1/2))
 
-if n_drone == 16 then
-	require("morphologyGenerateLittleMan")
-else
-	require("morphologyGenerateMan")
-end
-
 local structure_screen = generate_screen_square(n_screen_side)
-local structure_cube = generate_cube(n_cube_side)
 
-local structure_man = generate_man(
-	quaternion(math.pi/6, vector3(0,0,1)),
-	quaternion(math.pi/10, vector3(0,0,1)),
-	quaternion(math.pi/10, vector3(0,1,0))
-)
+local structure_man1 = create_body{
+	right_shoulder_Z = 145,
+	right_shoulder_Y = -15,
+	right_fore_arm_Z = 15,
+	right_fore_arm_Y = 25,
+}
 
-local structure_man_2 = generate_man(
-	quaternion(-math.pi/6, vector3(0,0,1)),
-	quaternion(0, vector3(0,0,1)),
-	quaternion(0, vector3(0,1,0))
-)
+local structure_man2 = create_body{
+	right_shoulder_Z = 145,
+	right_shoulder_Y = -12,
+	right_fore_arm_Z = 15,
+	right_fore_arm_Y = 30,
+}
 
-local structure_man_3 = generate_man(
-	quaternion(-math.pi/6, vector3(0,0,1)),
-	quaternion(-math.pi/10, vector3(0,0,1)),
-	quaternion(-math.pi/10, vector3(0,1,0))
-)
+local structure_man3 = create_body{
+	right_shoulder_Z = 145,
+	right_shoulder_Y = -10,
+	right_fore_arm_Z = 15,
+	right_fore_arm_Y = 35,
+}
+
+local structure_man4 = create_body{
+	right_shoulder_Z = 145,
+	right_shoulder_Y = -8,
+	right_fore_arm_Z = 15,
+	right_fore_arm_Y = 40,
+}
+
+local structure_man5 = DeepCopy(structure_man3)
+local structure_man6 = DeepCopy(structure_man2)
+
+local structure_truck1 = create_truck(10)
+local structure_truck2 = create_truck(20)
+local structure_truck3 = create_truck(30)
+local structure_truck4 = create_truck(40)
+local structure_truck5 = create_truck(50)
+local structure_truck6 = create_truck(60)
 
 local gene = {
 	robotTypeS = "drone",
@@ -53,10 +67,20 @@ local gene = {
 	orientationQ = quaternion(),
 	children = {
 		structure_screen,
-		structure_cube,
-		--structure_man,
-		--structure_man_2,
-		--structure_man_3,
+
+		structure_truck1,
+		structure_truck2,
+		structure_truck3,
+		structure_truck4,
+		structure_truck5,
+		structure_truck6,
+
+		structure_man1,
+		structure_man2,
+		structure_man3,
+		structure_man4,
+		structure_man5,
+		structure_man6,
 	}
 }
 --]]
@@ -164,42 +188,62 @@ function create_navigation_node(vns)
 	end
 
 	local map_3 = {
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,1,1,1,0,0},
-		{0,0,1,0,0,0,1,0},
-		{0,0,0,0,0,0,1,0},
-		{0,0,0,0,1,1,0,0},
-		{0,0,0,0,0,0,1,0},
-		{0,0,1,0,0,0,1,0},
-		{0,0,0,1,1,1,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,1,1,1,1,0,0,0},
+		{0,0,1,0,0,0,0,1,0,0},
+		{0,0,0,0,0,0,0,1,0,0},
+		{0,0,0,0,0,0,0,1,0,0},
+		{0,0,0,0,1,1,1,0,0,0},
+		{0,0,0,0,0,0,0,1,0,0},
+		{0,0,0,0,0,0,0,1,0,0},
+		{0,0,1,0,0,0,0,1,0,0},
+		{0,0,0,1,1,1,1,0,0,0},
 	}
 
 	local map_2 = {
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,1,1,1,0,0},
-		{0,0,1,0,0,0,1,0},
-		{0,0,0,0,0,0,1,0},
-		{0,0,0,0,0,1,0,0},
-		{0,0,0,0,1,0,0,0},
-		{0,0,0,1,0,0,0,0},
-		{0,0,1,1,1,1,1,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,1,1,1,1,0,0,0},
+		{0,0,1,0,0,0,0,1,0,0},
+		{0,0,0,0,0,0,0,1,0,0},
+		{0,0,0,0,0,0,0,1,0,0},
+		{0,0,0,0,0,0,1,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,1,0,0,0,0,0},
+		{0,0,0,1,0,0,0,0,0,0},
+		{0,0,1,1,1,1,1,1,0,0},
 	}
 
 	local map_1 = {
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,1,0,0,0},
-		{0,0,0,1,1,0,0,0},
-		{0,0,0,0,1,0,0,0},
-		{0,0,0,0,1,0,0,0},
-		{0,0,0,0,1,0,0,0},
-		{0,0,0,0,1,0,0,0},
-		{0,0,1,1,1,1,1,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,1,1,0,0,0,0},
+		{0,0,0,1,0,1,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,1,1,1,1,1,0,0},
 	}
 
 	local map_index = {}
 	map_index[1] = generate_map_index(map_1)
 	map_index[2] = generate_map_index(map_2)
 	map_index[3] = generate_map_index(map_3)
+
+	local rebellian = {
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,1,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0},
+	}
+	rebellian_index = generate_map_index(rebellian)
 
 return function()
 	stateCount = stateCount + 1
@@ -224,20 +268,23 @@ return function()
 	-- state
 	-- init
 	if state == "init" then
-		if api.stepCount > 100 then
-			--waitNextState = "man2"
+		if api.stepCount > 200 then
 			waitNextState = 3
 			switchAndSendNewState(vns, "wait")
 		end
 	elseif state == "wait" then
 		if vns.parentR == nil and stateCount > 30 then
 			if vns.driver.all_arrive == true then
-				logger("--- NewState: ", waitNextState)
 				switchAndSendNewState(vns, waitNextState)
 			end
 		end
 	-- count Down
 	elseif state == 3 or state == 2 or state == 1 then
+		-- parent log state
+		if vns.parentR == nil then
+			logger("--- count state : ", state)
+		end
+		-- all robots, check index and turn on led
 		local index = vns.allocator.target.idN
 		local index_base = structure_screen.idN
 		index = index - index_base + 1
@@ -248,31 +295,86 @@ return function()
 
 		if vns.parentR == nil and stateCount > 30 then
 			if state == 1 then
-				switchAndSendNewState(vns, "cube")
+				switchAndSendNewState(vns, "rebellian")
 			else
 				switchAndSendNewState(vns, state - 1)
 			end
 		end
-	elseif state == "cube" and vns.parent == nil then
-		vns.setMorphology(vns, structure_cube)
+	elseif state == "rebellian" then
+		local index = vns.allocator.target.idN
+		local index_base = structure_screen.idN
+		index = index - index_base + 1
+		if rebellian_index[index] == 1 then
+			logger("--- I'm  ", robot.id, "I'm rebellian")
+			if vns.parentR ~= nil then
+				vns.Msg.send(vns.parentR.idS, "dismiss")
+				vns.deleteParent(vns)
+			end
+			vns.Connector.newVnsID(vns, 2, 200)
 
-	-- man
-	elseif state == "man" and vns.parent == nil then
-		vns.setMorphology(vns, structure_man)
+			vns.allocator.mode_switch = "stationary"
+
+			state = "rebellian_wait"
+		end
+	elseif state == "rebellian_wait" then
+		if vns.parentR == nil then
+			logger("--- I'm  ", robot.id, "I'm waiting ", vns.scalemanager.scale:totalNumber())
+			if vns.scalemanager.scale:totalNumber() == n_drone then
+				vns.allocator.mode_switch = "allocate"
+				--vns.setMorphology(vns, structure_man)
+				vns.setMorphology(vns, structure_truck1)
+				waitNextState = "truck1"
+				switchAndSendNewState(vns, "wait")
+			end
+		end
+	elseif state == "truck1" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_truck2)
+		waitNextState = "truck2"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck2" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_truck3)
+		waitNextState = "truck3"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck3" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_truck4)
+		waitNextState = "truck4"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck4" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_truck5)
+		waitNextState = "truck5"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "truck5" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_truck6)
+		waitNextState = "truck6"
+		switchAndSendNewState(vns, "wait")
+
+	elseif state == "truck6" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man1)
+		waitNextState = "man1"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "man1" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man2)
 		waitNextState = "man2"
 		switchAndSendNewState(vns, "wait")
-	elseif state == "man2" and vns.parent == nil then
-		vns.setMorphology(vns, structure_man_2)
+	elseif state == "man2" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man3)
 		waitNextState = "man3"
 		switchAndSendNewState(vns, "wait")
-	elseif state == "man3" and vns.parent == nil then
-		vns.setMorphology(vns, structure_man_3)
-		waitNextState = "man2_back"
+	elseif state == "man3" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man4)
+		waitNextState = "man4"
 		switchAndSendNewState(vns, "wait")
-	elseif state == "man2_back" and vns.parent == nil then
-		vns.setMorphology(vns, structure_man_2)
-		waitNextState = "man"
+	elseif state == "man4" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man5)
+		waitNextState = "man5"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "man5" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man6)
+		waitNextState = "man6"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "man6" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_man1)
+		waitNextState = "man1"
 		switchAndSendNewState(vns, "wait")
 	end
-
 end end

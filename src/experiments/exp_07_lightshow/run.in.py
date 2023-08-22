@@ -6,11 +6,7 @@ import os
 
 # drone and pipuck
 
-# abuse experiment length for drone numbers
-if Experiment_length == None :
-    Experiment_length = 16
-n_drone = Experiment_length
-Experiment_length = n_drone * 200
+n_drone = 100
 
 # calculate side
 n_side = n_drone ** (1.0/3)
@@ -45,15 +41,15 @@ parameters = '''
 
     drone_label="1, 1000"
 
-    safezone_drone_drone="3"
-    dangerzone_drone="1"
+    safezone_drone_drone="5"
+    dangerzone_drone="0.5"
 
-    second_report_sight="true"
+    second_report_sight="false"
 
-    driver_default_speed="0.5"
-    driver_slowdown_zone="0.7"
+    driver_default_speed="0.3"
+    driver_slowdown_zone="1.0"
     driver_stop_zone="0.15"
-    driver_arrive_zone="0.7"
+    driver_arrive_zone="1.0"
 
     n_drone="{}"
 
@@ -74,7 +70,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters, {"velocity_mode":True})],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "black")],
     ]
 )
 
