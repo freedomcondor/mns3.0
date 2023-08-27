@@ -107,7 +107,7 @@ function init()
 	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height + 8
 	end
-	api.debug.show_all = true
+	--api.debug.show_all = true
 end
 
 function reset()
@@ -138,12 +138,15 @@ function step()
 
 	vns.postStep(vns)
 	api.postStep()
-	api.debug.showVirtualFrame(true)
-	api.debug.showChildren(vns, {drawOrientation = false})
+	--api.debug.showVirtualFrame(true)
+	--api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 
-	if vns.goal.positionV3:length() < vns.Parameters.driver_stop_zone * 2 then
+	local LED_zone = vns.Parameters.driver_stop_zone * 2
+	-- show morphology lines
+	if vns.goal.positionV3:length() < LED_zone then
 		api.debug.showMorphologyLines(vns, true)
+		api.debug.showMorphologyLightShowLEDs(vns, true)
 	end
 
 	vns.logLoopFunctionInfo(vns)
@@ -289,8 +292,9 @@ return function()
 		local index_base = structure_screen.idN
 		index = index - index_base + 1
 		if map_index[state][index] == 1 then
-			api.debug.drawRing("128, 0, 255", vector3(0,0,0), 0.3, true)
-			api.debug.drawRing("128, 0, 255", vector3(0,0,0.2), 0.3, true)
+			vns.allocator.target.lightShowLED = "red"
+		else
+			vns.allocator.target.lightShowLED = nil
 		end
 
 		if vns.parentR == nil and stateCount > 30 then

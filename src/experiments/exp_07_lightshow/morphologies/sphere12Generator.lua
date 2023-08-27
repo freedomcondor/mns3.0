@@ -73,23 +73,29 @@ local drawLines_upper = function()
 	}
 end
 	
-function create_sphere12()
+function create_sphere12(color)
 return 
 {	robotTypeS = "drone",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	drawLines = drawLines(),
+	drawLinesColor = color,
+	lightShowLED = color,
 	children = {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*sin(36), L*cos(36), 0),
 		orientationQ = quaternion(rad(-72), vector3(0,0,1)),
-        calcBaseValue = calcBaseValue,
+		calcBaseValue = calcBaseValue,
 		drawLines = drawLines(),
+		drawLinesColor = color,
+		lightShowLED = color,
 		children = {
 		{	robotTypeS = "drone",
 			positionV3 = vector3(L*sin(36), L*cos(36), 0),
 			orientationQ = quaternion(rad(-72), vector3(0,0,1)),
 			drawLines = drawLines(),
+			drawLinesColor = color,
+			lightShowLED = color,
 		},
 		{	robotTypeS = "drone",
 			positionV3 = vector3(L/(2*sin(36)), 
@@ -100,17 +106,23 @@ return
 			                                 )
 			                    ),
 			orientationQ = quaternion(),
+			drawLinesColor = color,
+			lightShowLED = color,
 		},
 	}},
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*sin(36), -L*cos(36), 0),
 		orientationQ = quaternion(rad(72), vector3(0,0,1)),
 		drawLines = drawLines(),
+		drawLinesColor = color,
+		lightShowLED = color,
 		children = {
 		{	robotTypeS = "drone",
 			positionV3 = vector3(L*sin(36), -L*cos(36), 0),
 			orientationQ = quaternion(rad(72), vector3(0,0,1)),
-		drawLines = drawLines(),
+			drawLines = drawLines(),
+			drawLinesColor = color,
+			lightShowLED = color,
 		},
 	}},
 
@@ -140,6 +152,8 @@ return
 		--calcBaseValue = calcBaseValue,
 		calcBaseValue = function() return 0 end,
 		drawLines = drawLines_upper(),
+		drawLinesColor = color,
+		lightShowLED = color,
 
 		children = {
 		{	robotTypeS = "drone",
@@ -148,12 +162,16 @@ return
 
 			calcBaseValue = calcBaseValue,
 			drawLines = drawLines_upper(),
+			drawLinesColor = color,
+			lightShowLED = color,
 
 			children = {
 			{	robotTypeS = "drone",
 				positionV3 = vector3(L*sin(36), L*cos(36), 0),
 				orientationQ = quaternion(rad(-72), vector3(0,0,1)),
 				drawLines = drawLines_upper(),
+				drawLinesColor = color,
+				lightShowLED = color,
 			},
 			{	robotTypeS = "drone",
 				positionV3 = vector3(L/(2*sin(36)), 
@@ -164,17 +182,23 @@ return
 				                                 )
 				                    ),
 				orientationQ = quaternion(),
+				drawLinesColor = color,
+				lightShowLED = color,
 			},
 		}},
 		{	robotTypeS = "drone",
 			positionV3 = vector3(L*sin(36), -L*cos(36), 0),
 			orientationQ = quaternion(rad(72), vector3(0,0,1)),
 			drawLines = drawLines_upper(),
+			drawLinesColor = color,
+			lightShowLED = color,
 			children = {
 			{	robotTypeS = "drone",
 				positionV3 = vector3(L*sin(36), -L*cos(36), 0),
 				orientationQ = quaternion(rad(72), vector3(0,0,1)),
 				drawLines = drawLines_upper(),
+				drawLinesColor = color,
+				lightShowLED = color,
 			},
 		}},
 	}},

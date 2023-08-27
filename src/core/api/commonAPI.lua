@@ -328,11 +328,24 @@ end
 
 function api.debug.showMorphologyLines(vns, essential)
 	if vns.allocator ~= nil and vns.allocator.target.drawLines ~= nil then
+		local color = vns.allocator.target.drawLinesColor or "white"
 		for i, vec in ipairs(vns.allocator.target.drawLines) do
-			vns.api.debug.drawArrow("green", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(vec), essential)
+			vns.api.debug.drawArrow(color, vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(vec), essential)
 		end
 	end
 end
+
+function api.debug.showMorphologyLightShowLEDs(vns, essential)
+	--if vns.allocator ~= nil and vns.allocator.target.lightShowLED ~= nil then
+		local color = vns.allocator.target.lightShowLED or "white"
+
+		local r = 0.15
+		api.debug.drawRing(color, vector3(0,0,0), r, true)
+		api.debug.drawRing(color, vector3(0,0,0.1), r, true)
+		api.debug.drawRing(color, vector3(0,0,0.2), r, true)
+	--end
+end
+
 -------------------------------------------------------------
 function api.linkRobotInterface(VNS)
 	VNS.Msg.sendTable = function(table)
