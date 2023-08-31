@@ -1,28 +1,63 @@
 #!/bin/bash
 source @CMAKE_SOURCE_DIR@/scripts/librun_threads.sh
 
-DATADIR=@CMAKE_MNS_DATA_PATH@/exp_01_formation/run_data
+# read experiment type
+#-----------------------------------------------------
+experiment_type=$1
+
+declare -A index
+index=(\
+#                 exp length    argos threads    run per thread   threads
+	[polyhedron_12]='300              16                 5              2'      \
+	[polyhedron_20]='500              20                 5              1'      \
+)
+
+#    "polyhedron_12" :    12,
+#    "polyhedron_20" :    20,
+#    "cube_27"       :    27,
+#    "cube_64"       :    64,
+#    "cube_125"      :   125,
+#    "screen_64"     :    64,
+#    "donut_64"      :    64,
+
+tuple_line=${index[${experiment_type}]}
+if [ -z "$tuple_line" ]; then
+	echo "wrong Experiment type, please choose among:"
+	for node in ${!index[@]}; do
+		echo "    ${node}"
+	done
+	exit
+fi
+
+tuple=($tuple_line)
+
+experiment_length=${tuple[0]}
+argos_multi_threads=${tuple[1]}
+run_per_thread=${tuple[2]}
+number_threads=${tuple[3]}
+
+echo "----------------------------"
+echo "$experiment_type chosen, "
+echo "experiment_length   = $experiment_length"
+echo "argos_multi_threads = $argos_multi_threads"
+echo "run_per_thread      = $run_per_thread"
+echo "number_threads      = $number_threads"
+echo "----------------------------"
+
+#-----------------------------------------------------
+# prepare to run threads
+DATADIR=@CMAKE_MNS_DATA_PATH@/exp_01_formation/$experiment_type/run_data
+CODEDIR=$DATADIR/../code
 TMPDIR=@CMAKE_BINARY_DIR@/threads
-THREADS_LOG_OUTPUT=`pwd`/threads_output.txt
+#THREADS_LOG_OUTPUT=`pwd`/threads_output.txt
 
-experiment_length=500
-
-check_finish() {
-	# wc -l : check line numbers
-	# cut -d ' ' means cut by space, -f1 means take the first cut word
-	stepnumber=`wc logs/drone1.log -l | cut -d ' ' -f1`
-	if [ $stepnumber = $experiment_length ]; then
-		return 0
-	else
-		return 1
-	fi
-}
-
-echo exp_01_formation start > $THREADS_LOG_OUTPUT # this is for run_single_threads
+#echo exp_01_formation start > $THREADS_LOG_OUTPUT # this is for run_single_threads to reset $THREADS_LOG_OUTPUT
 
 # start run number, run per thread, total threads
-run_threads 1 5 2\
-	"python3 @CMAKE_CURRENT_BINARY_DIR@/../simu_code/run.py -l $experiment_length -m 16" \
+run_threads 1 $run_per_thread $number_threads\
+	"python3 @CMAKE_CURRENT_BINARY_DIR@/../simu_code/run.py -t $experiment_type -l $experiment_length -m $argos_multi_threads" \
 	$DATADIR \
 	$TMPDIR \
-	check_finish
+	"check_finish_by_log_length $experiment_length"
+
+cp -r @CMAKE_CURRENT_BINARY_DIR@/../simu_code $CODEDIR

@@ -10,13 +10,15 @@ usage="[usage] example: python3 xxx.py -r 1 -l 1000 -v true -m 10"
 
 #----------------------------------------------------------------------------------------------
 # parse opts
-if "customizeOpts" not in locals() or customizeOpts != True :
-    try:
-        optlist, args = getopt.getopt(sys.argv[1:], "r:l:v:m:h")
-    except:
-        print("[error] unexpected opts")
-        print(usage)
-        sys.exit(0)
+if "customizeOpts" not in locals() :
+    customizeOpts = ""
+
+try:
+    optlist, args = getopt.getopt(sys.argv[1:], "r:l:v:m:h" + customizeOpts)
+except:
+    print("[error] unexpected opts")
+    print(usage)
+    sys.exit(0)
 
 Inputseed = None
 MultiThreads = None
@@ -24,24 +26,23 @@ Experiment_length = None
 Visualization = True
 VisualizationArgosFlag = ""
 
-if "customizeOpts" not in locals() or customizeOpts != True :
-    for opt, value in optlist:
-        if opt == "-r":
-            Inputseed = int(value)
-            print("Inputseed provided:", Inputseed)
-        elif opt == "-l":
-            Experiment_length = int(value)
-            print("experiment_length provided:", Experiment_length)
-        elif opt == "-v":
-            if value == "False" or value == "false" :
-                Visualization = False
-            print("visualization provided:", Visualization)
-        elif opt == "-m":
-            MultiThreads = int(value) 
-            print("Multi threads provided:", MultiThreads)
-        elif opt == "-h":
-            print(usage)
-            exit()
+for opt, value in optlist:
+    if opt == "-r":
+        Inputseed = int(value)
+        print("Inputseed provided:", Inputseed)
+    elif opt == "-l":
+        Experiment_length = int(value)
+        print("experiment_length provided:", Experiment_length)
+    elif opt == "-v":
+        if value == "False" or value == "false" :
+            Visualization = False
+        print("visualization provided:", Visualization)
+    elif opt == "-m":
+        MultiThreads = int(value) 
+        print("Multi threads provided:", MultiThreads)
+    elif opt == "-h":
+        print(usage)
+        exit()
 
 if Inputseed == None :
     Inputseed = int(time.time())

@@ -4,10 +4,23 @@ LOG_INDENT="                |"
 # set default dirs and output files
 THREADS_LOG_OUTPUT=/dev/stdout      #absolute path   overwrite with `pwd`/threads_output.txt
 KILL_THREADS=`pwd`/kill_threads.sh  # absolute path
-RUN_OUTPUT=output.log # relative path, relative to the runX folder
+RUN_OUTPUT=run_output.log # relative path, relative to the runX folder
+EVA_OUTPUT=eva_output.log # relative path, relative to the runX folder
 
 DATADIR=data
 TMPDIR=.
+
+check_finish_by_log_length() {
+	experiment_length=$1
+	# wc -l : check line numbers
+	# cut -d ' ' means cut by space, -f1 means take the first cut word
+	stepnumber=`wc logs/drone1.log -l | cut -d ' ' -f1`
+	if [ $stepnumber = $experiment_length ]; then
+		return 0
+	else
+		return 1
+	fi
+}
 
 run() {
 	CURRENTDIR=`pwd`
@@ -49,10 +62,11 @@ run() {
 	while [ $repeat_flag -eq 1 ]; do
 		$cmd -r $run_number -v false > $RUN_OUTPUT
 
+		# consider check program is mandatory
 		# if check finish if not provided
-		if [ -z "$check_finish_correctly_program" ]; then
-			break
-		fi
+		#if [ -z "$check_finish_correctly_program" ]; then
+		#	break
+		#fi
 		# else run check finish and set repeat_flag based on its result
 		$check_finish_correctly_program
 		result=$?
@@ -78,6 +92,32 @@ run() {
 	cd $CURRENTDIR
 }
 
+evaluate() {
+	CURRENTDIR=`pwd`
+
+	# go to $DATADIR/run$run_number and run cmd
+
+	run_number=$1
+	thread_number=$2
+	cmd=$3
+	DATADIR=$4
+
+	# log indent for this thread
+	log_indent=""
+	for (( indent=0; indent<$thread_number; indent++ )); do log_indent="$log_indent$LOG_INDENT"; done
+
+	if [ ! -d $DATADIR/run$run_number ]; then
+		echo "$log_indent"run$run_number "does't exist" >> $THREADS_LOG_OUTPUT
+		return
+	fi
+
+	echo "$log_indent"evaluating run$run_number >> $THREADS_LOG_OUTPUT
+	cd $DATADIR/run$run_number
+	$cmd > $EVA_OUTPUT
+	cd $CURRENTDIR
+	echo "$log_indent"eva run$run_number finish >> $THREADS_LOG_OUTPUT
+}
+
 run_single_thread() {
 	start=$1
 	end=$2
@@ -86,6 +126,7 @@ run_single_thread() {
 	DATADIR=$5
 	TMPDIR=$6
 	check_finish_correctly_program=$7
+	evaluation_flag=$8
 
 	# log indent for this thread
 	log_indent=""
@@ -93,9 +134,13 @@ run_single_thread() {
 
 	echo "$log_indent thread $thread_number start" >> $THREADS_LOG_OUTPUT
 
-	for (( i_run=$start; i_run<=$end; i_run++ )); 
-	do 
-		run $i_run $thread_number "$cmd" $DATADIR $TMPDIR $check_finish_correctly_program
+	for (( i_run=$start; i_run<=$end; i_run++ ));
+	do
+		if [ -z "$evaluation_flag" ]; then
+			run $i_run $thread_number "$cmd" $DATADIR $TMPDIR "$check_finish_correctly_program"
+		else
+			evaluate $i_run $thread_number "$cmd" $DATADIR
+		fi
 	done
 
 	echo "$log_indent thread $thread_number finish" >> $THREADS_LOG_OUTPUT
@@ -109,13 +154,22 @@ run_threads() {
 	DATADIR=$5
 	TMPDIR=$6
 	check_finish_correctly_program=$7
+	evaluation_flag=$8
 
 	# create kill_threads.sh
 	echo "ps -a" > $KILL_THREADS
 	echo "echo ---------------" >> $KILL_THREADS
 	echo "echo killing threads" >> $KILL_THREADS
 
-	echo "Threads start, execute in $TMPDIR, copy back in $DATADIR" > $THREADS_LOG_OUTPUT
+
+	if [ -z "$evaluation_flag" ]; then
+		echo "Threads start, execute in $TMPDIR," > $THREADS_LOG_OUTPUT
+		echo "copy back in $DATADIR" >> $THREADS_LOG_OUTPUT
+	else
+		echo "evaluating_flag detected : $evaluating_flag" > $THREADS_LOG_OUTPUT
+		echo "evaluating, in $DATADIR" >> $THREADS_LOG_OUTPUT
+	fi
+
 	# create temp dir
 	if [ -d $TMPDIR ]; then
 		echo "[warning] $TMPDIR already exists" >> $THREADS_LOG_OUTPUT
@@ -128,7 +182,7 @@ run_threads() {
 	for (( indent=0; indent<$threads; indent++ )); do log_line="$log_line$LOG_LINE"; done
 
 	# start log
-	echo "Experiment start" >> $THREADS_LOG_OUTPUT
+	echo "Threads start" >> $THREADS_LOG_OUTPUT
 	echo "$log_line" >> $THREADS_LOG_OUTPUT
 
 	# start threads
@@ -136,7 +190,7 @@ run_threads() {
 	do 
 		let thread_start=$start+$runs_per_thread*$i_thread
 		let thread_end=$thread_start+$runs_per_thread-1
-		run_single_thread $thread_start $thread_end $i_thread "$cmd" $DATADIR $TMPDIR $check_finish_correctly_program &
+		run_single_thread $thread_start $thread_end $i_thread "$cmd" $DATADIR $TMPDIR "$check_finish_correctly_program" $evaluation_flag &
 		echo "kill $!" >> $KILL_THREADS
 	done
 
@@ -144,6 +198,8 @@ run_threads() {
 	echo "killall argos3" >> $KILL_THREADS
 	echo "echo killing all python3" >> $KILL_THREADS
 	echo "killall python3" >> $KILL_THREADS
+	echo "echo killing all lua" >> $KILL_THREADS
+	echo "killall lua" >> $KILL_THREADS
 	echo "sleep 1" >> $KILL_THREADS
 	echo "echo ---------------" >> $KILL_THREADS
 	echo "ps -a" >> $KILL_THREADS

@@ -1,21 +1,39 @@
 createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 #execfile(createArgosFileName)
+customizeOpts = "t:"
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
+
+Experiment_type = None
+for opt, value in optlist:
+    if opt == "-t":
+        Experiment_type = value
+        print("Experiment_type provided: ", Experiment_type)
+if Experiment_type == None :
+    Experiment_type = "polyhedron_12"
+    print("Experiment_type not provided: using default", Experiment_type)
 
 import os
 
 # drone and pipuck
 
-structure_config = ["polyhedron_12",     12]
-#structure_config = ["polyhedron_20",     20]
-#structure_config = ["cube_27",           27]
-#structure_config = ["cube_64",            64]
-#structure_config = ["cube_125",         125]
-#structure_config = ["screen_64",         64]
-#structure_config = ["donut_64",         64]
+n_drone_index = {
+    "polyhedron_12" :    12,
+    "polyhedron_20" :    20,
+    "cube_27"       :    27,
+    "cube_64"       :    64,
+    "cube_125"      :   125,
+    "screen_64"     :    64,
+    "donut_64"      :    64,
+}
 
-structure = structure_config[0]
-n_drone = structure_config[1]
+structure = Experiment_type
+if structure not in n_drone_index :
+    print("wrong experiment type provided, please choose among : ")
+    for key in n_drone_index :
+        print("    " + key)
+    exit()
+
+n_drone = n_drone_index[structure]
 
 # calculate side
 n_side = n_drone ** (1.0/3)
@@ -76,4 +94,6 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
     ]
 )
 
+os.system("echo " + structure + "> type.txt")
 os.system("argos3 -c vns.argos" + VisualizationArgosFlag)
+
