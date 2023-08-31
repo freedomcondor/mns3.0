@@ -13,11 +13,32 @@ local BT = require("BehaviorTree")
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
-local structure = require(robot.params.structure or "morphology_20")
+require("morphologyGenerateCube")
+require("screenGenerator")
+require("trussGenerator")
+
+local structure
+if robot.params.structure == "polyhedron_12" then
+	structure = require("morphology_polyhedron_12")
+elseif robot.params.structure == "polyhedron_20" then
+	structure = require("morphology_polyhedron_20")
+elseif robot.params.structure == "cube_27" then
+	structure = generate_cube_morphology(27)
+elseif robot.params.structure == "cube_64" then
+	structure = generate_cube_morphology(64)
+elseif robot.params.structure == "cube_125" then
+	structure = generate_cube_morphology(125)
+elseif robot.params.structure == "screen_64" then
+	structure = generate_screen_square(8)
+elseif robot.params.structure == "donut_64" then
+	nodes = 64 / 4
+	structure = create_horizontal_truss_chain(nodes, 1.5, vector3(1.5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+end
 
 function init()
 	api.linkRobotInterface(VNS)
 	api.init()
+	api.debug.recordSwitch = true
 	vns = VNS.create("drone")
 	reset()
 
@@ -29,7 +50,7 @@ function init()
 	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = 5.0
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 function reset()
@@ -51,7 +72,7 @@ function step()
 	api.postStep()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
-	--api.debug.showSeenRobots(vns, {drawOrientation = true})
+
 	api.debug.showMorphologyLines(vns, true)
 	vns.logLoopFunctionInfo(vns)
 end

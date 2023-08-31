@@ -6,33 +6,47 @@ import os
 
 # drone and pipuck
 
-#structure_config = ["morphology_2",      2]
-#structure_config = ["morphology_4",      4]
-#structure_config = ["morphology_8",      8]
-#structure_config = ["morphology_12",     12]
-#structure_config = ["morphology_12_rec", 12]
-#structure_config = ["morphology_12_tri", 12]
-structure_config = ["morphology_20",     20]
+structure_config = ["polyhedron_12",     12]
+#structure_config = ["polyhedron_20",     20]
+#structure_config = ["cube_27",           27]
+#structure_config = ["cube_64",            64]
+#structure_config = ["cube_125",         125]
+#structure_config = ["screen_64",         64]
+#structure_config = ["donut_64",         64]
 
 structure = structure_config[0]
-n = structure_config[1]
+n_drone = structure_config[1]
 
-drone_locations = generate_random_locations(n,                  # total number
-                                            0, 0,             # origin location
-                                            -1.5, 1.5,              # random x range
-                                            -1.5, 1.5,              # random y range
-                                            0.5, 1.5)           # near limit and far limit
-drone_xml = generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
+# calculate side
+n_side = n_drone ** (1.0/3)
+L = 1.5
+
+half_side_length = (n_side-1) * L * 0.5
+
+arena_size = half_side_length * 30
+arena_z_center = arena_size / 2 - 2
+
+offset = 0
+yoffset = 0
+y_scale = 1.2
+if n_drone == 512 :
+    y_scale = 1.7
+drone_locations = generate_random_locations(n_drone,
+                                            offset -half_side_length,         yoffset -half_side_length,          # origin location
+                                            offset -half_side_length*1.2,     offset  +half_side_length*1.2,      # random x range
+                                            yoffset-half_side_length*y_scale, yoffset + half_side_length*y_scale, # random y range
+                                            0.5, 1.5,           # near limit and far limit
+                                            10000)              # attempt count
+
+drone_xml = generate_drones(drone_locations, 1, 4.2)                  # from label 1 generate drone xml tags, communication range 4.2
 
 parameters = '''
     mode_2D="false"
     drone_real_noise="false"
     drone_tilt_sensor="false"
 
-    drone_label="1, 20"
-    obstacle_label="100, 100"
+    drone_label="1, 200"
 
-    drone_default_start_height="3.0"
     safezone_drone_drone="3"
     dangerzone_drone="1"
 
@@ -41,8 +55,10 @@ parameters = '''
     driver_default_speed="0.5"
     driver_slowdown_zone="0.7"
     driver_stop_zone="0.15"
+    driver_arrive_zone="0.5"
 
     structure={}
+    drone_velocity_mode="true"
 '''.format(structure)
 
 # generate argos file
@@ -55,7 +71,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["DRONES",            drone_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters)],
+        ''' + parameters, {"velocity_mode":True})],
         ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
     ]
 )

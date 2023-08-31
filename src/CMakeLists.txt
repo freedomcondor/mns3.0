@@ -85,6 +85,9 @@ if(ARGOS_QTOPENGL_FOUND)
     my_extensions)
 endif(ARGOS_QTOPENGL_FOUND)
 
+#add data folder path
+set(CMAKE_MNS_DATA_PATH ${CMAKE_SOURCE_DIR}/../../mns3.0-data)
+
 #create a logs folder for logs
 make_directory(logs)
 #add testing sub directory
