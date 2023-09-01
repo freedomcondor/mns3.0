@@ -8,6 +8,10 @@ experiment_type=$1
 experiment_type_list=(\
 	"polyhedron_12" \
 	"polyhedron_20" \
+	"cube_27"       \
+	"cube_64"       \
+	"screen_64"       \
+	"donut_64"       \
 )
 
 #if [ ! -z "$experiment_type" ] && [[ "${experiment_type_list[@]}" =~ "$experiment_type" ]]; then
@@ -31,7 +35,7 @@ TMPDIR=@CMAKE_BINARY_DIR@/threads
 #echo exp_01_formation start > $THREADS_LOG_OUTPUT # this is for run_single_threads to reset $THREADS_LOG_OUTPUT
 
 # start run number, run per thread, total threads
-run_threads 1 1 10\
+run_threads 1 1 20\
 	"lua @CMAKE_CURRENT_BINARY_DIR@/evaluator.lua" \
 	$DATADIR \
 	$TMPDIR \

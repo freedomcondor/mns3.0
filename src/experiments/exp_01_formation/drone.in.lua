@@ -78,7 +78,13 @@ function step()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 
-	api.debug.showMorphologyLines(vns, true)
+
+	-- show morphology lines
+	local LED_zone = vns.Parameters.driver_arrive_zone * 2
+	if vns.goal.positionV3:length() < LED_zone then
+		api.debug.showMorphologyLines(vns, true)
+	end
+
 	vns.logLoopFunctionInfo(vns)
 end
 

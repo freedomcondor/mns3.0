@@ -9,6 +9,9 @@ logger.enable()
 local type = logReader.getFirstLineFromFile("type.txt")
 print("experiment type : ", type)
 
+require("morphologyGenerateCube")
+require("screenGenerator")
+require("trussGenerator")
 local structure
 if type == "polyhedron_12" then
 	structure = require("morphology_polyhedron_12")

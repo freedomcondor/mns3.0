@@ -2,26 +2,14 @@ import os
 import string
 import re
 
-customizeOpts = True
+customizeOpts = "i:"
 createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 #execfile(createArgosFileName)
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
 
 #----------------------------------------------------------------------------------------------
-# usage message 
-usage="[usage] example: python3 replayer.py -i xxx/logs"
-
-#----------------------------------------------------------------------------------------------
-# parse opts
-try:
-    optlist, args = getopt.getopt(sys.argv[1:], "i:h")
-except:
-    print("[error] unexpected opts")
-    print(usage)
-    sys.exit(0)
-
+# parse customize opts
 InputFolder = None
-
 for opt, value in optlist:
     if opt == "-i":
         InputFolder = value
