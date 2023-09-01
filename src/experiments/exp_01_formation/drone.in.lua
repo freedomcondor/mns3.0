@@ -50,7 +50,7 @@ function init()
 	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = 5.0
 	end
-	api.debug.show_all = true
+	--api.debug.show_all = true
 end
 
 function reset()
@@ -58,7 +58,12 @@ function reset()
 	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, structure)
 
-	bt = BT.create(vns.create_vns_node(vns))
+	bt = BT.create(vns.create_vns_node(vns,
+			{navigation_node_post_core = {type = "sequence", children = {
+				create_failsafe_node(vns),
+			}}}
+
+	))
 end
 
 function step()
@@ -81,3 +86,19 @@ function destroy()
 	vns.destroy()
 	api.destroy()
 end
+
+function create_failsafe_node(vns)
+return function()
+	-- fail safe
+	if vns.scalemanager.scale["drone"] == 1 and
+	   vns.api.actuator.flight_preparation.state == "navigation" then
+		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
+			local target = vns.brainkeeper.brain.positionV3 + vector3(0,0,5)
+			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.2, vector3())
+		else
+			--vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
+		end
+		return false, true
+	end
+	
+end end

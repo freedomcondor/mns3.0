@@ -18,30 +18,30 @@ local phi = (1+math.sqrt(5)) * 0.5
 local rev_phi = 1/phi
 local L_rate = L / (rev_phi * 2)
 
-local pl1 = vector3(-1, -1, -1) * L_rate
-local pl2 = vector3(-1,  1, -1) * L_rate
-local pl3 = vector3( 1, -1, -1) * L_rate
-local pl4 = vector3( 1,  1, -1) * L_rate
+local pl1 = vector3( 1, -1, -1) * L_rate
+local pl2 = vector3( 1,  1, -1) * L_rate
+local pl3 = vector3(-1, -1, -1) * L_rate
+local pl4 = vector3(-1,  1, -1) * L_rate
 
-local ph1 = vector3(-1, -1,  1) * L_rate
-local ph2 = vector3(-1,  1,  1) * L_rate
-local ph3 = vector3( 1, -1,  1) * L_rate
-local ph4 = vector3( 1,  1,  1) * L_rate
+local ph1 = vector3( 1, -1,  1) * L_rate
+local ph2 = vector3( 1,  1,  1) * L_rate
+local ph3 = vector3(-1, -1,  1) * L_rate
+local ph4 = vector3(-1,  1,  1) * L_rate
 
 local px1 = vector3(0, -phi, -rev_phi) * L_rate
 local px2 = vector3(0, -phi,  rev_phi) * L_rate
 local px3 = vector3(0,  phi, -rev_phi) * L_rate
 local px4 = vector3(0,  phi,  rev_phi) * L_rate
 
-local py1 = vector3 (-rev_phi, 0, -phi) * L_rate
-local py2 = vector3(-rev_phi, 0,  phi) * L_rate
-local py3 = vector3( rev_phi, 0, -phi) * L_rate
-local py4 = vector3( rev_phi, 0,  phi) * L_rate
+local py1 = vector3( rev_phi, 0, -phi) * L_rate
+local py2 = vector3( rev_phi, 0,  phi) * L_rate
+local py3 = vector3(-rev_phi, 0, -phi) * L_rate
+local py4 = vector3(-rev_phi, 0,  phi) * L_rate
 
-local pz1 = vector3(-phi, -rev_phi, 0) * L_rate
-local pz2 = vector3(-phi,  rev_phi, 0) * L_rate
-local pz3 = vector3( phi, -rev_phi, 0) * L_rate
-local pz4 = vector3( phi,  rev_phi, 0) * L_rate
+local pz1 = vector3( phi, -rev_phi, 0) * L_rate
+local pz2 = vector3( phi,  rev_phi, 0) * L_rate
+local pz3 = vector3(-phi, -rev_phi, 0) * L_rate
+local pz4 = vector3(-phi,  rev_phi, 0) * L_rate
 
 function drawLines(myself, points)
 	local relative_points = {}
@@ -57,6 +57,7 @@ return
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	drawLines = drawLines(py3, {py1, pl3, pl4}),
+	label = "morphology20",
 	children = {
 	{	robotTypeS = "drone",
 		-- py1

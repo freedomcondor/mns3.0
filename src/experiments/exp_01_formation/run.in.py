@@ -77,6 +77,8 @@ parameters = '''
 
     structure={}
     drone_velocity_mode="true"
+
+    brainkeeper_time="200"
 '''.format(structure)
 
 # generate argos file
