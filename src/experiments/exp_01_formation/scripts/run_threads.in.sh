@@ -12,10 +12,10 @@ index=(\
 	[polyhedron_20]='800              24                 20              1'      \
 	[cube_27]='      500              32                 20              1'      \
 	[cube_64]='      800              32                 20              1'      \
+	[cube_125]='     1000             32                 20              1'      \
 	[screen_64]='    800              32                 20              1'      \
 	[donut_64]='     1000             32                 20              1'      \
 )
-#    "cube_125"      :   125,
 
 tuple_line=${index[${experiment_type}]}
 if [ -z "$tuple_line" ]; then

@@ -10,6 +10,7 @@ experiment_type_list=(\
 	"polyhedron_20" \
 	"cube_27"       \
 	"cube_64"       \
+	"cube_125"       \
 	"screen_64"       \
 	"donut_64"       \
 )
@@ -29,7 +30,7 @@ fi
 #-----------------------------------------------------
 DATADIR=@CMAKE_MNS_DATA_PATH@/exp_01_formation/$experiment_type/run_data
 CODEDIR=$DATADIR/../code
-TMPDIR=@CMAKE_BINARY_DIR@/threads
+TMPDIR=@CMAKE_BINARY_DIR@/eva_threads
 #THREADS_LOG_OUTPUT=`pwd`/threads_evaluator_output.txt
 
 #echo exp_01_formation start > $THREADS_LOG_OUTPUT # this is for run_single_threads to reset $THREADS_LOG_OUTPUT
