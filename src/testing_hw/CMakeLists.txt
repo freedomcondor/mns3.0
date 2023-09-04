@@ -1,0 +1,1 @@
+add_subdirectory(test_01_simple_drone_pipuck_mns)

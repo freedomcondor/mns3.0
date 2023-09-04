@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <experiment length="0" ticks_per_second="5" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <lua_controller id="drone">
+      <actuators>
+        <drone_flight_system implementation="default" />
+        <drone_leds implementation="default" />
+        <radios implementation="default" />
+      </actuators>
+      <sensors>
+        <drone_flight_system implementation="default" />
+        <drone_system implementation="default" /> 
+        <radios implementation="default" />
+        <drone_cameras_system implementation="default">
+          <camera id="arm0"
+                  device="/dev/camera0" 
+
+                  calibration="/home/root/calibration/drone_camera_calibration_arm0.xml"
+
+                  capture_resolution="1024,768"
+                  processing_resolution="700,700"
+                  processing_offset="162,34"
+
+                  tag_family="tag25h9"
+                  tag_side_length="0.1075"
+
+                  camera_brightness="15"
+                  camera_exposure_auto_mode="false"
+                  camera_exposure_absolute_time="39"
+          />
+          <!--
+                  save_as="/media/usb/" 
+          -->
+          <camera id="arm1"
+                  device="/dev/camera1" 
+
+                  calibration="/home/root/calibration/drone_camera_calibration_arm1.xml"
+
+                  capture_resolution="1024,768"
+                  processing_resolution="700,700"
+                  processing_offset="162,34"
+
+                  tag_family="tag25h9" 
+                  tag_side_length="0.1075"
+
+                  camera_brightness="15"
+                  camera_exposure_auto_mode="false"
+                  camera_exposure_absolute_time="39"
+          />
+          <camera id="arm2"
+                  device="/dev/camera3" 
+
+                  calibration="/home/root/calibration/drone_camera_calibration_arm2.xml"
+
+                  capture_resolution="1024,768"
+                  processing_resolution="700,700"
+                  processing_offset="162,34"
+
+                  tag_family="tag25h9"
+                  tag_side_length="0.1075"
+
+                  camera_brightness="15"
+                  camera_exposure_auto_mode="false"
+                  camera_exposure_absolute_time="39"
+          />
+          <camera id="arm3"
+                  device="/dev/camera2" 
+
+                  calibration="/home/root/calibration/drone_camera_calibration_arm3.xml"
+
+                  capture_resolution="1024,768"
+                  processing_resolution="700,700"
+                  processing_offset="162,34"
+
+                  tag_family="tag25h9"
+                  tag_side_length="0.1075"
+
+                  camera_brightness="15"
+                  camera_exposure_auto_mode="false"
+                  camera_exposure_absolute_time="39"
+          />
+        </drone_cameras_system>
+      </sensors>
+      <params 
+        PARAMS
+        my_type="drone"
+        hardware="true"
+      />
+    </lua_controller>
+  </controllers>
+
+</argos-configuration>
