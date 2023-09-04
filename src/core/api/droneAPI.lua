@@ -432,7 +432,7 @@ function api.droneDetectTags(option)
 	api.droneDetectLeds()
 
 	-- add tags
-	tags = {}
+	local tags = {}
 	for _, camera in pairs(robot.cameras_system) do
 		for _, newTag in ipairs(camera.tags) do
 			local positionV3 =
