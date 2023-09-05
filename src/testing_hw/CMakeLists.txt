@@ -1,1 +1,2 @@
 add_subdirectory(test_01_simple_drone_pipuck_mns)
+add_subdirectory(test_02_drone_drone_detection)
