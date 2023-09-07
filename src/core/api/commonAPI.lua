@@ -31,9 +31,6 @@ api.time.period = 0.2
 function api.processTime()
 	api.time.period = robot.system.time - api.time.currentTime
 	api.time.currentTime = robot.system.time
-
-	-- hard code it hack
-	api.time.period = 0.2
 end
 
 -------------------------------------------------------------

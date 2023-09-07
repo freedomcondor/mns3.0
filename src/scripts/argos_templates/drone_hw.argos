@@ -29,7 +29,7 @@
                   tag_side_length="0.1075"
           -->
           <!--
-                  save_as="/media/usb/" 
+                  save_as="/media/usb/"
           -->
           <camera id="arm0"
                   device="/dev/camera0" 

@@ -1,6 +1,6 @@
 local dis = 2.0
 local height = 1.5
-return 
+return
 {	robotTypeS = "drone",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),

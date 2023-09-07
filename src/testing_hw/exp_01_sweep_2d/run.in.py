@@ -50,15 +50,15 @@ parameters = '''
 '''
 
 # generate argos file
-generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/vns_template.argos", 
+generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/vns_template.argos",
                     "vns.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["REAL_SCENARIO",     generate_real_scenario_object()],
-        ["DRONES",            drone_xml], 
-        ["OBSTACLES",         obstacle_tagstr], 
+        ["DRONES",            drone_xml],
+        ["OBSTACLES",         obstacle_tagstr],
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/code/drone.lua"
         ''' + parameters, {"velocity_mode":False})],

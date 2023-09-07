@@ -461,8 +461,7 @@ function api.droneDetectTags(option)
 			end
 
 			-- check orientation Z up
-			--if option.check_vertical == true and
-			if true and
+			if option.check_vertical == true and
 			   (vector3(0,0,1):rotate(orientationQ) - vector3(0,0,1)):length() > 0.3 then
 				logger("bad tag orientation, ignore tag", newTag.id)
 				logger("                     positionV3", positionV3)

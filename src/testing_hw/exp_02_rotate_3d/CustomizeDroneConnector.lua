@@ -15,7 +15,7 @@ function create_global_tag_index()
 	local offset = {1.23, -1.23}
 	local obstacle_locations = {}
 	for i = 0, 8 do
- 		for j = 0, 4 do
+		for j = 0, 4 do
 			x = base[1] + i * offset[1]
 			y = base[2] + j * offset[2]
 			id = i * 5 + j
