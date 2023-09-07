@@ -2,3 +2,7 @@ add_subdirectory(test_01_simple_drone_pipuck_mns)
 add_subdirectory(test_02_drone_drone_detection)
 add_subdirectory(test_03_drone_api)
 add_subdirectory(test_04_drone_mns)
+add_subdirectory(test_05_tags_cover)
+
+add_subdirectory(exp_01_sweep_2d)
+add_subdirectory(exp_02_rotate_3d)

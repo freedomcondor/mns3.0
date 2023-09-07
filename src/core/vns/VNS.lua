@@ -309,6 +309,12 @@ function VNS.logLoopFunctionInfoHW(vns)
 	if vns.parentR ~= nil then
 		parentID = vns.parentR.idS
 	end
+
+	local debugRecord
+	if vns.api.debug.recordSwitch == true then
+		debugRecord = vns.api.debug.record
+	end
+
 	VNS.Msg.sendTable{
 		toS = "LOGINFO",
 		stepCount = vns.api.stepCount,
@@ -317,7 +323,8 @@ function VNS.logLoopFunctionInfoHW(vns)
 		goalOrientationQ = vns.goal.orientationQ,
 		targetID = targetID,
 		vnsID = vns.idS,
-		parentID = parentID
+		parentID = parentID,
+		debugRecord = debugRecord,
 	}
 end
 

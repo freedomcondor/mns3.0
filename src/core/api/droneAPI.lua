@@ -346,7 +346,7 @@ function api.droneSetSpeed_waypoint_control_mode(x, y, z, th)
 	local transScalarZ = 4
 	local rotateScalar = 0.5
 	if robot.params.hardware == true then
-		transScalar = 30
+		transScalar = 40
 		transScalarZ = 5
 		rotateScalar = 3
 	end
