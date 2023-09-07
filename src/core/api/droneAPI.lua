@@ -244,16 +244,21 @@ function api.droneAdjustHeight(z)
 			return
 		end
 		local heightError = z - currentHeight
-		local speed_limit = 0.3
-		if heightError > speed_limit then heightError = speed_limit end
-		if heightError < -speed_limit then heightError = -speed_limit end
-		local ZScalar = 5
-		if robot.params.hardware == true then ZScalar = 3 end
+		local error_max_limit = 0.3
+		local error_min_limit = 0.05
+		if heightError > error_max_limit then heightError = error_max_limit end
+		if heightError < -error_max_limit then heightError = -error_max_limit end
+		if heightError <  error_min_limit and
+		   heightError > -error_min_limit then
+			heightError = 0
+		end
+		local ZScalar = 0.5
+		if robot.params.hardware == true then ZScalar = 0.3 end
 		-- TODO: there may be a jump here
 		if api.parameters.droneVelocityMode == true then
 			api.actuator.newPosition.z = heightError * 1.0 / 3
 		else
-			api.actuator.newPosition.z = robot.flight_system.position.z + heightError * api.time.period * ZScalar
+			api.actuator.newPosition.z = api.droneLastHeight + heightError * api.time.period * ZScalar
 		end
 		logger("heightError = ", heightError)
 		logger("robot.flight_system.position.z = ", robot.flight_system.position.z)
@@ -341,9 +346,9 @@ function api.droneSetSpeed_waypoint_control_mode(x, y, z, th)
 	local transScalarZ = 4
 	local rotateScalar = 0.5
 	if robot.params.hardware == true then
-		transScalar = 10
+		transScalar = 30
 		transScalarZ = 5
-		rotateScalar = 0.1
+		rotateScalar = 3
 	end
 
 	x = x * transScalar * api.time.period
@@ -456,7 +461,8 @@ function api.droneDetectTags(option)
 			end
 
 			-- check orientation Z up
-			if option.check_vertical == true and
+			--if option.check_vertical == true and
+			if true and
 			   (vector3(0,0,1):rotate(orientationQ) - vector3(0,0,1)):length() > 0.3 then
 				logger("bad tag orientation, ignore tag", newTag.id)
 				logger("                     positionV3", positionV3)

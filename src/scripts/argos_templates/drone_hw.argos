@@ -23,6 +23,10 @@
         <drone_system implementation="default" /> 
         <radios implementation="default" />
         <drone_cameras_system implementation="default">
+          <!--
+                  tag_family="tag25h9"
+                  tag_family="tag36h11"
+          -->
           <camera id="arm0"
                   device="/dev/camera0" 
 
@@ -32,7 +36,7 @@
                   processing_resolution="700,700"
                   processing_offset="162,34"
 
-                  tag_family="tag25h9"
+                  tag_family="tag36h11"
                   tag_side_length="0.1075"
 
                   camera_brightness="15"
@@ -51,7 +55,7 @@
                   processing_resolution="700,700"
                   processing_offset="162,34"
 
-                  tag_family="tag25h9" 
+                  tag_family="tag36h11"
                   tag_side_length="0.1075"
 
                   camera_brightness="15"
@@ -67,7 +71,7 @@
                   processing_resolution="700,700"
                   processing_offset="162,34"
 
-                  tag_family="tag25h9"
+                  tag_family="tag36h11"
                   tag_side_length="0.1075"
 
                   camera_brightness="15"
@@ -83,7 +87,7 @@
                   processing_resolution="700,700"
                   processing_offset="162,34"
 
-                  tag_family="tag25h9"
+                  tag_family="tag36h11"
                   tag_side_length="0.1075"
 
                   camera_brightness="15"
