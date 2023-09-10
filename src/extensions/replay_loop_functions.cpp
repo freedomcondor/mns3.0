@@ -10,8 +10,17 @@ namespace argos {
       /* read log file folder from replay_input_folder.txt */
       std::string strLogFolder = "./logs";
       std::ifstream infile("replay_input_folder.txt"); 
-      if (!infile.fail())
+      std::string strDrawGoalFlag = "False";
+      std::string strDrawDebugArrowsFlag = "False";
+      if (!infile.fail()) {
          infile >> strLogFolder;
+         infile >> strDrawGoalFlag;
+         infile >> strDrawDebugArrowsFlag;
+         if (strDrawGoalFlag == "True")
+            m_bDrawGoalFlag = true;
+         if (strDrawDebugArrowsFlag == "True")
+            m_bDrawDebugArrowsFlag = true;
+      }
 
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
@@ -118,6 +127,31 @@ namespace argos {
 
             std::string strTarget = vecWordList[15];
             std::string strBrain = vecWordList[16];
+
+            // draw Virtual Orientation and goal
+            if (m_bDrawGoalFlag) {
+               // Virtual Orientation
+               Real fAxisLength = 0.15;
+               CVector3 X = CVector3(fAxisLength*3, 0, 0);
+               CVector3 Y = CVector3(0, fAxisLength*2, 0);
+               CVector3 Z = CVector3(0, 0, fAxisLength*1.5);
+               CColor cColor = CColor::GREEN;
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CVector3(0,0,0), X.Rotate(CVirtualOrientationQ), cColor);
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CVector3(0,0,0), Y.Rotate(CVirtualOrientationQ), cColor);
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CVector3(0,0,0), Z.Rotate(CVirtualOrientationQ), cColor);
+               cColor = CColor::RED;
+               // Goal Position
+               CVector3 CGoalPositionV3InReal = CVector3(CGoalPositionV3).Rotate(CVirtualOrientationQ);
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CVector3(0,0,0), CGoalPositionV3InReal, cColor);
+               // Goal Orientation
+               CQuaternion CGoalOrientationQInReal = CVirtualOrientationQ * CGoalOrientationQ;
+               X = CVector3(fAxisLength*3, 0, 0).Rotate(CGoalOrientationQInReal);
+               Y = CVector3(0, fAxisLength*2, 0).Rotate(CGoalOrientationQInReal);
+               Z = CVector3(0, 0, fAxisLength*1.5).Rotate(CGoalOrientationQInReal);
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CGoalPositionV3InReal, CGoalPositionV3InReal + X, cColor);
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CGoalPositionV3InReal, CGoalPositionV3InReal + Y, cColor);
+               s_tracked_entity.DebugEntity->GetArrows().emplace_back(CGoalPositionV3InReal, CGoalPositionV3InReal + Z, cColor);
+            }
          }
 
          if (vecWordList.size() >= 18) {
@@ -125,7 +159,7 @@ namespace argos {
             mapParent[ID] = strParent;
          }
 
-         if (vecWordList.size() > 18) {
+         if ((vecWordList.size() > 18) && (m_bDrawDebugArrowsFlag == true)) {
             bArrowsInLog = true;
             UInt32 nCurrentIdx = 18;
             while (nCurrentIdx < vecWordList.size()) {

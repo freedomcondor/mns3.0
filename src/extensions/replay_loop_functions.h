@@ -47,6 +47,8 @@ namespace argos {
       };
 
       std::vector<STrackedEntity> m_vecTrackedEntities;
+      bool m_bDrawGoalFlag = false;
+      bool m_bDrawDebugArrowsFlag = false;
    };
 }
 
