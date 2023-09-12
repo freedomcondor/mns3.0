@@ -1,0 +1,26 @@
+diff --git a/src/core/simulator/physics_engine/physics_engine.cpp b/src/core/simulator/physics_engine/physics_engine.cpp
+index bdd904aa..b53d0d31 100644
+--- a/src/core/simulator/physics_engine/physics_engine.cpp
++++ b/src/core/simulator/physics_engine/physics_engine.cpp
+@@ -14,6 +14,8 @@
+ #include <argos3/core/simulator/entity/entity.h>
+ 
+ namespace argos {
++   /** to prevent memory fault when using multi threads **/
++   static pthread_mutex_t tMultiThreadMutex = PTHREAD_MUTEX_INITIALIZER;
+ 
+    /****************************************/
+    /****************************************/
+@@ -27,8 +29,11 @@ namespace argos {
+       /* Create a reference to the vector of physics engines */
+       CPhysicsEngine::TVector& vecEngines = cSimulator.GetPhysicsEngines();
+       /* Ask each engine to perform the ray query */
+-      for(size_t i = 0; i < vecEngines.size(); ++i)
++      for(size_t i = 0; i < vecEngines.size(); ++i) {
++         pthread_mutex_lock(&tMultiThreadMutex);
+          vecEngines[i]->CheckIntersectionWithRay(t_data, c_ray);
++         pthread_mutex_unlock(&tMultiThreadMutex);
++      }
+       /* Remove duplicates */
+       // TODO
+       /* Return true if an intersection was found */

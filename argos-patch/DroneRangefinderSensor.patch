@@ -1,0 +1,305 @@
+diff --git a/src/plugins/robots/drone/CMakeLists.txt b/src/plugins/robots/drone/CMakeLists.txt
+index 1e87fef4..823fce06 100644
+--- a/src/plugins/robots/drone/CMakeLists.txt
++++ b/src/plugins/robots/drone/CMakeLists.txt
+@@ -18,7 +18,7 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
+     simulator/drone_flight_system_default_sensor.h
+     simulator/drone_flight_system_entity.h
+     simulator/drone_leds_default_actuator.h
+-#    simulator/drone_rangefinders_default_sensor.h
++    simulator/drone_rangefinders_default_sensor.h
+     simulator/drone_system_default_sensor.h
+     simulator/pointmass3d_drone_model.h)
+   if(ARGOS_QTOPENGL_FOUND)
+@@ -52,7 +52,7 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
+     simulator/drone_flight_system_default_sensor.cpp
+     simulator/drone_flight_system_entity.cpp
+     simulator/drone_leds_default_actuator.cpp
+-#    simulator/drone_rangefinders_default_sensor.cpp
++    simulator/drone_rangefinders_default_sensor.cpp
+     simulator/drone_system_default_sensor.cpp
+     simulator/pointmass3d_drone_model.cpp)
+   if(ARGOS_QTOPENGL_FOUND)
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp
+index 796ebb73..6081e8a3 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp
++++ b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp
+@@ -33,6 +33,7 @@ namespace argos {
+          CLuaUtility::AddToTable(pt_lua_state, "position", ps_interface->PositionOffset);
+          CLuaUtility::AddToTable(pt_lua_state, "orientation", ps_interface->OrientationOffset);
+          CLuaUtility::AddToTable(pt_lua_state, "anchor", ps_interface->Anchor);
++         CLuaUtility::AddToTable(pt_lua_state, "range", ps_interface->Range);
+          CLuaUtility::EndTable(pt_lua_state);
+          CLuaUtility::EndTable(pt_lua_state);
+       }
+@@ -59,20 +60,29 @@ namespace argos {
+    /****************************************/
+    /****************************************/
+ 
+-   const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion> >
++   const Real CCI_DroneRangefindersSensor::m_fRange = 1.0;
++
++   const Real fArmLengthXComponent = 0.17;
++   const Real fArmHeight = 0.20;
++   const CVector3 cLeftFront  = CVector3( fArmLengthXComponent,  fArmLengthXComponent, fArmHeight);
++   const CVector3 cLeftBack   = CVector3(-fArmLengthXComponent,  fArmLengthXComponent, fArmHeight);
++   const CVector3 cRightFront = CVector3( fArmLengthXComponent, -fArmLengthXComponent, fArmHeight);
++   const CVector3 cRightBack  = CVector3(-fArmLengthXComponent, -fArmLengthXComponent, fArmHeight);
++
++   const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> >
+       CCI_DroneRangefindersSensor::m_mapSensorConfig = {
+-         std::make_pair("1",  std::make_tuple("origin", CVector3( 0.0440, -0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000,  1.0000, 0)))),
+-         std::make_pair("2",  std::make_tuple("origin", CVector3( 0.0323, -0.0522, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.7071,  0.7071, 0)))),
+-         std::make_pair("3",  std::make_tuple("origin", CVector3(-0.0025, -0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 1.0000,  0.0000, 0)))),
+-         std::make_pair("4",  std::make_tuple("origin", CVector3(-0.0375, -0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 1.0000,  0.0000, 0)))),
+-         std::make_pair("5",  std::make_tuple("origin", CVector3(-0.0722, -0.0523, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.7071, -0.7071, 0)))),
+-         std::make_pair("6",  std::make_tuple("origin", CVector3(-0.0840, -0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000, -1.0000, 0)))),
+-         std::make_pair("7",  std::make_tuple("origin", CVector3(-0.0840,  0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000, -1.0000, 0)))),
+-         std::make_pair("8",  std::make_tuple("origin", CVector3(-0.0722,  0.0523, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-0.7071, -0.7071, 0)))),
+-         std::make_pair("9",  std::make_tuple("origin", CVector3(-0.0375,  0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-1.0000,  0.0000, 0)))),
+-         std::make_pair("10", std::make_tuple("origin", CVector3(-0.0025,  0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-1.0000,  0.0000, 0)))),
+-         std::make_pair("11", std::make_tuple("origin", CVector3( 0.0323,  0.0522, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-0.7071,  0.7071, 0)))),
+-         std::make_pair("12", std::make_tuple("origin", CVector3( 0.0440,  0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000,  1.0000, 0)))),
++         std::make_pair("1",  std::make_tuple("origin", cLeftFront , CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000,  1.0000, 0)), m_fRange)),
++         std::make_pair("2",  std::make_tuple("origin", cLeftFront , CQuaternion(0.5 * CRadians::PI, CVector3(-0.7071,  0.7071, 0)), m_fRange)),
++         std::make_pair("3",  std::make_tuple("origin", cLeftFront , CQuaternion(0.5 * CRadians::PI, CVector3(-1.0000,  0.0000, 0)), m_fRange)),
++         std::make_pair("4",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5 * CRadians::PI, CVector3(-1.0000,  0.0000, 0)), m_fRange)),
++         std::make_pair("5",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5 * CRadians::PI, CVector3(-0.7071, -0.7071, 0)), m_fRange)),
++         std::make_pair("6",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000, -1.0000, 0)), m_fRange)),
++         std::make_pair("7",  std::make_tuple("origin", cRightFront, CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000,  1.0000, 0)), m_fRange)),
++         std::make_pair("8",  std::make_tuple("origin", cRightFront, CQuaternion(0.5 * CRadians::PI, CVector3( 0.7071,  0.7071, 0)), m_fRange)),
++         std::make_pair("9",  std::make_tuple("origin", cRightFront, CQuaternion(0.5 * CRadians::PI, CVector3( 1.0000,  0.0000, 0)), m_fRange)),
++         std::make_pair("10", std::make_tuple("origin", cRightBack , CQuaternion(0.5 * CRadians::PI, CVector3( 1.0000,  0.0000, 0)), m_fRange)),
++         std::make_pair("11", std::make_tuple("origin", cRightBack , CQuaternion(0.5 * CRadians::PI, CVector3( 0.7071, -0.7071, 0)), m_fRange)),
++         std::make_pair("12", std::make_tuple("origin", cRightBack , CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000, -1.0000, 0)), m_fRange)),
+    };
+ 
+    /****************************************/
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h
+index 62b45f54..e71ddeee 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h
++++ b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h
+@@ -17,6 +17,7 @@ namespace argos {
+ 
+ #include <map>
+ #include <tuple>
++#include <functional>
+ 
+ namespace argos {
+ 
+@@ -31,13 +32,15 @@ namespace argos {
+             Illuminance(0.0),
+             Anchor(std::get<std::string>(m_mapSensorConfig.at(str_label))),
+             PositionOffset(std::get<CVector3>(m_mapSensorConfig.at(str_label))),
+-            OrientationOffset(std::get<CQuaternion>(m_mapSensorConfig.at(str_label))) {}
++            OrientationOffset(std::get<CQuaternion>(m_mapSensorConfig.at(str_label))),
++            Range(std::get<Real>(m_mapSensorConfig.at(str_label))) {}
+          std::string Label;
+          Real Proximity;
+          Real Illuminance;
+          const std::string& Anchor;
+          const CVector3& PositionOffset;
+          const CQuaternion& OrientationOffset;
++         Real Range;
+          using TVector = std::vector<SInterface*>;
+       };
+ 
+@@ -55,7 +58,8 @@ namespace argos {
+ 
+       SInterface::TVector m_vecInterfaces;
+ 
+-      static const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion> > m_mapSensorConfig;
++      static const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> > m_mapSensorConfig;
++      static const Real m_fRange;
+ 
+    };
+ 
+diff --git a/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp
+new file mode 100644
+index 00000000..3bb98076
+--- /dev/null
++++ b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp
+@@ -0,0 +1,111 @@
++/**
++ * @file <argos3/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp>
++ *
++ * @author Michael Allwright - <allsey87@gmail.com>
++ * @author Weixu Zhu- <zhuweixu_harry@126.com>
++ */
++
++#include "drone_rangefinders_default_sensor.h"
++
++#include <argos3/core/utility/logging/argos_log.h>
++#include <argos3/core/simulator/entity/composable_entity.h>
++#include <argos3/core/simulator/entity/controllable_entity.h>
++#include <argos3/core/simulator/entity/embodied_entity.h>
++#include <argos3/core/simulator/physics_engine/physics_model.h>
++
++namespace argos {
++
++   /****************************************/
++   /****************************************/
++
++   void CDroneRangefindersDefaultSensor::SetRobot(CComposableEntity& c_entity) {
++      m_pcControllableEntity = &(c_entity.GetComponent<CControllableEntity>("controller"));
++      // allocate memory for the sensor interfaces 
++      m_vecInterfacesBody.reserve(m_mapSensorConfig.size());
++      // get the anchors for the sensor interfaces from m_mapSensorConfig
++      for(const std::pair<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> > t_config : m_mapSensorConfig) {
++         m_vecInterfacesBody.emplace_back(t_config.first);
++         m_vecInterfaces.push_back(&m_vecInterfacesBody.back());
++      }
++      m_pOriginAnchor = &c_entity.GetComponent<CEmbodiedEntity>("body").GetAnchor("origin");
++   }
++
++   /****************************************/
++   /****************************************/
++   
++   void CDroneRangefindersDefaultSensor::Init(TConfigurationNode& t_tree) {
++      try {
++         CCI_DroneRangefindersSensor::Init(t_tree);
++         GetNodeAttributeOrDefault(t_tree, "show_rays", m_bShowRays, m_bShowRays);
++      }
++      catch(CARGoSException& ex) {
++         THROW_ARGOSEXCEPTION_NESTED("Initialization error in the Drone rangefinders sensor.", ex);
++      }
++   }
++  
++   /****************************************/
++   /****************************************/
++   
++   void CDroneRangefindersDefaultSensor::Update() {
++      // buffers
++      CRay3 cSensorRay;
++      CVector3 cRayStart, cRayEnd;
++      SEmbodiedEntityIntersectionItem sIntersection;
++      // go through the sensors
++      //for(SSimulatedInterface& s_interface : m_vecSimulatedInterfaces) {
++      for(SInterface& s_interface : m_vecInterfacesBody) {
++         cRayStart = s_interface.PositionOffset;
++         cRayStart.Rotate(m_pOriginAnchor->Orientation);
++         cRayStart += m_pOriginAnchor->Position;
++         cRayEnd = CVector3::Z * s_interface.Range;
++         cRayEnd.Rotate(s_interface.OrientationOffset);
++         cRayEnd.Rotate(m_pOriginAnchor->Orientation);
++         cRayEnd += cRayStart;
++         cSensorRay.Set(cRayStart,cRayEnd);
++         // Get the closest intersection
++         if(GetClosestEmbodiedEntityIntersectedByRay(sIntersection, cSensorRay)) {
++            // There is an intersection
++            if(m_bShowRays) {
++               m_pcControllableEntity->AddIntersectionPoint(cSensorRay, sIntersection.TOnRay);
++               m_pcControllableEntity->AddCheckedRay(true, cSensorRay);
++            }
++            s_interface.Proximity =
++               ConvertToMeters(cSensorRay.GetDistance(sIntersection.TOnRay));
++         }
++         else {
++            // No intersection
++            s_interface.Proximity = s_interface.Range;
++            if(m_bShowRays) {
++               m_pcControllableEntity->AddCheckedRay(false, cSensorRay);
++            }
++         }
++         // not implemented for the moment
++         s_interface.Illuminance = 0.0;
++      }
++   }
++
++   /****************************************/
++   /****************************************/
++   
++   void CDroneRangefindersDefaultSensor::Reset() {
++      for(SInterface& s_interface : m_vecInterfacesBody) {
++         s_interface.Proximity = s_interface.Range;
++         s_interface.Illuminance = 0.0;
++      }
++   }
++   
++   /****************************************/
++   /****************************************/
++
++   REGISTER_SENSOR(CDroneRangefindersDefaultSensor,
++                  "drone_rangefinders", "default",
++                  "Weixu Zhu [zhuweixu_harry@126.com]",
++                  "1.0",
++                  "The Drone rangefinders sensor.",
++                  "This sensor measures the distance to nearby obstacles.",
++                  "Usable"
++   );
++   
++}
++
++   
+diff --git a/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h
+new file mode 100644
+index 00000000..4f9387d9
+--- /dev/null
++++ b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h
+@@ -0,0 +1,66 @@
++/**
++ * @file <argos3/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h>
++ *
++ * @author Michael Allwright - <allsey87@gmail.com>
++ * @author Weixu Zhu - <zhuweixu_harry@126.com>
++ */
++
++#ifndef DRONE_RANGEFINDERS_DEFAULT_SENSOR_H
++#define DRONE_RANGEFINDERS_DEFAULT_SENSOR_H
++
++namespace argos {
++   class CDroneRangefindersDefaultSensor;
++   class CControllableEntity;
++   class CEmbodiedEntity;
++   struct SAnchor;
++}
++
++#include <argos3/core/simulator/sensor.h>
++#include <argos3/core/utility/math/vector3.h>
++#include <argos3/core/utility/math/quaternion.h>
++#include <argos3/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h>
++
++namespace argos {
++
++   class CDroneRangefindersDefaultSensor : public CSimulatedSensor,
++                                           public CCI_DroneRangefindersSensor {
++
++   public:
++
++      CDroneRangefindersDefaultSensor():
++         m_bShowRays(false),
++         m_pcControllableEntity(nullptr) {}
++
++      virtual ~CDroneRangefindersDefaultSensor() {}
++
++      virtual void SetRobot(CComposableEntity& c_entity);
++
++      virtual void Init(TConfigurationNode& t_tree);
++
++      virtual void Update();
++
++      virtual void Reset();
++
++   private:
++
++      Real ConvertToMeters(Real f_raw) {
++         static const Real fConversionFactor = Real(1.0);
++         return (f_raw * fConversionFactor);
++      }
++
++      Real ConvertToLux(Real f_raw) {
++         static const Real fConversionFactor = Real(1.0);
++         return (f_raw * fConversionFactor);
++      }
++
++      std::vector<SInterface> m_vecInterfacesBody;
++      SAnchor* m_pOriginAnchor;
++
++   private:
++
++      bool m_bShowRays;
++      CControllableEntity* m_pcControllableEntity;
++   };
++}
++
++#endif
