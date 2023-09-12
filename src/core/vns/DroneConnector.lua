@@ -32,10 +32,16 @@ function DroneConnector.step(vns)
 		seenObstacles
 	)
 
-	seenBlocks = {}
+	local seenBlocks = {}
 	vns.api.droneAddBlocks(
 		vns.api.droneDetectTags(),
 		seenBlocks
+	)
+
+	-- add rangefinder into aerial obstacles
+	local rangefinderAerialObstacles = {}
+	vns.api.droneAddAerialObstacles(
+		rangefinderAerialObstacles
 	)
 
 	-- broadcast my sight so other drones would see me
@@ -204,6 +210,16 @@ function DroneConnector.step(vns)
 	end
 
 	SensorUpdater.updateObstaclesByRealFrame(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
+
+	-- convert aerial obstacles from real frame into virtual frame seenObstaclesInVirtualFrame
+	local aerialObstaclesInVirtualFrame = {}
+	for i, v in ipairs(rangefinderAerialObstacles) do
+		aerialObstaclesInVirtualFrame[i] = {
+			positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
+		}
+	end
+	vns.avoider.aerial_obstacles = aerialObstaclesInVirtualFrame
+
 
 	--[[ draw obstacles
 	if vns.parentR == nil then

@@ -575,4 +575,22 @@ function api.droneAddBlocks(tags, blocksInRealFrame) -- tags is an array of R
 	end
 end
 
+
+function api.droneAddAerialObstacles(aerialObstaclesInRealFrame)
+	if robot.rangefinders == nil then
+		for i, v in pairs(aerialObstaclesInRealFrame) do
+			aerialObstaclesInRealFrame[i] = nil
+		end
+		return
+	end
+	for i, rangefinder in pairs(robot.rangefinders) do
+		local range = rangefinder.transform.range
+		if rangefinder.proximity < range then
+			local obstacle_position = rangefinder.transform.position + vector3(rangefinder.proximity, 0, 0):rotate(rangefinder.transform.orientation)
+			obstacle_position.z = 0
+			table.insert(aerialObstaclesInRealFrame, {positionV3 = obstacle_position})
+		end
+	end
+end
+
 return api

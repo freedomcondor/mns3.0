@@ -10,6 +10,7 @@ end
 
 function Avoider.reset(vns)
 	vns.avoider.obstacles = {}
+	vns.avoider.aerial_obstacles = {}
 end
 
 function Avoider.preStep(vns)
@@ -35,7 +36,7 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				if drone_vortex == "goal" then
 					drone_vortex = vns.goal.positionV3
 				elseif drone_vortex == "true" then
-					drone_vortex = true 
+					drone_vortex = true
 				elseif drone_vortex == "nil" then
 					drone_vortex = nil
 				end
@@ -66,7 +67,7 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				if pipuck_vortex == "goal" then
 					pipuck_vortex = vns.goal.positionV3
 				elseif pipuck_vortex == "true" then
-					pipuck_vortex = true 
+					pipuck_vortex = true
 				elseif pipuck_vortex == "nil" then
 					pipuck_vortex = nil
 				end
@@ -92,7 +93,7 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				if drone_vortex == "goal" then
 					drone_vortex = vns.goal.positionV3
 				elseif drone_vortex == "true" then
-					drone_vortex = true 
+					drone_vortex = true
 				elseif drone_vortex == "nil" then
 					drone_vortex = nil
 				end
@@ -109,45 +110,33 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 	end
 
 	-- avoid obstacles
-	if vns.robotTypeS ~= "drone" then
+	if vns.robotTypeS == "drone" then
+		if vns.api.actuator.flight_preparation.state == "navigation" and
+		   vns.parentR ~= nil then
+			-- avoid aerial obstacles
+			for i, obstacle in ipairs(vns.avoider.aerial_obstacles) do
+				avoid_speed.positionV3 =
+					Avoider.add(vector3(), obstacle.positionV3,
+					            avoid_speed.positionV3,
+					            vns.Parameters.dangerzone_aerial_obstacle,
+					            nil,
+					            vns.Parameters.deadzone_aerial_obstacle
+					)
+			end
+		end
+	else
+		-- avoid ground obstacles
 		for i, obstacle in ipairs(vns.avoider.obstacles) do if obstacle.added ~= true then
-			--local vortex = false
-			--if obstacle.type == 1 then
-			--	vortex = true
-			--end
-
-			--[[
-			-- counting in nearby obstacles and average
-			--local virtualOb = {positionV3 = obstacle.positionV3, number = 1}
-			local virtualOb = {positionV3 = vector3(), number = 0}
-			for j, nearbyOb in ipairs(vns.avoider.obstacles) do
-				if (nearbyOb.positionV3 - obstacle.positionV3):length() < vns.api.parameters.obstacle_match_distance * 2 then
-					virtualOb.positionV3 = virtualOb.positionV3 + nearbyOb.positionV3
-					virtualOb.number = virtualOb.number + 1
-					nearbyOb.added = true
-				end
-			end
-			virtualOb.positionV3 = virtualOb.positionV3 * (1 / virtualOb.number)
-			local longest = 0
-			for j, nearbyOb in ipairs(vns.avoider.obstacles) do
-				if (nearbyOb.positionV3 - obstacle.positionV3):length() < vns.api.parameters.obstacle_match_distance * 2 and
-				   (nearbyOb.positionV3 - virtualOb.positionV3):length() > longest then
-					longest = (nearbyOb.positionV3 - virtualOb.positionV3):length()
-				end
-			end
-			local virtual_danger_zone = vns.Parameters.dangerzone_block + longest
-			                            --vns.api.parameters.obstacle_match_distance * (virtualOb.number - 1) / 2
-			--]]
 			-- check vortex
 			local block_vortex = vns.Parameters.avoid_block_vortex
 			if block_vortex == "goal" then
 				block_vortex = vns.goal.positionV3
 			elseif block_vortex == "true" then
-				block_vortex = true 
+				block_vortex = true
 			elseif block_vortex == "nil" then
 				block_vortex = nil
 			end
-			avoid_speed.positionV3 = 
+			avoid_speed.positionV3 =
 				Avoider.add(vector3(), obstacle.positionV3,
 				            avoid_speed.positionV3,
 				            vns.Parameters.dangerzone_block,
@@ -157,11 +146,6 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				            --virtual_danger_zone)
 				            --vns.goal.positionV3)
 		end end -- end of obstacle.added ~= true and for
-		--[[
-		for i, obstacle in ipairs(vns.avoider.obstacles) do
-			obstacle.added = nil
-		end
-		--]]
 	end
 
 	-- TODO: maybe add surpress or not
@@ -189,9 +173,9 @@ function Avoider.add(myLocV3, obLocV3, accumulatorV3, threshold, vortex, deadzon
 	        |  ||
 	speed   |  | |  -log(d/dangerzone) * scalar
 	        |  |  |
-	        |  |   \  
+	        |  |   \
 	        |  |    -\
-	        |  |      --\ 
+	        |  |      --\
 	        |------------+------------------------
 	           |         |
 	        deadzone   threshold
@@ -202,10 +186,10 @@ function Avoider.add(myLocV3, obLocV3, accumulatorV3, threshold, vortex, deadzon
 	           R   \ Ob \
 	                  /
 	--]]
-	-- if vortex is vector3, it means the goal of the robot is at the vortex, 
+	-- if vortex is vector3, it means the goal of the robot is at the vortex,
 	--         add left or right speed accordingly
 	--[[
-	                 /    
+	                 /
 	           R   \ Ob -
 	   movedown \    \      * goal(vortex)
 	--]]
@@ -221,8 +205,8 @@ function Avoider.add(myLocV3, obLocV3, accumulatorV3, threshold, vortex, deadzon
 			robot.leds.set_leds("blue")
 		end
 		dV3:normalize()
-		local transV3 = - vns.Parameters.avoid_speed_scalar 
-		                * math.log(d/(threshold-deadzone)) 
+		local transV3 = - vns.Parameters.avoid_speed_scalar
+		                * math.log(d/(threshold-deadzone))
 		                * dV3:normalize()
 		if type(vortex) == "bool" and vortex == true then
 			ans = ans + transV3:rotate(quaternion(math.pi/4, vector3(0,0,1)))

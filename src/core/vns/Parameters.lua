@@ -15,10 +15,12 @@ return {
 	dangerzone_pipuck = tonumber(robot.params.dangerzone_pipuck or 0.40),
 	dangerzone_block = tonumber(robot.params.dangerzone_block or 0.40),
 	dangerzone_predator = tonumber(robot.params.dangerzone_predator or 0.50),
+	dangerzone_aerial_obstacle = tonumber(robot.params.dangerzone_aerial_obstacle or 0.50),
 
 	deadzone_pipuck = tonumber(robot.params.deadzone_pipuck or 0.10),
 	deadzone_drone = tonumber(robot.params.deadzone_pipuck or 0),
 	deadzone_block = tonumber(robot.params.deadzone_pipuck or 0),
+	deadzone_aerial_obstacle = tonumber(robot.params.deadzone_aerial_obstacle or 0.10),
 
 	dangerzone_reference_pipuck_scalar = tonumber(robot.params.dangerzone_reference_pipuck_scalar or 1),
 	deadzone_reference_pipuck_scalar = tonumber(robot.params.deadzone_reference_pipuck_scalar or 1),
