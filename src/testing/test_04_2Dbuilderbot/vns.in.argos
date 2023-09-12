@@ -25,6 +25,7 @@
         <drone_system implementation="default" />
         <drone_cameras_system implementation="default" show_frustum="false" show_tag_rays="true" />
         <drone_flight_system implementation="default" />
+        <drone_rangefinders implementation="default" show_rays="true" />
         <radios implementation="default" />
       </sensors>
       <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua" 

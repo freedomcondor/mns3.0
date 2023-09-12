@@ -89,6 +89,7 @@ def generate_drone_controller(params, option={}) :
         <drone_system implementation="default" />
         <drone_cameras_system implementation="default" show_frustum="{}" show_tag_rays="{}" />
         <drone_flight_system implementation="default" />
+        <drone_rangefinders implementation="default" show_rays="false" />
         <radios implementation="default" />
       </sensors>
       <params simulation="true" {} />
