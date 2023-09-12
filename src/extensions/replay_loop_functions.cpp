@@ -224,6 +224,7 @@ namespace argos {
             if (s_tracked_entity.DebugEntity != NULL) {
                std::string ID = s_tracked_entity.Entity->GetId();
                std::string ParentID = mapParent[ID];
+               if (ParentID == "") continue;
                if (ParentID == "nil")
                   s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
                else {
