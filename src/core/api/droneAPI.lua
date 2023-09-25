@@ -586,8 +586,7 @@ function api.droneAddAerialObstacles(aerialObstaclesInRealFrame)
 	for i, rangefinder in pairs(robot.rangefinders) do
 		local range = rangefinder.transform.range
 		if rangefinder.proximity < range then
-			local obstacle_position = rangefinder.transform.position + vector3(rangefinder.proximity, 0, 0):rotate(rangefinder.transform.orientation)
-			obstacle_position.z = 0
+			local obstacle_position = rangefinder.transform.position + vector3(0, 0, rangefinder.proximity):rotate(rangefinder.transform.orientation)
 			table.insert(aerialObstaclesInRealFrame, {positionV3 = obstacle_position})
 		end
 	end
