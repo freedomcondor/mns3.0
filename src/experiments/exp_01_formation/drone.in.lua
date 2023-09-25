@@ -32,7 +32,10 @@ elseif robot.params.structure == "screen_64" then
 	structure = generate_screen_square(8)
 elseif robot.params.structure == "donut_64" then
 	nodes = 64 / 4
-	structure = create_horizontal_truss_chain(nodes, 1.5, vector3(1.5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif robot.params.structure == "donut_48" then
+	nodes = 48 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
 end
 
 function init()
@@ -43,14 +46,20 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	if number % 3 == 1 then
-		api.parameters.droneDefaultStartHeight = 1
-	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = 3.0
-	elseif number % 3 == 0 then
-		api.parameters.droneDefaultStartHeight = 5.0
+	local baseHeight = 4
+	local distribute_scale = 4
+	if number % 5 == 1 then
+		api.parameters.droneDefaultStartHeight = baseHeight
+	elseif number % 5 == 2 then
+		api.parameters.droneDefaultStartHeight = baseHeight + 1 * distribute_scale
+	elseif number % 5 == 3 then
+		api.parameters.droneDefaultStartHeight = baseHeight + 2 * distribute_scale
+	elseif number % 5 == 4 then
+		api.parameters.droneDefaultStartHeight = baseHeight + 3 * distribute_scale
+	elseif number % 5 == 0 then
+		api.parameters.droneDefaultStartHeight = baseHeight + 4 * distribute_scale
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 function reset()
@@ -100,7 +109,7 @@ return function()
 	   vns.api.actuator.flight_preparation.state == "navigation" then
 		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
 			local target = vns.brainkeeper.brain.positionV3 + vector3(0,0,5)
-			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.2, vector3())
+			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
 		else
 			--vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
 		end

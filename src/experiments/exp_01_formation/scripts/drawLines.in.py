@@ -25,7 +25,7 @@ if Experiment_type == None :
     Experiment_type = "polyhedron_12"
     print("Experiment_type not provided: using default", Experiment_type)
 
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_360_rangefinders"
 DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
 
 # check experiment type
@@ -43,11 +43,17 @@ legend = []
 for subfolder in getSubfolders(DATADIR) :
     legend.append(subfolder)
     data = readDataFrom(subfolder + "result_data.txt")
-    if data[150] > 0.25 :
+    drawData(data)
+
+    data = readDataFrom(subfolder + "result_minimum_distances.txt")
+    if data[319] < 0.6 :
         print(subfolder)
     drawData(data)
 #plt.legend(legend)
+'''
 
-#drawData(readDataFrom("result_data.txt"))
+drawData(readDataFrom("result_data.txt"))
+drawData(readDataFrom("result_minimum_distances.txt"))
+'''
 
 plt.show()

@@ -13,6 +13,7 @@ experiment_type_list=(\
 	"cube_125"       \
 	"screen_64"       \
 	"donut_64"       \
+	"donut_48"       \
 )
 
 #if [ ! -z "$experiment_type" ] && [[ "${experiment_type_list[@]}" =~ "$experiment_type" ]]; then

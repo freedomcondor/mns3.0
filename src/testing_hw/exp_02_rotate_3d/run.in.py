@@ -40,7 +40,7 @@ parameters = '''
     dangerzone_drone="2.0"
     deadzone_drone="1.5"
 
-    second_report_sight="true"
+    report_sight_rounds="2"
 
     driver_default_speed="0.1"
     driver_slowdown_zone="0.3"

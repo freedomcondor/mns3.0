@@ -482,6 +482,35 @@ function logReader.calcSegmentLowerBoundErrorInc(robotsData, geneIndex, startSte
 	end
 end
 
+function logReader.calcMinimumDistances(robotsData)
+	local startStep = 1
+	local endStep = logReader.getEndStep(robotsData)
+	local distances = {}
+	for step = startStep, endStep do
+		local step_distance = math.huge
+		for robotName1, robotData1 in pairs(robotsData) do
+			for robotName2, robotData2 in pairs(robotsData) do
+				if robotName1 ~= robotName2 then
+					local dis = (robotData1[step].positionV3 - robotData2[step].positionV3):len()
+					if dis < step_distance then step_distance = dis end
+				end
+			end
+		end
+		table.insert(distances, step_distance)
+	end
+	return distances
+end
+
+function logReader.savePlainData(plainData, saveFile, startStep, endStep)
+	local startStep = startStep or 1
+	local endStep = endStep or #plainData
+	local f = io.open(saveFile, "w")
+	for step = startStep, endStep do
+		f:write(tostring(plainData[step]).."\n")
+	end
+	io.close(f)
+end
+
 function logReader.saveData(robotsData, saveFile, attribute, startStep, endStep)
 	if attribute == nil then attribute = 'error' end
 	if attribute == "lowerBoundError" then

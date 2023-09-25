@@ -27,7 +27,10 @@ elseif type == "screen_64" then
 	structure = generate_screen_square(8)
 elseif type == "donut_64" then
 	nodes = 64 / 4
-	structure = create_horizontal_truss_chain(nodes, 1.5, vector3(1.5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif type == "donut_48" then
+	nodes = 48 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
 end
 
 local geneIndex = logReader.calcMorphID(structure)
@@ -39,6 +42,8 @@ local saveStartStep = firstRecruitStep + 10
 print("firstRecruit happens", firstRecruitStep, "data start at", saveStartStep)
 
 logReader.calcSegmentData(robotsData, geneIndex)
+minimum_distances = logReader.calcMinimumDistances(robotsData)
+logReader.savePlainData(minimum_distances, "result_minimum_distances.txt", saveStartStep)
 
 logReader.saveData(robotsData, "result_data.txt", "error", saveStartStep)
 logReader.saveEachRobotData(robotsData, "result_each_robot_error", "error", saveStartStep)

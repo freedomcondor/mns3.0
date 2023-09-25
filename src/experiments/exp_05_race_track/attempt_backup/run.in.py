@@ -133,7 +133,7 @@ parameters = '''
     safezone_drone_drone="3"
     dangerzone_drone="1"
 
-    second_report_sight="true"
+    report_sight_rounds="2"
 
     driver_default_speed="0.5"
     driver_slowdown_zone="0.7"

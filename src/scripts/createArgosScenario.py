@@ -89,7 +89,7 @@ def generate_drone_controller(params, option={}) :
         <drone_system implementation="default" />
         <drone_cameras_system implementation="default" show_frustum="{}" show_tag_rays="{}" />
         <drone_flight_system implementation="default" />
-        <drone_rangefinders implementation="default" show_rays="false" />
+        <drone_rangefinders implementation="default" show_rays="true" />
         <radios implementation="default" />
       </sensors>
       <params simulation="true" {} />
@@ -1021,6 +1021,44 @@ def generate_obstacles(locations, start_id, type) :
         tagstr = tagstr + generate_obstacle_xml(i, loc[0], loc[1], 0, type)
         i = i + 1
     return tagstr
+
+#######################################################################
+# parameters
+def generateParametersText(parameters) :
+    txt = "\n"
+    for key in parameters :
+        line = "              " + key + "=\"" + parameters[key] + "\"\n"
+        txt = txt + line
+    return txt
+  
+def generate3DdroneParameters() :
+    dict = {
+        "mode_2D"              :"false",
+        "drone_real_noise"     :"false",
+        "drone_tilt_sensor"    :"true",
+        "report_sight_rounds"  :"2",
+
+        "safezone_drone_drone" :"15",
+
+        "dangerzone_drone"     :"2.5",
+        "deadzone_drone"       :"1.5",
+        "dangerzone_aerial_obstacle"  :"2.5",
+        "deadzone_aerial_obstacle"    :"1.5",
+        "avoid_speed_scalar"   :"5",
+
+        "driver_default_speed" :"0.3",
+        "driver_slowdown_zone" :"2.0",
+        "driver_stop_zone"     :"0.50",
+        "driver_arrive_zone"   :"1.5",
+
+        "drone_velocity_mode"  :"true",
+
+        "brainkeeper_time"     :"200",
+
+        "drone_label"          :"1, 1024",
+    }
+    return dict
+
 #######################################################################
 # create argos file
 def generate_argos_file(template_name, argos_name, replacements) :
