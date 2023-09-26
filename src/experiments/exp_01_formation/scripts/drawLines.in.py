@@ -39,6 +39,7 @@ if not os.path.isdir(DATADIR) :
 
 # start to draw
 #--------------------------------------
+'''
 legend = []
 for subfolder in getSubfolders(DATADIR) :
     legend.append(subfolder)
@@ -54,6 +55,5 @@ for subfolder in getSubfolders(DATADIR) :
 
 drawData(readDataFrom("result_data.txt"))
 drawData(readDataFrom("result_minimum_distances.txt"))
-'''
 
 plt.show()

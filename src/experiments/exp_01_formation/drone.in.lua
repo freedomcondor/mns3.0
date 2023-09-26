@@ -46,7 +46,7 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	local baseHeight = 4
+	local baseHeight = 8
 	local distribute_scale = 4
 	if number % 5 == 1 then
 		api.parameters.droneDefaultStartHeight = baseHeight
@@ -59,6 +59,7 @@ function init()
 	elseif number % 5 == 0 then
 		api.parameters.droneDefaultStartHeight = baseHeight + 4 * distribute_scale
 	end
+
 	api.debug.show_all = true
 end
 
@@ -107,8 +108,10 @@ return function()
 	-- fail safe
 	if vns.scalemanager.scale["drone"] == 1 and
 	   vns.api.actuator.flight_preparation.state == "navigation" then
-		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
-			local target = vns.brainkeeper.brain.positionV3 + vector3(0,0,5)
+		--if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
+		--	local target = vns.brainkeeper.brain.positionV3 + vector3(0,0,5)
+		if vns.brainkeeper ~= nil and vns.brainkeeper.parent ~= nil then
+			local target = vns.brainkeeper.parent.positionV3 + vector3(0,0,5)
 			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
 		else
 			--vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())

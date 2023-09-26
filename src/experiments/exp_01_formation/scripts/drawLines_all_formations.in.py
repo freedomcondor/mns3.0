@@ -29,7 +29,8 @@ Experiment_types = {
 #ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_no_rangefinders"
 #ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_no_rangefinder_idealmode"
 #ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_360_rangefinders"
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_360_rangefinders_idealmode"
+#ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_360_rangefinders_idealmode"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_altitude_lock_default_speed_0.5"
 
 for Experiment_type in Experiment_types :
     print("Drawing ", Experiment_type)
@@ -60,10 +61,10 @@ for Experiment_type in Experiment_types :
     legend = []
     for subfolder in getSubfolders(DATADIR) :
         #legend.append(subfolder)
-        #data = readDataFrom(subfolder + "result_data.txt")
+        data = readDataFrom(subfolder + "result_data.txt")
         #if data[150] > 0.25 :
         #    print(subfolder)
-        #drawData(data)
+        drawDataInSubplot(data, Experiment_types[Experiment_type])
         data = readDataFrom(subfolder + "result_minimum_distances.txt")
         drawDataInSubplot(data, Experiment_types[Experiment_type])
         Experiment_types[Experiment_type].set_ylim([0,5.5])

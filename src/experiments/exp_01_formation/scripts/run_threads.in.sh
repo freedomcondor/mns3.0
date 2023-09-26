@@ -8,14 +8,14 @@ experiment_type=$1
 declare -A index
 index=(\
 #                 exp length    argos threads    run per thread   threads
-	[polyhedron_12]='500              16                 10              2'      \
-	[polyhedron_20]='800              24                 10              2'      \
+	[polyhedron_12]='350              16                 10              2'      \
+	[polyhedron_20]='350              24                 10              2'      \
 	[cube_27]='      600              32                 10              2'      \
-	[cube_64]='      800              32                 20              1'      \
-	[cube_125]='     1000             32                 20              1'      \
-	[screen_64]='    1500             32                 20              1'      \
+	[cube_64]='      1200              32                 20              1'      \
+	[cube_125]='     1500             32                 20              1'      \
+	[screen_64]='    1200             32                 20              1'      \
 	[donut_64]='     1800             32                 20              1'      \
-	[donut_48]='     1000             32                 10              2'      \
+	[donut_48]='     1200             32                 10              2'      \
 )
 
 tuple_line=${index[${experiment_type}]}
