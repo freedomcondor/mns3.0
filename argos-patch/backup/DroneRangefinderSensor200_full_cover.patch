@@ -1,0 +1,519 @@
+diff --git a/src/plugins/robots/drone/CMakeLists.txt b/src/plugins/robots/drone/CMakeLists.txt
+index 1e87fef4..823fce06 100644
+--- a/src/plugins/robots/drone/CMakeLists.txt
++++ b/src/plugins/robots/drone/CMakeLists.txt
+@@ -18,7 +18,7 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
+     simulator/drone_flight_system_default_sensor.h
+     simulator/drone_flight_system_entity.h
+     simulator/drone_leds_default_actuator.h
+-#    simulator/drone_rangefinders_default_sensor.h
++    simulator/drone_rangefinders_default_sensor.h
+     simulator/drone_system_default_sensor.h
+     simulator/pointmass3d_drone_model.h)
+   if(ARGOS_QTOPENGL_FOUND)
+@@ -52,7 +52,7 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
+     simulator/drone_flight_system_default_sensor.cpp
+     simulator/drone_flight_system_entity.cpp
+     simulator/drone_leds_default_actuator.cpp
+-#    simulator/drone_rangefinders_default_sensor.cpp
++    simulator/drone_rangefinders_default_sensor.cpp
+     simulator/drone_system_default_sensor.cpp
+     simulator/pointmass3d_drone_model.cpp)
+   if(ARGOS_QTOPENGL_FOUND)
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp
+index 796ebb73..88f7b957 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp
++++ b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.cpp
+@@ -33,6 +33,7 @@ namespace argos {
+          CLuaUtility::AddToTable(pt_lua_state, "position", ps_interface->PositionOffset);
+          CLuaUtility::AddToTable(pt_lua_state, "orientation", ps_interface->OrientationOffset);
+          CLuaUtility::AddToTable(pt_lua_state, "anchor", ps_interface->Anchor);
++         CLuaUtility::AddToTable(pt_lua_state, "range", ps_interface->Range);
+          CLuaUtility::EndTable(pt_lua_state);
+          CLuaUtility::EndTable(pt_lua_state);
+       }
+@@ -59,20 +60,225 @@ namespace argos {
+    /****************************************/
+    /****************************************/
+ 
+-   const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion> >
++   const Real CCI_DroneRangefindersSensor::m_fRange = 4.0;
++
++   const Real fArmLengthXComponent = 0.17;
++   const Real fArmHeight = 0.20;
++   const CVector3 cLeftFront  = CVector3( fArmLengthXComponent,  fArmLengthXComponent, fArmHeight);
++   const CVector3 cLeftBack   = CVector3(-fArmLengthXComponent,  fArmLengthXComponent, fArmHeight);
++   const CVector3 cRightFront = CVector3( fArmLengthXComponent, -fArmLengthXComponent, fArmHeight);
++   const CVector3 cRightBack  = CVector3(-fArmLengthXComponent, -fArmLengthXComponent, fArmHeight);
++
++   const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> >
+       CCI_DroneRangefindersSensor::m_mapSensorConfig = {
+-         std::make_pair("1",  std::make_tuple("origin", CVector3( 0.0440, -0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000,  1.0000, 0)))),
+-         std::make_pair("2",  std::make_tuple("origin", CVector3( 0.0323, -0.0522, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.7071,  0.7071, 0)))),
+-         std::make_pair("3",  std::make_tuple("origin", CVector3(-0.0025, -0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 1.0000,  0.0000, 0)))),
+-         std::make_pair("4",  std::make_tuple("origin", CVector3(-0.0375, -0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 1.0000,  0.0000, 0)))),
+-         std::make_pair("5",  std::make_tuple("origin", CVector3(-0.0722, -0.0523, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.7071, -0.7071, 0)))),
+-         std::make_pair("6",  std::make_tuple("origin", CVector3(-0.0840, -0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000, -1.0000, 0)))),
+-         std::make_pair("7",  std::make_tuple("origin", CVector3(-0.0840,  0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000, -1.0000, 0)))),
+-         std::make_pair("8",  std::make_tuple("origin", CVector3(-0.0722,  0.0523, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-0.7071, -0.7071, 0)))),
+-         std::make_pair("9",  std::make_tuple("origin", CVector3(-0.0375,  0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-1.0000,  0.0000, 0)))),
+-         std::make_pair("10", std::make_tuple("origin", CVector3(-0.0025,  0.0640, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-1.0000,  0.0000, 0)))),
+-         std::make_pair("11", std::make_tuple("origin", CVector3( 0.0323,  0.0522, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3(-0.7071,  0.7071, 0)))),
+-         std::make_pair("12", std::make_tuple("origin", CVector3( 0.0440,  0.0175, 0.0515), CQuaternion(0.5 * CRadians::PI, CVector3( 0.0000,  1.0000, 0)))),
++         std::make_pair("01",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("02",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("03",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("04",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("05",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("06",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("07",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("08",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("09",  std::make_tuple("origin", cLeftFront , CQuaternion(0.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("11",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("12",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("13",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("14",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("15",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("16",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("17",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("18",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("19",  std::make_tuple("origin", cLeftFront , CQuaternion(0.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("21",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("22",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("23",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("24",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("25",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("26",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("27",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("28",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("29",  std::make_tuple("origin", cLeftFront , CQuaternion(0.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("31",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("32",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("33",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("34",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("35",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("36",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("37",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("38",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("39",  std::make_tuple("origin", cLeftFront , CQuaternion(0.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("41",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("42",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("43",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("44",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("45",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("46",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("47",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("48",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("49",  std::make_tuple("origin", cLeftFront  , CQuaternion(0.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("51",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("52",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("53",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("54",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("55",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("56",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("57",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("58",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("59",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("61",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("62",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("63",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("64",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("65",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("66",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("67",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("68",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("69",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("71",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("72",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("73",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("74",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("75",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("76",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("77",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("78",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("79",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("81",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("82",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("83",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("84",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("85",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("86",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("87",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("88",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("89",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("91",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("92",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("93",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("94",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("95",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("96",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("97",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("98",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("99",  std::make_tuple("origin", cLeftBack  , CQuaternion(0.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("101",  std::make_tuple("origin", cRightBack, CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("102",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("103",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("104",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("105",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("106",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("107",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("108",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("109",  std::make_tuple("origin", cRightBack , CQuaternion(1.0*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("111",  std::make_tuple("origin", cRightBack, CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("112",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("113",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("114",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("115",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("116",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("117",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("118",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("119",  std::make_tuple("origin", cRightBack , CQuaternion(1.1*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("121",  std::make_tuple("origin", cRightBack, CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("122",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("123",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("124",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("125",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("126",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("127",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("128",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("129",  std::make_tuple("origin", cRightBack , CQuaternion(1.2*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("131",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("132",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("133",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("134",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("135",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("136",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("137",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("138",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("139",  std::make_tuple("origin", cRightBack , CQuaternion(1.3*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("141",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("142",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("143",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("144",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("145",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("146",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("147",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("148",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("149",  std::make_tuple("origin", cRightBack , CQuaternion(1.4*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("151",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("152",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("153",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("154",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("155",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("156",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("157",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("158",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("159",  std::make_tuple("origin", cRightFront  , CQuaternion(1.5*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("161",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("162",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("163",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("164",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("165",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("166",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("167",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("168",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("169",  std::make_tuple("origin", cRightFront  , CQuaternion(1.6*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("171",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("172",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("173",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("174",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("175",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("176",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("177",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("178",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("179",  std::make_tuple("origin", cRightFront  , CQuaternion(1.7*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("181",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("182",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("183",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("184",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("185",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("186",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("187",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("188",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("189",  std::make_tuple("origin", cRightFront  , CQuaternion(1.8*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++
++         std::make_pair("191",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.1*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("192",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.2*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("193",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.3*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("194",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.4*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("195",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.5*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("196",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.6*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("197",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.7*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("198",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.8*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++         std::make_pair("199",  std::make_tuple("origin", cRightFront  , CQuaternion(1.9*CRadians::PI,CVector3(0,0,1))*CQuaternion(0.9*CRadians::PI,CVector3(0,1,0)), m_fRange)),
++   };
++
++   const Real fOffset = tan((10 * 0.5) * ARGOS_PI / 180) * 0.7071;
++   const std::map<std::string, CVector3> CCI_DroneRangefindersSensor::m_mapRangefinderFrame = {
++      std::make_pair("center",     CVector3( 0, 0, 0)),
++      std::make_pair("top_left",   CVector3( fOffset, fOffset, 0)),
++      std::make_pair("top_right",  CVector3( fOffset,-fOffset, 0)),
++      std::make_pair("back_left",  CVector3(-fOffset,-fOffset, 0)),
++      std::make_pair("back_right", CVector3(-fOffset, fOffset, 0)),
+    };
+ 
+    /****************************************/
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h
+index 62b45f54..091aaa3a 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h
++++ b/src/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h
+@@ -17,6 +17,7 @@ namespace argos {
+ 
+ #include <map>
+ #include <tuple>
++#include <functional>
+ 
+ namespace argos {
+ 
+@@ -31,13 +32,15 @@ namespace argos {
+             Illuminance(0.0),
+             Anchor(std::get<std::string>(m_mapSensorConfig.at(str_label))),
+             PositionOffset(std::get<CVector3>(m_mapSensorConfig.at(str_label))),
+-            OrientationOffset(std::get<CQuaternion>(m_mapSensorConfig.at(str_label))) {}
++            OrientationOffset(std::get<CQuaternion>(m_mapSensorConfig.at(str_label))),
++            Range(std::get<Real>(m_mapSensorConfig.at(str_label))) {}
+          std::string Label;
+          Real Proximity;
+          Real Illuminance;
+          const std::string& Anchor;
+          const CVector3& PositionOffset;
+          const CQuaternion& OrientationOffset;
++         Real Range;
+          using TVector = std::vector<SInterface*>;
+       };
+ 
+@@ -55,7 +58,9 @@ namespace argos {
+ 
+       SInterface::TVector m_vecInterfaces;
+ 
+-      static const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion> > m_mapSensorConfig;
++      static const std::map<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> > m_mapSensorConfig;
++      static const std::map<std::string, CVector3> m_mapRangefinderFrame;
++      static const Real m_fRange;
+ 
+    };
+ 
+diff --git a/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp
+new file mode 100644
+index 00000000..4c421aba
+--- /dev/null
++++ b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp
+@@ -0,0 +1,124 @@
++/**
++ * @file <argos3/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp>
++ *
++ * @author Michael Allwright - <allsey87@gmail.com>
++ * @author Weixu Zhu- <zhuweixu_harry@126.com>
++ */
++
++#include "drone_rangefinders_default_sensor.h"
++
++#include <argos3/core/utility/logging/argos_log.h>
++#include <argos3/core/simulator/entity/composable_entity.h>
++#include <argos3/core/simulator/entity/controllable_entity.h>
++#include <argos3/core/simulator/entity/embodied_entity.h>
++#include <argos3/core/simulator/physics_engine/physics_model.h>
++
++namespace argos {
++
++   /****************************************/
++   /****************************************/
++
++   void CDroneRangefindersDefaultSensor::SetRobot(CComposableEntity& c_entity) {
++      m_pcControllableEntity = &(c_entity.GetComponent<CControllableEntity>("controller"));
++      // allocate memory for the sensor interfaces 
++      m_vecInterfacesBody.reserve(m_mapSensorConfig.size());
++      // get the anchors for the sensor interfaces from m_mapSensorConfig
++      for(const std::pair<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> > t_config : m_mapSensorConfig) {
++         m_vecInterfacesBody.emplace_back(t_config.first);
++         m_vecInterfaces.push_back(&m_vecInterfacesBody.back());
++      }
++      m_pOriginAnchor = &c_entity.GetComponent<CEmbodiedEntity>("body").GetAnchor("origin");
++   }
++
++   /****************************************/
++   /****************************************/
++   
++   void CDroneRangefindersDefaultSensor::Init(TConfigurationNode& t_tree) {
++      try {
++         CCI_DroneRangefindersSensor::Init(t_tree);
++         GetNodeAttributeOrDefault(t_tree, "show_rays", m_bShowRays, m_bShowRays);
++      }
++      catch(CARGoSException& ex) {
++         THROW_ARGOSEXCEPTION_NESTED("Initialization error in the Drone rangefinders sensor.", ex);
++      }
++      m_pcRNG = CRandom::CreateRNG("argos");
++   }
++  
++   /****************************************/
++   /****************************************/
++   
++   void CDroneRangefindersDefaultSensor::Update() {
++      // buffers
++      CRay3 cSensorRay;
++      CVector3 cRayStart, cRayEnd;
++      SEmbodiedEntityIntersectionItem sIntersection;
++      // go through the sensors
++      //for(SSimulatedInterface& s_interface : m_vecSimulatedInterfaces) {
++      for(SInterface& s_interface : m_vecInterfacesBody) {
++         cRayStart = s_interface.PositionOffset;
++         cRayStart.Rotate(m_pOriginAnchor->Orientation);
++         cRayStart += m_pOriginAnchor->Position;
++         s_interface.Proximity = 0;
++         for (const std::pair<std::string, CVector3> t_FrameRayCornerConfig : m_mapRangefinderFrame) {
++            cRayEnd = (CVector3::Z + t_FrameRayCornerConfig.second) * s_interface.Range;
++            cRayEnd.Rotate(s_interface.OrientationOffset);
++            cRayEnd.Rotate(m_pOriginAnchor->Orientation);
++            cRayEnd += cRayStart;
++            cSensorRay.Set(cRayStart,cRayEnd);
++            Real fRayWeight = 1;
++            Real fStdev = 0.1;
++            if (t_FrameRayCornerConfig.first == "center") {
++               fRayWeight = 4;
++               fStdev = 0.05;
++            }
++            else {
++            }
++            // Get the closest intersection
++            if(GetClosestEmbodiedEntityIntersectedByRay(sIntersection, cSensorRay)) {
++               // There is an intersection
++               if(m_bShowRays) {
++                  m_pcControllableEntity->AddIntersectionPoint(cSensorRay, sIntersection.TOnRay);
++                  m_pcControllableEntity->AddCheckedRay(true, cSensorRay);
++               }
++               s_interface.Proximity +=
++                  ConvertToMeters(cSensorRay.GetDistance(sIntersection.TOnRay), fStdev) * fRayWeight;
++            }
++            else {
++               // No intersection
++               s_interface.Proximity += s_interface.Range * fRayWeight;
++               if(m_bShowRays) {
++                  m_pcControllableEntity->AddCheckedRay(false, cSensorRay);
++               }
++            }
++         }
++         s_interface.Proximity *= (1.0/8); // 1/8, center weights 4
++         // not implemented for the moment
++         s_interface.Illuminance = 0.0;
++      }
++   }
++
++   /****************************************/
++   /****************************************/
++   
++   void CDroneRangefindersDefaultSensor::Reset() {
++      for(SInterface& s_interface : m_vecInterfacesBody) {
++         s_interface.Proximity = s_interface.Range;
++         s_interface.Illuminance = 0.0;
++      }
++   }
++   
++   /****************************************/
++   /****************************************/
++
++   REGISTER_SENSOR(CDroneRangefindersDefaultSensor,
++                  "drone_rangefinders", "default",
++                  "Weixu Zhu [zhuweixu_harry@126.com]",
++                  "1.0",
++                  "The Drone rangefinders sensor.",
++                  "This sensor measures the distance to nearby obstacles.",
++                  "Usable"
++   );
++   
++}
++
++   
+diff --git a/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h
+new file mode 100644
+index 00000000..ef8e925d
+--- /dev/null
++++ b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h
+@@ -0,0 +1,70 @@
++/**
++ * @file <argos3/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h>
++ *
++ * @author Michael Allwright - <allsey87@gmail.com>
++ * @author Weixu Zhu - <zhuweixu_harry@126.com>
++ */
++
++#ifndef DRONE_RANGEFINDERS_DEFAULT_SENSOR_H
++#define DRONE_RANGEFINDERS_DEFAULT_SENSOR_H
++
++namespace argos {
++   class CDroneRangefindersDefaultSensor;
++   class CControllableEntity;
++   class CEmbodiedEntity;
++   struct SAnchor;
++}
++
++#include <argos3/core/simulator/sensor.h>
++#include <argos3/core/utility/math/vector3.h>
++#include <argos3/core/utility/math/quaternion.h>
++#include <argos3/plugins/robots/drone/control_interface/ci_drone_rangefinders_sensor.h>
++#include <argos3/core/utility/math/rng.h>
++
++namespace argos {
++
++   class CDroneRangefindersDefaultSensor : public CSimulatedSensor,
++                                           public CCI_DroneRangefindersSensor {
++
++   public:
++
++      CDroneRangefindersDefaultSensor():
++         m_bShowRays(false),
++         m_pcControllableEntity(nullptr) {}
++
++      virtual ~CDroneRangefindersDefaultSensor() {}
++
++      virtual void SetRobot(CComposableEntity& c_entity);
++
++      virtual void Init(TConfigurationNode& t_tree);
++
++      virtual void Update();
++
++      virtual void Reset();
++
++   private:
++
++      Real ConvertToMeters(Real f_raw, Real f_stdev) {
++         static const Real fConversionFactor = Real(1.0);
++         //return (f_raw * fConversionFactor + m_pcRNG->Gaussian(f_stdev));
++         return (f_raw * fConversionFactor);
++      }
++
++      Real ConvertToLux(Real f_raw) {
++         static const Real fConversionFactor = Real(1.0);
++         return (f_raw * fConversionFactor);
++      }
++
++      CRandom::CRNG* m_pcRNG;
++
++      std::vector<SInterface> m_vecInterfacesBody;
++      SAnchor* m_pOriginAnchor;
++
++   private:
++
++      bool m_bShowRays;
++      CControllableEntity* m_pcControllableEntity;
++   };
++}
++
++#endif

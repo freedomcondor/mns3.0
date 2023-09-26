@@ -116,7 +116,7 @@ index 62b45f54..e71ddeee 100644
  
 diff --git a/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp
 new file mode 100644
-index 00000000..3bb98076
+index 00000000..3f9b7e1a
 --- /dev/null
 +++ b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.cpp
 @@ -0,0 +1,111 @@
@@ -142,7 +142,7 @@ index 00000000..3bb98076
 +
 +   void CDroneRangefindersDefaultSensor::SetRobot(CComposableEntity& c_entity) {
 +      m_pcControllableEntity = &(c_entity.GetComponent<CControllableEntity>("controller"));
-+      // allocate memory for the sensor interfaces 
++      // allocate memory for the sensor interfaces
 +      m_vecInterfacesBody.reserve(m_mapSensorConfig.size());
 +      // get the anchors for the sensor interfaces from m_mapSensorConfig
 +      for(const std::pair<std::string, std::tuple<std::string, CVector3, CQuaternion, Real> > t_config : m_mapSensorConfig) {
@@ -154,7 +154,7 @@ index 00000000..3bb98076
 +
 +   /****************************************/
 +   /****************************************/
-+   
++
 +   void CDroneRangefindersDefaultSensor::Init(TConfigurationNode& t_tree) {
 +      try {
 +         CCI_DroneRangefindersSensor::Init(t_tree);
@@ -164,10 +164,10 @@ index 00000000..3bb98076
 +         THROW_ARGOSEXCEPTION_NESTED("Initialization error in the Drone rangefinders sensor.", ex);
 +      }
 +   }
-+  
++
 +   /****************************************/
 +   /****************************************/
-+   
++
 +   void CDroneRangefindersDefaultSensor::Update() {
 +      // buffers
 +      CRay3 cSensorRay;
@@ -208,14 +208,14 @@ index 00000000..3bb98076
 +
 +   /****************************************/
 +   /****************************************/
-+   
++
 +   void CDroneRangefindersDefaultSensor::Reset() {
 +      for(SInterface& s_interface : m_vecInterfacesBody) {
 +         s_interface.Proximity = s_interface.Range;
 +         s_interface.Illuminance = 0.0;
 +      }
 +   }
-+   
++
 +   /****************************************/
 +   /****************************************/
 +
@@ -227,10 +227,10 @@ index 00000000..3bb98076
 +                  "This sensor measures the distance to nearby obstacles.",
 +                  "Usable"
 +   );
-+   
++
 +}
 +
-+   
++
 diff --git a/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h b/src/plugins/robots/drone/simulator/drone_rangefinders_default_sensor.h
 new file mode 100644
 index 00000000..4f9387d9

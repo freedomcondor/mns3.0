@@ -155,7 +155,7 @@ index 1f02ff37..2a720e42 100644
        CVector3 m_cAccelerometer;
        CVector3 m_cMagnetometer;
 diff --git a/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp b/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp
-index 4dbd761e..9ce90e7e 100644
+index 9386c1a9..ec804d83 100644
 --- a/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp
 +++ b/src/plugins/robots/drone/simulator/drone_flight_system_default_actuator.cpp
 @@ -38,6 +38,12 @@ namespace argos {
@@ -282,7 +282,7 @@ index b1fb7b69..bd18262a 100644
  }
  
 diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
-index 42af8764..d238ad76 100644
+index 42af8764..1302f657 100644
 --- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
 +++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
 @@ -56,20 +56,25 @@ namespace argos
@@ -497,8 +497,14 @@ index 42af8764..d238ad76 100644
           CalculatePIDResponse(cOrientationError.GetZ(),
                                m_cAngularVelocityCumulativeError.GetZ(),
                                cAngularVelocityError.GetZ(),
-@@ -203,25 +268,25 @@ namespace argos
+@@ -201,27 +266,31 @@ namespace argos
+       TORQUE_LIMIT.TruncValue(fAttitudeControlSignalX);
+       TORQUE_LIMIT.TruncValue(fAttitudeControlSignalY);
        TORQUE_LIMIT.TruncValue(fAttitudeControlSignalZ);
++      /* do not change altitude until attitude is ready */
++      if (((cOrientationError.Length() > 0.05) && (fTargetTransAccZ > 0)) ||
++          ((cOrientationError.Length() > 0.15) && (fTargetTransAccZ < 0)))
++         cControlSignals.SetZ(MASS * GetPM3DEngine().GetGravity() - m_cVelocity.GetZ() * 1);
        /* calculate the rotor speeds from the control signals */
        std::array<Real, 4> arrSquaredRotorSpeeds = {
 -         fAltitudeControlSignal / (4 * B) - 
@@ -528,7 +534,7 @@ index 42af8764..d238ad76 100644
                        std::sqrt(std::abs(arrSquaredRotorSpeeds[1])) +
                       -std::sqrt(std::abs(arrSquaredRotorSpeeds[2])) +
                        std::sqrt(std::abs(arrSquaredRotorSpeeds[3]));
-@@ -237,7 +302,7 @@ namespace argos
+@@ -237,7 +306,7 @@ namespace argos
        /* saturate the thrust */
        THRUST_LIMIT.TruncValue(fThrust);
        /* calculate the system response: acceleration */
@@ -537,7 +543,7 @@ index 42af8764..d238ad76 100644
           (std::cos(fYawAngleCorrected) * std::sin(m_cOrientation.GetY()) * std::cos(m_cOrientation.GetX()) +
            std::sin(fYawAngleCorrected) * std::sin(m_cOrientation.GetX())) * fThrust / MASS,
           (std::sin(fYawAngleCorrected) * std::sin(m_cOrientation.GetY()) * std::cos(m_cOrientation.GetX()) -
-@@ -273,18 +338,18 @@ namespace argos
+@@ -273,18 +342,18 @@ namespace argos
        m_cOrientation += m_cAngularVelocity * GetPM3DEngine().GetPhysicsClockTick();
        m_cAngularVelocityPrev = m_cAngularVelocity;
        /* accelerometer sensor readings */
@@ -563,7 +569,7 @@ index 42af8764..d238ad76 100644
        /* update the position using trapezoid integration */
        m_cVelocity = 0.5 * (m_cVelocityPrev + m_cVelocity);
        m_cPosition += m_cVelocity * GetPM3DEngine().GetPhysicsClockTick();
-@@ -345,7 +410,7 @@ namespace argos
+@@ -345,7 +414,7 @@ namespace argos
  
     bool CPointMass3DDroneModel::CheckIntersectionWithRay(Real &f_t_on_ray,
                                                           const CRay3 &c_ray) const {
@@ -572,7 +578,7 @@ index 42af8764..d238ad76 100644
           GetEmbodiedEntity().GetOriginAnchor().Orientation;
        CVector3 cDroneAxis(CVector3::Z);
        cDroneAxis.Rotate(cDroneOrientation);
-@@ -377,22 +442,25 @@ namespace argos
+@@ -377,25 +446,28 @@ namespace argos
     const CVector3 CPointMass3DDroneModel::INERTIA = {0.01085, 0.01092, 0.02121};
     const Real CPointMass3DDroneModel::B = 1.1236e-5;
     const Real CPointMass3DDroneModel::D = 1.4088e-7;
@@ -597,15 +603,20 @@ index 42af8764..d238ad76 100644
 -   const Real CPointMass3DDroneModel::ALTITUDE_KP = 5;
 -   const Real CPointMass3DDroneModel::ALTITUDE_KI = 0;
 -   const Real CPointMass3DDroneModel::ALTITUDE_KD = 6;   
+-   const Real CPointMass3DDroneModel::ROLL_PITCH_KP = 12;
 +   const Real CPointMass3DDroneModel::ALT_VEL_KP = 5;
 +   const Real CPointMass3DDroneModel::ALT_VEL_KI = 0;
 +   const Real CPointMass3DDroneModel::ALT_VEL_KD = 6;
 +   const Real CPointMass3DDroneModel::XY_VEL_KP = 1;
 +   const Real CPointMass3DDroneModel::XY_VEL_KI = 0;
 +   const Real CPointMass3DDroneModel::XY_VEL_KD = 3;
-    const Real CPointMass3DDroneModel::ROLL_PITCH_KP = 12;
++   const Real CPointMass3DDroneModel::ROLL_PITCH_KP = 20;
     const Real CPointMass3DDroneModel::ROLL_PITCH_KI = 0;
-    const Real CPointMass3DDroneModel::ROLL_PITCH_KD = 6;
+-   const Real CPointMass3DDroneModel::ROLL_PITCH_KD = 6;
++   const Real CPointMass3DDroneModel::ROLL_PITCH_KD = 12;
+    const Real CPointMass3DDroneModel::ROOT_TWO = std::sqrt(2.0);
+ #ifdef POINTMASS3D_DRONE_DISABLE_NOISE
+    /* Gyro sensor noise coefficents */
 diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
 index 19da0fea..9956242a 100644
 --- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.h
