@@ -22,7 +22,7 @@ function step()
 	logger(robot.id, api.stepCount, "----------------------------")
 	api.preStep()
 
-	api.droneSetSpeed(2, 0, 2, 0)
+	api.droneSetSpeed(2, 0, -1, 0)
 
 	api.postStep()
 end
