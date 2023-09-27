@@ -1027,7 +1027,7 @@ def generate_obstacles(locations, start_id, type) :
 def generateParametersText(parameters) :
     txt = "\n"
     for key in parameters :
-        line = "              " + key + "=\"" + parameters[key] + "\"\n"
+        line = "              " + key + "=\"" + str(parameters[key]) + "\"\n"
         txt = txt + line
     return txt
   
