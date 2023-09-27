@@ -257,8 +257,8 @@ return function()
 		end
 
 		local offset = vector3(0,0,0)
-		local forward_speed_max = 0.3
-		local vertical_speed_max = 0.3
+		local forward_speed_max = 1
+		local vertical_speed_max = 0.5
 
 		-- move blindly forward
 		if start == true and marker == nil then
@@ -339,7 +339,7 @@ return function()
 				split_marker = find_marker(vns, obstacle_left, true)
 				vns.setMorphology(vns, structure_left)
 
-				local side_length = (n_left_side - 1) * 1.5
+				local side_length = (n_left_side - 1 + 1) * 5
 				offset = vector3(-side_length, -side_length * 0.5, 0.5)
 				search_velocity = vector3(0.2, 0.3, 0)
 			else
@@ -347,12 +347,12 @@ return function()
 				split_marker = find_marker(vns, obstacle_right, true)
 				vns.setMorphology(vns, structure_right)
 
-				local side_length = (n_right_side - 1) * 1.5
+				local side_length = (n_right_side - 1 + 1) * 5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
-				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.7, 0, 1)
+				offset = vector3(-side_length * math.sqrt(3)*0.4, 0, 1)
 
 				if n_drone == 27 then
-					offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5*0.7, 0, 0.3)
+					offset = vector3(-(n_right_side-1)* 5 *math.sqrt(3)*0.5*0.7, 0, 0.3)
 				end
 				search_velocity = vector3(0.1, 0.0, 0)
 			end
