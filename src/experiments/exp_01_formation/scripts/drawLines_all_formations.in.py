@@ -26,11 +26,7 @@ Experiment_types = {
     "screen_64": axs[1,1],
 }
 
-#ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_no_rangefinders"
-#ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_no_rangefinder_idealmode"
-#ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_360_rangefinders"
-#ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_0.3_with_360_rangefinders_idealmode"
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation_altitude_lock_default_speed_0.5"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
 
 for Experiment_type in Experiment_types :
     print("Drawing ", Experiment_type)
