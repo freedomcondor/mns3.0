@@ -5,13 +5,14 @@ exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'
 import os
 
 # drones
+scale = 5/1.5
 
 drone_locations = generate_random_locations(20,                  # total number
                                             0, 0,             # origin location
-                                            -1.5, 1.5,              # random x range
-                                            -1.5, 1.5,              # random y range
-                                            0.5, 1.5)           # near limit and far limit
-drone_xml = generate_drones(drone_locations, 1)                 # from label 1 generate drone xml tags
+                                            -1.5*scale, 1.5*scale,              # random x range
+                                            -1.5*scale, 1.5*scale,              # random y range
+                                            0.5*scale, 1.5*scale)           # near limit and far limit
+drone_xml = generate_drones(drone_locations, 1, 12)                 # from label 1 generate drone xml tags
 
 # obstacles
 
@@ -39,50 +40,36 @@ gate_locations = [
     [41,  0,   3.5,   0,  0,  0,  6, 10,    0.1,  100,  "circle"],
 ]
 
+
 id = 0
 obstacle_xml = ""
 for loc in gate_locations :
     id = id + 1
     if loc[10] == "circle" :
         obstacle_xml += generate_3D_circle_gate_xml(id,                     # id
-                                                    loc[0], loc[1], loc[2], # position
+                                                    loc[0]*scale, loc[1]*scale, loc[2]*scale, # position
                                                     loc[3], loc[4], loc[5], # orientation
                                                     loc[9],                 # payload
-                                                    loc[6], loc[7], loc[8]) # size x, knots, thickness
+                                                    loc[6]*scale, loc[7], loc[8]*scale) # size x, knots, thickness
     if loc[10] == "triangle" :
         obstacle_xml += generate_3D_triangle_gate_xml(id,                     # id
-                                                      loc[0], loc[1], loc[2], # position
+                                                      loc[0]*scale, loc[1]*scale, loc[2]*scale, # position
                                                       loc[3], loc[4], loc[5], # orientation
                                                       loc[9],                 # payload
-                                                      loc[6],       loc[8])   # size x, knots, thickness
+                                                      loc[6]*scale, loc[8]*scale)   # size x, thick ness
     if loc[10] == "rectangular" :
         obstacle_xml += generate_3D_rectangular_gate_xml(id,                     # id
-                                                      loc[0], loc[1], loc[2], # position
+                                                      loc[0]*scale, loc[1]*scale, loc[2]*scale, # position
                                                       loc[3], loc[4], loc[5], # orientation
                                                       loc[9],                 # payload
-                                                      loc[6], loc[7], loc[8]) # size x, knots, thickness
+                                                      loc[6]*scale, loc[7]*scale, loc[8]*scale) # size x, size y, thickness
 
-parameters = '''
-    mode_2D="false"
-    drone_real_noise="false"
-    drone_tilt_sensor="true"
-
-    drone_label="1, 20"
-    obstacle_label="100, 110"
-
-    drone_default_start_height="3.0"
-    safezone_drone_drone="3"
-    dangerzone_drone="1"
-
-    report_sight_rounds="2"
-
-    driver_default_speed="0.5"
-    driver_slowdown_zone="0.7"
-    driver_stop_zone="0.15"
-    driver_arrive_zone="1.0"
-
-    drone_velocity_mode="true"
-'''
+parameters = generate3DdroneParameters()
+parameters['drone_label'] = "1, 20"
+parameters['obstacle_label'] = "100, 110"
+parameters['dangerzone_aerial_obstacle'] = 2
+parameters['dangerzone_drone'] = 3.5
+parameters_txt = generateParametersText(parameters)
 
 # generate argos file
 generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 
@@ -95,8 +82,8 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["OBSTACLES",         obstacle_xml],
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters, {"velocity_mode":True})],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
+        ''' + parameters_txt, {"velocity_mode":True})],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True)],
     ]
 )
 

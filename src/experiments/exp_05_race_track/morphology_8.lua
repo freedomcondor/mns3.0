@@ -14,7 +14,7 @@ local baseValueFunction = function(base, current, target)
 	end
 end
 
-local dis = 1.5
+local dis = 5
 local height = dis * 1.5
 	
 return 

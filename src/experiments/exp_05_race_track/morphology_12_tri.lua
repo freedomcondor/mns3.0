@@ -1,4 +1,4 @@
-local L = 0.7
+local L = 3
 
 local S = L * 0.5
 local D = L * 0.5 * math.sqrt(3)

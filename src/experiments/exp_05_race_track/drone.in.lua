@@ -51,13 +51,13 @@ function init()
 
 	number = tonumber(string.match(robot.id, "%d+"))
 	if number % 3 == 1 then
-		api.parameters.droneDefaultStartHeight = 1
+		api.parameters.droneDefaultStartHeight = 5
 	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = 3.0
+		api.parameters.droneDefaultStartHeight = 10.0
 	elseif number % 3 == 0 then
-		api.parameters.droneDefaultStartHeight = 5.0
+		api.parameters.droneDefaultStartHeight = 15.0
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 function reset()
@@ -171,7 +171,8 @@ function create_navigation_node(vns)
 		-- fail safe
 		if vns.scalemanager.scale["drone"] == 1 and
 		   vns.api.actuator.flight_preparation.state == "navigation" then
-			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.5), vector3())
+			vns.idN = 0
+			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.3), vector3())
 			return false, true
 		end
 
@@ -183,7 +184,7 @@ function create_navigation_node(vns)
 			end
 		-- forward
 		elseif state == "forward" and marker ~= nil and vns.parentR == nil then
-			local offset = vector3(0, 0, 1)
+			local offset = vector3(0, 0, 3)
 
 			-- handle different condition
 			if marker.type == gate_cir_20 and vns.scalemanager.scale["drone"] > 12 then
@@ -196,33 +197,43 @@ function create_navigation_node(vns)
 			-- 12 rec, tri, cir
 			elseif marker.type == gate_rec_12 and vns.scalemanager.scale["drone"] == 12 then
 				vns.setMorphology(vns, structure12_rec)
-				offset = vector3(0,0,1)
+				offset = vector3(0,0,3)
 			elseif marker.type == gate_tri_12 and vns.scalemanager.scale["drone"] == 12 then
 				vns.setMorphology(vns, structure12_tri)
-				offset = vector3(0,0,1)
+				offset = vector3(0,0,2)
 			elseif marker.type == gate_cir_12 and vns.scalemanager.scale["drone"] == 12 then
 				vns.setMorphology(vns, structure12)
-				offset = vector3(0,0,1)
+				offset = vector3(0,0,3)
 			-- 8 rec
 			elseif marker.type == gate_rec_8 and vns.scalemanager.scale["drone"] == 8 then
 				vns.setMorphology(vns, structure8)
-				offset = vector3(0,-0.7,1)
+				offset = vector3(0,-0.7 * 5 / 1.5,3)
 			end
 
 			-- vertical speed
+			local vertical_speed_max = 1.0
 			local target_position = marker.positionV3 + offset:rotate(marker.orientationQ)
 			local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
 			local vertical_position = target_position - target_position:dot(dirVec) * dirVec
-			local vertical_speed = vertical_position:normalize() * 0.1
+			local vertical_speed = vertical_position * 0.1
+			if vertical_speed:length() > vertical_speed_max then
+				vertical_speed = vertical_speed * (vertical_speed_max / vertical_speed:length())
+			end
 
 			-- horizontal speed
 			-- move forward with speed, calculate into move_speed
-			local speed = 0.5
-			if vns.driver.all_arrive == false then speed = 0.1 end
-			if marker.type == gate_cir_20 and vns.scalemanager.scale["drone"] ~= 20 then speed = 0 end
-			if marker.type == gate_rec_8 and vns.scalemanager.scale["drone"] == 8 then speed = 0.3 end
-			local move_speed = vector3(dirVec):rotate(marker.orientationQ) * speed
+			local forward_speed_max = 1
+			if vns.driver.all_arrive == false then forward_speed_max = 0.3; stateCount = 0 end
+			-- who ever arrives the first will be the new brain
+			if marker.type == gate_cir_20 and vns.scalemanager.scale["drone"] ~= 20 and stateCount then
+				forward_speed_max = 0
+				vns.Connector.newVnsID(vns, 1.1)
+			end
+			if marker.type == gate_rec_8 and vns.scalemanager.scale["drone"] == 8 then forward_speed_max = 0.8 end
 
+			local forward_speed_scalar = stateCount / 50
+			if forward_speed_scalar > 1 then forward_speed_scalar = 1 end
+			local move_speed = vector3(1,0,0) * forward_speed_max * forward_speed_scalar
 			-- move forward with vertical speed and move speed
 			vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
 			vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
@@ -246,21 +257,21 @@ function create_navigation_node(vns)
 				-- find marker again with priority
 				local split_marker
 				local offset
-				local search_velocity = vector3(0.1, 0, 0)
+				local search_velocity = vector3(0.3, 0, 0)
 
 				if vns.scalemanager.scale["drone"] == 12 then
 					split_marker = find_marker(vns, gate_rec_12, true)
 					vns.setMorphology(vns, structure12_rec)
 
-					offset = vector3(-1.7, 0, 1)
-					search_velocity = vector3(0.1, 0.1, 0)
+					offset = vector3(-5, 0, 3)
+					search_velocity = vector3(0.3, 0.3, 0)
 				end
 				if vns.scalemanager.scale["drone"] == 8 then
 					split_marker = find_marker(vns, gate_rec_8, true)
 					vns.setMorphology(vns, structure8)
 
-					offset = vector3(-1.7,-0.7, 1)
-					search_velocity = vector3(0.1, -0.1, 0)
+					offset = vector3(-5,-2.5, 3)
+					search_velocity = vector3(0.3, -0.3, 0)
 				end
 
 				if split_marker ~= nil then

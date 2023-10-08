@@ -1,4 +1,4 @@
-local L = 1.5
+local L = 5
 local height_rate = 2
 
 local function rad(degree)
