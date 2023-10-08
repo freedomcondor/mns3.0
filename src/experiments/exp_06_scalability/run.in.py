@@ -44,13 +44,13 @@ half_side_length_split_main = (n_side_split_main-1) * L * 0.5
 arena_size = half_side_length_split_main * 6 + half_side_length * 6
 arena_z_center = half_side_length * 2 - 2
 
-A = half_side_length_split_ranger * 2 * 1.5
-B = half_side_length_split_ranger * 2 * 1.5
+A = half_side_length_split_ranger * 2 * 1.75
+B = half_side_length_split_ranger * 2 * 1.75
 if n_side_split_ranger == 2:
     B = B * 2
-C = half_side_length_split_main * 2 * 1.5
+C = half_side_length_split_main * 2 * 1.75
 
-H = (A + C + 1) * 0.5 
+H = (A + C + 3) * 0.5 
 
 
 offset = -half_side_length * 4
@@ -74,7 +74,7 @@ obstacle_xml += generate_3D_triangle_gate_xml(1,                    # id
                                               0, 0, 0,              # orientation
                                               1001,                 # payload
                                               C, 0.2,          # size x, size y, thickness
-                                              C+1, H*2)      
+                                              C+3, H*2)      
 
 size_y = half_side_length_split_ranger*3 
 obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
@@ -82,7 +82,7 @@ obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
                                                  0, 0, 0,              # orientation
                                                  1002,                 # payload
                                                  A, B, 0.2,    # size x, size y, thickness
-                                                 A+1, H*2)
+                                                 A+3, H*2)
 
 parameters = generate3DdroneParameters()
 parameters["n_drone"] = n_drone

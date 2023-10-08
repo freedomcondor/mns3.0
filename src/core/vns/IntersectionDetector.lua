@@ -142,7 +142,9 @@ end
 ------ behaviour tree ---------------------------------------
 function IntersectionDetector.create_intersectiondetector_node(vns)
 	return function()
-		IntersectionDetector.step(vns)
+		if vns.api.parameters.mode_2D == true then 
+			IntersectionDetector.step(vns)
+		end
 		return false, true
 	end
 end

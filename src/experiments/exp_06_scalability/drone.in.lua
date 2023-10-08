@@ -39,6 +39,24 @@ local gene = {
 }
 --]]
 
+function VNS.CollectiveSensor.reportAll(vns)
+	for i, ob in pairs(vns.avoider.obstacles) do
+		VNS.CollectiveSensor.addToSendList(vns, ob)
+	end
+	for i, ob in pairs(vns.collectivesensor.receiveList) do
+		local flag = true
+		for j, existing_ob in pairs(vns.collectivesensor.sendList) do
+			if existing_ob.type == ob.type then
+				flag = false
+				break
+			end
+		end
+		if flag == true then
+			VNS.CollectiveSensor.addToSendList(vns, ob)
+		end
+	end
+end
+
 -- called when a child lost its parent
 function VNS.Allocator.resetMorphology(vns)
 	vns.Allocator.setMorphology(vns, structure_left)
@@ -54,6 +72,7 @@ end
 function init()
 	api.linkRobotInterface(VNS)
 	api.init()
+	api.debug.recordSwitch = true
 	vns = VNS.create("drone")
 	reset()
 
@@ -62,11 +81,11 @@ function init()
 	if number % 3 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = base_height + 2
+		api.parameters.droneDefaultStartHeight = base_height + 6
 	elseif number % 3 == 0 then
-		api.parameters.droneDefaultStartHeight = base_height + 4
+		api.parameters.droneDefaultStartHeight = base_height + 12
 	end
-	api.debug.show_all = true
+	--api.debug.show_all = true
 end
 
 local startTime = getCurrentTime()
@@ -206,6 +225,10 @@ function create_navigation_node(vns)
 	local obstacle_right = 1001
 
 	local start = true
+	local startCountDown = 10
+
+	local last_markers = {}
+	local last_marker_n = 20
 
 return function()
 	stateCount = stateCount + 1
@@ -220,9 +243,9 @@ return function()
 	   vns.api.actuator.flight_preparation.state == "navigation" then
 		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
 			local target = vns.brainkeeper.brain.positionV3 + vector3(3,0,5)
-			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.1, vector3())
+			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
 		else
-			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
+			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.5), vector3())
 		end
 		return false, true
 	end
@@ -262,6 +285,7 @@ return function()
 
 		-- move blindly forward
 		if start == true and marker == nil then
+			startCountDown = 10
 			-- horizontal speed
 			-- move forward with speed, calculate into move_speed
 			local forward_speed_scalar = stateCount / 50
@@ -271,13 +295,18 @@ return function()
 			vns.Spreader.emergency_after_core(vns, move_speed, vector3())
 
 		-- if I don't see the marker, but spliting, I still move accordingly
-		elseif start == false and (marker == nil or marker.positionV3.x < -0.5) then
+		--elseif start == false and (marker == nil or marker.positionV3.x < -5.0) then
+		elseif start == false and marker == nil then
 			logger("--- NewState: end")
 			switchAndSendNewState(vns, "end")
 
 		-- if I see marker, move forward
 		elseif marker ~= nil then
-			start = false
+			if startCountDown > 0 then
+				startCountDown = startCountDown - 1
+			else
+				start = false
+			end
 
 			-- if full size and meet obstacle left or right, split
 			if vns.scalemanager.scale["drone"] == n_drone and 
@@ -291,16 +320,37 @@ return function()
 
 			-- forward with adjustments
 			if vns.scalemanager.scale["drone"] == n_left_drone and marker.type == obstacle_left then
-				offset = vector3(-(n_left_side-1)*0.5 * 1.5, -(n_left_side-1)*0.5 * 1.5, 1)
+				offset = vector3(-(n_left_side-1)*0.5 * 5, -(n_left_side-1)*0.5 * 5, 3)
 			elseif vns.scalemanager.scale["drone"] == n_right_drone and marker.type == obstacle_right then
-				offset = vector3(-(n_right_side-1)*1.5*math.sqrt(3)*0.5, 0, 1)
+				offset = vector3(-(n_right_side-1)*5*math.sqrt(3)*0.5, 0, 3)
 			else
 				return false, true
 			end
 
 			-- vertical speed
-			local target_position = marker.positionV3 + offset:rotate(marker.orientationQ)
-			local dirVec = vector3(1,0,0):rotate(marker.orientationQ)
+			--local forwardDirQ = marker.orientationQ
+
+			local forwardDirQ = quaternion()
+			--local target_position = marker.positionV3 + offset:rotate(forwardDirQ)
+			-- average last marker
+			local sum = marker.positionV3 + offset:rotate(forwardDirQ)
+			local sumN = 1
+			for i = 1, last_marker_n do
+				local last_marker = last_markers[i]
+				if last_marker ~= nil then
+					sum = sum + last_marker.positionV3 + offset:rotate(forwardDirQ) 
+					sumN = sumN + 1
+				end
+			end
+			for i = last_marker_n, 2 ,-1 do
+				last_markers[i] = last_markers[i - 1]
+			end
+			last_markers[1] = marker
+
+			local target_position = sum * (1.0/sumN)
+
+			local target = sum * (1.0/sumN)
+			local dirVec = vector3(1,0,0):rotate(forwardDirQ)
 			local vertical_position = target_position - target_position:dot(dirVec) * dirVec
 			local vertical_speed = vertical_position * 0.1
 			if vertical_speed:length() > vertical_speed_max then
@@ -311,23 +361,41 @@ return function()
 			-- move forward with speed, calculate into move_speed
 			local forward_speed_scalar = stateCount / 50
 			if forward_speed_scalar > 1 then forward_speed_scalar = 1 end
-			local move_speed = vector3(dirVec):rotate(marker.orientationQ) * forward_speed_max * forward_speed_scalar
+			local move_speed = vector3(dirVec):rotate(forwardDirQ) * forward_speed_max * forward_speed_scalar
 
 			-- move forward with vertical speed and move speed
-			vns.setGoal(vns, vector3(0,0,0), marker.orientationQ)
+			--vns.setGoal(vns, vector3(0,0,0), forwardDirQ)
+			-- calc rotate speed
+			local targetXAxis = vector3(1,0,0):rotate(marker.orientationQ)
+			local rotateAxis = vector3(1,0,0):cross(targetXAxis):normalize()
+			local rotateSpeed = (vector3(1,0,0) - targetXAxis):length() * 0.1
 			vns.Spreader.emergency_after_core(vns, vertical_speed + move_speed, vector3())
-
+			vns.goal.rotateV3 = rotateAxis * rotateSpeed
 		end
 
 	elseif state == "split" then
 		if vns.allocator.target.split == true then
 			-- rebellion
 			if vns.parentR ~= nil then
+				vns.Msg.send(vns.parentR.idS, "whoissplitting", {idS = robot.id})
 				vns.Msg.send(vns.parentR.idS, "dismiss")
 				vns.deleteParent(vns)
 			end
-			vns.Connector.newVnsID(vns, 0.9, 10000)
+			vns.Connector.newVnsID(vns, 0.9, 1000000)
 		end	
+
+		-- spread the splitting one
+		for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "whoissplitting")) do
+			-- if not myself, spread the word
+			if msgM.dataT.idS ~= robot.id then
+				vns.connector.lastid[msgM.dataT.idS] = 1000000
+				for idS, neighbourR in pairs(vns.getNeighbours(vns)) do
+					if idS ~= msgM.fromS then
+						vns.Msg.send(idS, "whoissplitting", {idS = msgM.dataT.idS})
+					end
+				end
+			end
+		end
 
 		if vns.parentR == nil then
 			-- find marker again with priority
@@ -339,9 +407,9 @@ return function()
 				split_marker = find_marker(vns, obstacle_left, true)
 				vns.setMorphology(vns, structure_left)
 
-				local side_length = (n_left_side - 1 + 1) * 5
-				offset = vector3(-side_length, -side_length * 0.5, 0.5)
-				search_velocity = vector3(0.2, 0.3, 0)
+				local side_length = (n_left_side - 1) * 5
+				offset = vector3(-side_length-3, -side_length * 0.5, 3)
+				search_velocity = vector3(0.3, 0.5, 0)
 			else
 			--if vns.scalemanager.scale["drone"] == n_right_drone then
 				split_marker = find_marker(vns, obstacle_right, true)
@@ -349,19 +417,40 @@ return function()
 
 				local side_length = (n_right_side - 1 + 1) * 5
 				--offset = vector3(-side_length*math.sqrt(3)*0.5, 0, 1.0)
-				offset = vector3(-side_length * math.sqrt(3)*0.4, 0, 1)
+				offset = vector3(-side_length * math.sqrt(3)*0.4 - 3, 0, 3)
 
 				if n_drone == 27 then
-					offset = vector3(-(n_right_side-1)* 5 *math.sqrt(3)*0.5*0.7, 0, 0.3)
+					offset = vector3(-(n_right_side-1)* 5 *math.sqrt(3)*0.5*0.7, 0, 3)
 				end
 				search_velocity = vector3(0.1, 0.0, 0)
 			end
 
 			if split_marker ~= nil then
-				local target = split_marker.positionV3 + offset:rotate(split_marker.orientationQ)
+				--local target = split_marker.positionV3 + offset:rotate(split_marker.orientationQ)
+				--local target = split_marker.positionV3 + offset:rotate(quaternion())
+				local sum = split_marker.positionV3 + offset:rotate(quaternion())
+				local sumN = 1
+				for i = 1, last_marker_n do
+					local last_marker = last_markers[i]
+					if last_marker ~= nil then
+						sum = sum + last_marker.positionV3 + offset:rotate(quaternion()) 
+						sumN = sumN + 1
+					end
+				end
+				for i = last_marker_n, 2 ,-1 do
+					last_markers[i] = last_markers[i - 1]
+				end
+				last_markers[1] = split_marker
+
+				local target = sum * (1.0/sumN)
+
+
+				api.debug.drawArrow("red", vector3(0,0,0), api.virtualFrame.V3_VtoR(target), true)
+
 				if target:length() > 0.3 then
 					local slow_down = 1
 					local max_speed = 0.3
+					--local search_velocity = target * (max_speed / slow_down)
 					local search_velocity = target * (max_speed / slow_down)
 					if search_velocity:length() > slow_down * max_speed then search_velocity = search_velocity:normalize() * max_speed end
 					--vns.setGoal(vns, vector3(), split_marker.orientationQ)
@@ -370,11 +459,16 @@ return function()
 				else
 					--vns.setGoal(vns, target, split_marker.orientationQ)
 					--if target:length() < 0.3 then
-						vns.setGoal(vns, target, split_marker.orientationQ)
+						vns.setGoal(vns, target, quaternion())
 						logger("--- NewState: wait")
 						switchAndSendNewState(vns, "wait")	
 					--end
 				end
+				-- rotate to align with marker
+				local targetXAxis = vector3(1,0,0):rotate(marker.orientationQ)
+				local rotateAxis = vector3(1,0,0):cross(targetXAxis):normalize()
+				local rotateSpeed = (vector3(1,0,0) - targetXAxis):length() * 0.1
+				vns.goal.rotateV3 = rotateAxis * rotateSpeed
 			else
 				vns.setGoal(vns, vector3(), quaternion())
 				vns.Spreader.emergency_after_core(vns, search_velocity, vector3())
@@ -396,7 +490,7 @@ return function()
 			end
 
 			if vns.scalemanager.scale["drone"] == n_right_drone then
-				vns.Spreader.emergency_after_core(vns, vector3(0, 0.3, 0), vector3())
+				vns.Spreader.emergency_after_core(vns, vector3(0, 0.5, 0), vector3())
 			end
 		end
 		if vns.scalemanager.scale["drone"] == n_left_drone then
