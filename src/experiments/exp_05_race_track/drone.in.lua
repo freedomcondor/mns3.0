@@ -173,7 +173,12 @@ function create_navigation_node(vns)
 		if vns.scalemanager.scale["drone"] == 1 and
 		   vns.api.actuator.flight_preparation.state == "navigation" then
 			vns.idN = 0
-			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.3), vector3())
+			if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
+				local target = vns.brainkeeper.brain.positionV3 + vector3(3,0,5)
+				vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
+			else
+				vns.Spreader.emergency_after_core(vns, vector3(0,0,0.5), vector3())
+			end
 			return false, true
 		end
 
