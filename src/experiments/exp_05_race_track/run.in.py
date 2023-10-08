@@ -24,8 +24,12 @@ gate_locations = [
 
     [15,  3,   3.5,  20,  0,  0,  5,  5,    0.1,  101,  "rectangular"],
     [20,  4,   3.5,   0,  0,  0,  5,  5,    0.1,  101,  "rectangular"],
+
     [25,  4,   3.5,   0,  0,  0,  6,  None, 0.1,  102,  "triangle"],
     [30,  4,   3.5,   0,  0,  0,  5,  10,   0.1,  103,  "circle"],
+    #[25,  4,   3.5,   0,  0,  0,  5,  5,    0.1,  101,  "rectangular"],
+    #[30,  4,   3.5,   0,  0,  0,  5,  5,    0.1,  101,  "rectangular"],
+
     [35,  3,   3.5, -20,  0,  0,  5,  10,   0.1,  103,  "circle"],
 
     [15, -3,   3.5, -30,  0,  0,  3,  5,    0.1,  104,  "rectangular"],
@@ -40,6 +44,10 @@ gate_locations = [
     [41,  0,   3.5,   0,  0,  0,  6, 10,    0.1,  100,  "circle"],
 ]
 
+randomNumber = random.random()
+if randomNumber < 0.5 :
+    gate_locations[4] = [25,  4,   3.5,   0,  0,  0,  5,  5,    0.1,  101,  "rectangular"]
+    gate_locations[5] = [30,  4,   3.5,   0,  0,  0,  5,  5,    0.1,  101,  "rectangular"]
 
 id = 0
 obstacle_xml = ""

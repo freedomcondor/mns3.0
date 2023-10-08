@@ -100,6 +100,7 @@ function create_navigation_node(vns)
 
 	state = "init"
 	stateCount = 0
+	local start = true
 
 	local function sendChilrenNewState(vns, newState)
 		for idS, childR in pairs(vns.childrenRT) do
@@ -225,11 +226,16 @@ function create_navigation_node(vns)
 			local forward_speed_max = 1
 			if vns.driver.all_arrive == false then forward_speed_max = 0.3; stateCount = 0 end
 			-- who ever arrives the first will be the new brain
-			if marker.type == gate_cir_20 and vns.scalemanager.scale["drone"] ~= 20 and stateCount then
+			if marker.type == gate_cir_20 and
+			   marker.positionV3.x > 0 and
+			   vns.scalemanager.scale["drone"] ~= 20 and
+			   start == false then
 				forward_speed_max = 0
-				vns.Connector.newVnsID(vns, 1.1)
+				if vns.idN <= 1 then
+					vns.Connector.newVnsID(vns, vns.idN + 1)
+				end
 			end
-			if marker.type == gate_rec_8 and vns.scalemanager.scale["drone"] == 8 then forward_speed_max = 0.8 end
+			if marker.type == gate_rec_8 and vns.scalemanager.scale["drone"] == 8 then forward_speed_max = 0.7 end
 
 			local forward_speed_scalar = stateCount / 50
 			if forward_speed_scalar > 1 then forward_speed_scalar = 1 end
@@ -244,6 +250,7 @@ function create_navigation_node(vns)
 				switchAndSendNewState(vns, "split")	
 			end	
 		elseif state == "split" then
+			start = false
 			if vns.allocator.target.split == true then
 				-- rebellion
 				if vns.parentR ~= nil then
