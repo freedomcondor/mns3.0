@@ -9,12 +9,14 @@ local IntersectionDetector = {}
 
 function IntersectionDetector.create(vns)
 	vns.intersectionDetector = {}
+	vns.intersectionDetector.switch = true
 	vns.intersectionDetector.seenForeignRobots = {}
 	vns.intersectionDetector.intersectionList = {}
 	IntersectionDetector.reset(vns)
 end
 
 function IntersectionDetector.reset(vns)
+	vns.intersectionDetector.switch = true
 	vns.intersectionDetector.seenForeignRobots = {}
 	vns.intersectionDetector.intersectionList = {}
 end
@@ -142,7 +144,7 @@ end
 ------ behaviour tree ---------------------------------------
 function IntersectionDetector.create_intersectiondetector_node(vns)
 	return function()
-		if vns.api.parameters.mode_2D == true then 
+		if vns.intersectionDetector.switch == true then
 			IntersectionDetector.step(vns)
 		end
 		return false, true
