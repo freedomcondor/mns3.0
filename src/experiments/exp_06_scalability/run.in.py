@@ -1,16 +1,35 @@
 createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 #execfile(createArgosFileName)
+customizeOpts = "t:"
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
+
+Experiment_type = None
+for opt, value in optlist:
+    if opt == "-t":
+        Experiment_type = value
+        print("Experiment_type provided: ", Experiment_type)
+if Experiment_type == None :
+    Experiment_type = "cube_27"
+    print("Experiment_type not provided: using default", Experiment_type)
 
 import os
 
 # drone and pipuck
+n_drone_index = {
+    "cube_27"       :    27,
+    "cube_64"       :    64,
+    "cube_125"      :   125,
+    "cube_216"      :   216,
+}
 
-# abuse experiment length for drone numbers
-if Experiment_length == None :
-    Experiment_length = 27
-n_drone = Experiment_length
-Experiment_length = n_drone * 100
+structure = Experiment_type
+if structure not in n_drone_index :
+    print("wrong experiment type provided, please choose among : ")
+    for key in n_drone_index :
+        print("    " + key)
+    exit()
+
+n_drone = n_drone_index[structure]
 
 # calculate split
 if n_drone == 27:

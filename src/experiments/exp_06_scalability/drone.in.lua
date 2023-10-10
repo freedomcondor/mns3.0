@@ -85,7 +85,7 @@ function init()
 	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height + 12
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 local startTime = getCurrentTime()
@@ -269,6 +269,7 @@ return function()
 		end
 	-- forward
 	elseif state == "forward" and vns.parentR == nil then
+		vns.intersectionDetector.switch = true
 		lastScale = vns.scalemanager.scale["drone"]
 		-- switch formations based on swarm size
 		if vns.scalemanager.scale["drone"] == n_drone then
@@ -374,6 +375,7 @@ return function()
 		end
 
 	elseif state == "split" then
+		vns.intersectionDetector.switch = false
 		if vns.allocator.target.split == true then
 			-- rebellion
 			if vns.parentR ~= nil then
@@ -389,11 +391,14 @@ return function()
 			-- if not myself, spread the word
 			if msgM.dataT.idS ~= robot.id then
 				vns.connector.lastid[msgM.dataT.idS] = 1000000
-				for idS, neighbourR in pairs(vns.getNeighbours(vns)) do
-					if idS ~= msgM.fromS then
-						vns.Msg.send(idS, "whoissplitting", {idS = msgM.dataT.idS})
+				if receiveWhoissplittigFlag ~= true then
+					for idS, neighbourR in pairs(vns.getNeighbours(vns)) do
+						if idS ~= msgM.fromS then
+							vns.Msg.send(idS, "whoissplitting", {idS = msgM.dataT.idS})
+						end
 					end
 				end
+				receiveWhoissplittigFlag = true
 			end
 		end
 
@@ -475,6 +480,7 @@ return function()
 			end
 		end
 	elseif state == "end" then
+		vns.intersectionDetector.switch = true
 		if vns.parentR == nil then
 			lastScale = vns.scalemanager.scale["drone"]
 			-- switch formations based on swarm size
