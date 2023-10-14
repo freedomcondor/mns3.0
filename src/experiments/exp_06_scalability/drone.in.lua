@@ -92,7 +92,7 @@ local startTime = getCurrentTime()
 
 function reset()
 	vns.reset(vns)
-	if vns.idS == "drone1" then vns.idN = 1 end
+	if vns.idS == "drone1" then vns.idN = 2 end
 	vns.setGene(vns, gene)
 	vns.setMorphology(vns, structure_full)
 
@@ -383,7 +383,7 @@ return function()
 				vns.Msg.send(vns.parentR.idS, "dismiss")
 				vns.deleteParent(vns)
 			end
-			vns.Connector.newVnsID(vns, 0.9, 1000000)
+			vns.Connector.newVnsID(vns, 1, 1000000)
 		end	
 
 		-- spread the splitting one
