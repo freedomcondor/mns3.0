@@ -1,32 +1,20 @@
-createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
+replayerFile = "@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer.py"
 #execfile(createArgosFileName)
-customizeOpts = "t:"
-exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
+exec(compile(open(replayerFile, "rb").read(), replayerFile, 'exec'))
 
-Experiment_type = None
-for opt, value in optlist:
-    if opt == "-t":
-        Experiment_type = value
-        print("Experiment_type provided: ", Experiment_type)
-        print("Use -t left or right to specify track shape")
-if Experiment_type == None :
-    Experiment_type = "left"
-    print("Experiment_type not provided: using default", Experiment_type)
-    print("Use -t left or right to specify track shape")
+# read from 
+typeFileAppend = "../type.txt"
+if InputFolder[:-1] == "/" :
+    typeFile = InputFolder + typeFileAppend
+else :
+    typeFile = InputFolder + "/" + typeFileAppend
 
-import os
-
-# drones
-scale = 5/1.5
-
-drone_locations = generate_random_locations(20,                  # total number
-                                            0, 0,             # origin location
-                                            -1.5*scale, 1.5*scale,              # random x range
-                                            -1.5*scale, 1.5*scale,              # random y range
-                                            0.5*scale, 1.5*scale)           # near limit and far limit
-drone_xml = generate_drones(drone_locations, 1, 12)                 # from label 1 generate drone xml tags
+with open(typeFile) as f:
+    Experiment_type = f.readline().strip('\n')
+print(Experiment_type)
 
 # obstacles
+scale = 5/1.5
 
 # phase 1 : rec 8
 gate_locations = [
@@ -56,8 +44,6 @@ gate_locations = [
     [41,  0,   3.5,   0,  0,  0,  6, 10,    0.1,  100,  "circle"],
 ]
 
-#randomNumber = random.random()
-#if randomNumber < 0.5 :
 if Experiment_type == "left" :
     os.system("echo left > type.txt")
     gate_locations[4] = [25,  4,   3.5,   0,  0,  0,  5,  5,    0.1,  101,  "rectangular"]
@@ -88,27 +74,24 @@ for loc in gate_locations :
                                                       loc[9],                 # payload
                                                       loc[6]*scale, loc[7]*scale, loc[8]*scale) # size x, size y, thickness
 
-parameters = generate3DdroneParameters()
-parameters['drone_label'] = "1, 20"
-parameters['obstacle_label'] = "100, 110"
-parameters['dangerzone_aerial_obstacle'] = 2
-parameters['dangerzone_drone'] = 3.5
-parameters_txt = generateParametersText(parameters)
 
+arena_size_xml = "{}, {}, {}".format(500, 100, 100)
+arena_center_xml = "{},{},{}".format(200, 0, 25)
+
+#----------------------------------------------------------------------------------------------
 # generate argos file
-generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 
-                    "vns.argos",
+generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.argos", 
+                    "replay.argos",
     [
-        ["RANDOMSEED",        str(Inputseed)],     # Inputseed is inherit from createArgosScenario.py
-        ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
+        ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
         ["DRONES",            drone_xml], 
+        ["PIPUCKS",           pipuck_xml], 
         ["OBSTACLES",         obstacle_xml],
-        ["DRONE_CONTROLLER", generate_drone_controller('''
-              script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters_txt, {"velocity_mode":True})],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, None, True)],
+        ["ARENA_SIZE",        arena_size_xml], 
+        ["ARENA_CENTER",      arena_center_xml], 
     ]
 )
 
-os.system("argos3 -c vns.argos" + VisualizationArgosFlag)
+os.system("argos3 -c replay.argos")

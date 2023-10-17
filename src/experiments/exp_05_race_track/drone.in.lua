@@ -46,6 +46,7 @@ end
 function init()
 	api.linkRobotInterface(VNS)
 	api.init()
+	api.debug.recordSwitch = true
 	vns = VNS.create("drone")
 	reset()
 
@@ -87,6 +88,7 @@ function step()
 	api.postStep()
 	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
+	vns.logLoopFunctionInfo(vns)
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 	api.debug.showMorphologyLines(vns, true)
 end
