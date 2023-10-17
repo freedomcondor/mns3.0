@@ -130,4 +130,5 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
     ]
 )
 
+os.system("echo " + structure + "> type.txt")
 os.system("argos3 -c vns.argos" + VisualizationArgosFlag)
