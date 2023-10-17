@@ -3,3 +3,5 @@ configure_file( eva_threads.in.sh         eva_threads.sh   @ONLY)
 configure_file( evaluator.in.lua          evaluator.lua)
 configure_file( drawLines.in.py           drawLines.py)
 configure_file( drawLines_all_formations.in.py           drawLines_all_formations.py)
+
+configure_file(drawLines_violin_compare.in.py  drawLines_violin_compare.py)
