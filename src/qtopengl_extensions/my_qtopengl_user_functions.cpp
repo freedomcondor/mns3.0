@@ -229,6 +229,15 @@ namespace argos {
          glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), 128u);
          DrawArrow3(cFrom, cTo);
       }
+      for(const auto& t_arrow : c_debug_entity.GetCustomizeArrows()) {
+         const CVector3& cFrom = std::get<0>(t_arrow);
+         const CVector3& cTo = std::get<1>(t_arrow);
+         const CColor& cColor = std::get<2>(t_arrow);
+         Real fThickness = std::get<3>(t_arrow);
+         Real fHead = std::get<4>(t_arrow);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), 128u);
+         DrawArrow3(cFrom, cTo, fThickness, fHead);
+      }
       for(const auto& t_ring : c_debug_entity.GetRings()) {
          const CVector3& cCenter = std::get<0>(t_ring);
          const Real& fRadius = std::get<1>(t_ring);
@@ -284,9 +293,13 @@ namespace argos {
    /****************************************/
 
    void CMyQtOpenGLUserFunctions::DrawArrow3(const CVector3& c_from, const CVector3& c_to) {
+      DrawArrow3(c_from, c_to, 0.015625f * 2, 0.031250f * 2.5);
+   }
+
+   void CMyQtOpenGLUserFunctions::DrawArrow3(const CVector3& c_from, const CVector3& c_to, Real f_arrow_thickness, Real f_arrow_head) {
       const CCachedShapes& cCachedShapes = CCachedShapes::GetCachedShapes();
-      const Real fArrowThickness = 0.015625f * 2;
-      const Real fArrowHead =      0.031250f * 2.5;
+      const Real fArrowThickness = f_arrow_thickness;
+      const Real fArrowHead =      f_arrow_head;
       CVector3 cArrow(c_to - c_from);
       CQuaternion cRotation(CVector3::Z, cArrow / cArrow.Length());
       CRadians cZAngle, cYAngle, cXAngle;

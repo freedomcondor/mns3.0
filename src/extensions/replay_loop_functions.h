@@ -32,23 +32,30 @@ namespace argos {
          STrackedEntity(CEntity* pc_entity,
                         CEmbodiedEntity* pc_embodied_entity,
                         CDebugEntity* pc_debug_entity,
-                        std::string str_log_folder) :
+                        std::string str_log_folder,
+                        CColor track_color) :
             Entity(pc_entity),
             EmbodiedEntity(pc_embodied_entity),
             //LogFile(str_log_folder + "/" + pc_entity->GetId() + ".log") {}
-            DebugEntity(pc_debug_entity) {
+            DebugEntity(pc_debug_entity),
+            CTrackColor(track_color) {
                LogFile = fopen((str_log_folder + "/" + pc_entity->GetId() + ".log").c_str(), "r");
             }
          CEntity* Entity;
          CEmbodiedEntity* EmbodiedEntity;
          CDebugEntity* DebugEntity;
          //std::ifstream LogFile; // too slow
+         std::vector<CVector3> vecTrack;
+         CColor CTrackColor;
          FILE *LogFile;
       };
 
       std::vector<STrackedEntity> m_vecTrackedEntities;
+
       bool m_bDrawGoalFlag = false;
       bool m_bDrawDebugArrowsFlag = false;
+      bool m_bDrawTrackFlag = false;
+      std::vector<CColor> m_vecColorMap;
    };
 }
 

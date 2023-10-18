@@ -17,6 +17,7 @@ namespace argos {
 
    public:
       using TArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor> >;
+      using TCustomizeArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor, Real, Real> >;
       using TRingVec = std::vector<std::tuple<CVector3, Real, CColor> >;
       using TMessageVec = std::vector<std::string>;
 
@@ -34,6 +35,10 @@ namespace argos {
          return m_vecArrows;
       }
 
+      TCustomizeArrowVec& GetCustomizeArrows() {
+         return m_vecCustomizeArrows;
+      }
+
       TRingVec& GetRings() {
          return m_vecRings;
       }
@@ -44,6 +49,7 @@ namespace argos {
 
    private:
       TArrowVec m_vecArrows;
+      TCustomizeArrowVec m_vecCustomizeArrows;
       TRingVec m_vecRings;
       TMessageVec m_vecMessages;
    };

@@ -43,6 +43,7 @@ namespace argos {
 
    private:
       void DrawArrow3(const CVector3& c_from, const CVector3& c_to);
+      void DrawArrow3(const CVector3& c_from, const CVector3& c_to, Real f_arrow_thickness, Real f_arrow_head);
       void DrawRing3(const CVector3& c_center, Real f_radius);
 
    };

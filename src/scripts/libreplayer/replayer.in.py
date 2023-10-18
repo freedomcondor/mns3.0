@@ -5,7 +5,7 @@ import re
 usage="[usage for replay] example: python3 replay.py -i logs -d -g\n -d to draw debug arrows\n -g to draw virtual frame and goal"
 print(usage)
 
-customizeOpts = "i:gd"
+customizeOpts = "i:gdt"
 createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 #execfile(createArgosFileName)
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
@@ -15,6 +15,7 @@ exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'
 InputFolder = None
 DrawGoalFlag = None
 DrawDebugArrowsFlag = None
+DrawTrackFlag = None
 for opt, value in optlist:
     if opt == "-i":
         InputFolder = value
@@ -25,6 +26,9 @@ for opt, value in optlist:
     elif opt == "-d":
         DrawDebugArrowsFlag = True
         print("DrawDebugArrowsFlag provided:", DrawDebugArrowsFlag)
+    elif opt == "-t":
+        DrawTrackFlag = True
+        print("DrawTrackFlag provided:", DrawTrackFlag)
     elif opt == "-h":
         print(usage)
         exit()
@@ -40,6 +44,10 @@ if DrawGoalFlag == None :
 if DrawDebugArrowsFlag == None :
     DrawDebugArrowsFlag = False
     print("DrawDebugArrowsFlag not provided, do not draw by default, use -d to enable.")
+
+if DrawTrackFlag == None :
+    DrawTrackFlag = False
+    print("DrawTrackFlag not provided, do not draw by default, use -t to enable.")
 
 #----------------------------------------------------------------------------------------------
 # read InputFolder and extract .log
@@ -81,6 +89,7 @@ InputFolderNameFile = open("replay_input_folder.txt", "w")
 InputFolderNameFile.write(InputFolder + "\n")
 InputFolderNameFile.write(str(DrawGoalFlag) + "\n")
 InputFolderNameFile.write(str(DrawDebugArrowsFlag) + "\n")
+InputFolderNameFile.write(str(DrawTrackFlag) + "\n")
 InputFolderNameFile.close()
 
 

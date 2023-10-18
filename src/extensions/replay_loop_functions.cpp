@@ -12,19 +12,40 @@ namespace argos {
       std::ifstream infile("replay_input_folder.txt"); 
       std::string strDrawGoalFlag = "False";
       std::string strDrawDebugArrowsFlag = "False";
+      std::string strDrawTrackFlag = "False";
       if (!infile.fail()) {
          infile >> strLogFolder;
          infile >> strDrawGoalFlag;
          infile >> strDrawDebugArrowsFlag;
+         infile >> strDrawTrackFlag;
          if (strDrawGoalFlag == "True")
             m_bDrawGoalFlag = true;
          if (strDrawDebugArrowsFlag == "True")
             m_bDrawDebugArrowsFlag = true;
+         if (strDrawTrackFlag == "True")
+            m_bDrawTrackFlag = true;
+      }
+
+      /* create a colormap */
+      UInt16 r = 255;
+      UInt16 g = 1;
+      UInt16 b = 0;
+      while (!((r == 255) && (g == 0) && (b == 0))) {
+         if (r == 255 && g < 255 && b == 0) g++;
+         if (g == 255 && r > 0 && b == 0) r--;
+         if (g == 255 && b < 255 && r == 0) b++;
+         if (b == 255 && g > 0 && r == 0) g--;
+         if (b == 255 && r < 255 && g == 0) r++;
+         if (r == 255 && b > 0 && g == 0) b--;
+         m_vecColorMap.push_back(CColor(r,g,b));
       }
 
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
+      Real fColorMapStepLength = std::floor(m_vecColorMap.size() / tRootEntityVector.size());
+      UInt16 unColorMapIndex = 0;
       for(CEntity* pc_entity : tRootEntityVector) {
+         unColorMapIndex += fColorMapStepLength;
          CComposableEntity* pcComposable = dynamic_cast<CComposableEntity*>(pc_entity);
          if(pcComposable == nullptr) {
             continue;
@@ -33,10 +54,10 @@ namespace argos {
             CEmbodiedEntity& cBody = pcComposable->GetComponent<CEmbodiedEntity>("body");
             try {
                CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
-               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder);
+               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, m_vecColorMap[unColorMapIndex]);
             }
             catch(CARGoSException& ex) {
-               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder);
+               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, m_vecColorMap[unColorMapIndex]);
             }
          }
          catch(CARGoSException& ex) {
@@ -44,7 +65,6 @@ namespace argos {
             continue;
          }
       }
-
    }
 
    /****************************************/
@@ -86,6 +106,9 @@ namespace argos {
             CPositionV3.SetY(std::stod(vecWordList[1]));
             CPositionV3.SetZ(std::stod(vecWordList[2]));
          }
+         if (m_bDrawTrackFlag == true) {
+            s_tracked_entity.vecTrack.push_back(CPositionV3);
+         }
          // get Orientation
          if (vecWordList.size() >= 6) {
             CRadians CX, CY, CZ;
@@ -102,6 +125,24 @@ namespace argos {
          mapPosition[ID] = CPositionV3;
          mapOrientation[ID] = COrientationQ;
 
+         // draw Track
+         if ((m_bDrawTrackFlag == true) &&
+             (s_tracked_entity.vecTrack.size() > 1) &&
+             (s_tracked_entity.DebugEntity != NULL)) {
+            for (UInt32 i = 1; i < s_tracked_entity.vecTrack.size(); i++) {
+               CVector3 CRelativePosition1 = CVector3(s_tracked_entity.vecTrack[i-1] - CPositionV3).Rotate(COrientationQ.Inverse());
+               CVector3 CRelativePosition2 = CVector3(s_tracked_entity.vecTrack[i] - CPositionV3).Rotate(COrientationQ.Inverse());
+               s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(
+                  CRelativePosition1,
+                  CRelativePosition2,
+                  s_tracked_entity.CTrackColor,
+                  0.03,
+                  0.0
+               );
+            }
+         }
+
+         // draw lines
          if (vecWordList.size() > 6) {
             CQuaternion CVirtualOrientationQ(0,0,0,0);
             CVector3 CGoalPositionV3(0,0,0);
@@ -210,7 +251,16 @@ namespace argos {
                      cColor.Set(vecWordList[nCurrentIdx]);
                      nCurrentIdx ++;
                   }
-                  s_tracked_entity.DebugEntity->GetArrows().emplace_back(cVecBegin, cVecEnd, cColor);
+                  if (m_bDrawTrackFlag == true) {
+                     if (cColor == CColor::WHITE)
+                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03);
+                     if (cColor == CColor::BLUE) {
+                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03);
+                     }
+                  }
+                  else {
+                     s_tracked_entity.DebugEntity->GetArrows().emplace_back(cVecBegin, cVecEnd, cColor);
+                  }
                }
                else {
                   nCurrentIdx ++;
@@ -226,11 +276,24 @@ namespace argos {
                std::string ParentID = mapParent[ID];
                if (ParentID == "") continue;
                if (ParentID == "nil")
-                  s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
+                  if (m_bDrawTrackFlag == true) {
+                     s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLACK);
+                     s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.21, CColor::BLACK);
+                     s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0.01), 0.2, CColor::BLACK);
+                     s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0.01), 0.21, CColor::BLACK);
+                  }
+                  else {
+                     s_tracked_entity.DebugEntity->GetRings().emplace_back(CVector3(0,0,0), 0.2, CColor::BLUE);
+                  }
                else {
                   CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
                   CRelativePosition.Rotate(mapOrientation[ID].Inverse());
-                  s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+                  if (m_bDrawTrackFlag == true) {
+                     s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLACK, 0.05, 0.05);
+                  }
+                  else {
+                     s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);
+                  }
                }
             }
          }

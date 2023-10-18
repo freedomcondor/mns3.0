@@ -20,6 +20,7 @@ namespace argos {
    public:
 
       using TArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor> >;
+      using TCustomizeArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor, Real, Real> >;
       using TRingVec = std::vector<std::tuple<CVector3, Real, CColor> >;
       using TMessageVec = std::vector<std::string>;
       
@@ -36,12 +37,14 @@ namespace argos {
 
       virtual void Init(TConfigurationNode& t_tree) {
          m_pvecArrows = &m_pcDebugEntity->GetArrows();
+         m_pvecCustomizeArrows = &m_pcDebugEntity->GetCustomizeArrows();
          m_pvecRings = &m_pcDebugEntity->GetRings();
          m_pvecMessages = &m_pcDebugEntity->GetMessages();
       }
 
       virtual void Update() {
          m_pvecArrows->clear();
+         m_pvecCustomizeArrows->clear();
          m_pvecRings->clear();
          m_pvecMessages->clear();
       }
@@ -59,6 +62,7 @@ namespace argos {
       CDebugEntity* m_pcDebugEntity;
       
       TArrowVec* m_pvecArrows;
+      TCustomizeArrowVec* m_pvecCustomizeArrows;
       TRingVec* m_pvecRings;
       TMessageVec* m_pvecMessages;
    };
