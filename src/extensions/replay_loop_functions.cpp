@@ -127,7 +127,7 @@ namespace argos {
          }
          if (m_bDrawTrackFlag == true) {
             s_tracked_entity.vecTrack.push_back(CPositionV3);
-            if (m_unStepCount == m_vecDrawTrackKeyFrame[0])
+            if ((m_vecDrawTrackKeyFrame.size() > 0) && (m_unStepCount == m_vecDrawTrackKeyFrame[0]))
                s_tracked_entity.vecKeyFrame.emplace_back(CPositionV3);
          }
          // get Orientation
@@ -148,6 +148,7 @@ namespace argos {
 
          // draw Track
          if ((m_bDrawTrackFlag == true) &&
+             //(m_unStepCount % 100 == 0) &&
              (s_tracked_entity.vecTrack.size() > 1) &&
              (s_tracked_entity.DebugEntity != NULL)) {
             for (UInt32 i = 1; i < s_tracked_entity.vecTrack.size(); i++) {
@@ -335,7 +336,8 @@ namespace argos {
          }
       }
 
-      if (m_unStepCount == m_vecDrawTrackKeyFrame[0]) m_vecDrawTrackKeyFrame.erase(m_vecDrawTrackKeyFrame.begin());
+      if ((m_vecDrawTrackKeyFrame.size() > 0) && (m_unStepCount == m_vecDrawTrackKeyFrame[0]))
+         m_vecDrawTrackKeyFrame.erase(m_vecDrawTrackKeyFrame.begin());
       m_unStepCount++;
    }
    
