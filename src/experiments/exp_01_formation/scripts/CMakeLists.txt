@@ -4,4 +4,6 @@ configure_file( evaluator.in.lua          evaluator.lua)
 configure_file( drawLines.in.py           drawLines.py)
 configure_file( drawLines_all_formations.in.py           drawLines_all_formations.py)
 
-configure_file(drawLines_violin_compare.in.py  drawLines_violin_compare.py)
+configure_file( drawLines_violin_compare.in.py  drawLines_violin_compare.py)
+
+configure_file( drawLine_track_plot.in.py drawLine_track_plot.py)

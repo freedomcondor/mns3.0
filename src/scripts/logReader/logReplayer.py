@@ -17,8 +17,12 @@ usage="[usage] example: python3 replay.py -i xx/logs (default logs)"
 
 #----------------------------------------------------------------------------------------------
 # parse opts
+# parse opts
+if "customizeOpts" not in locals() :
+    customizeOpts = ""
+
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], "i:")
+	optlist, args = getopt.getopt(sys.argv[1:], "i:" + customizeOpts)
 except:
 	print("[error] unexpected opts")
 	print(usage)
