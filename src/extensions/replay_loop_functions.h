@@ -48,6 +48,15 @@ namespace argos {
          std::vector<CVector3> vecTrack;
          CColor CTrackColor;
          FILE *LogFile;
+
+         struct SKeyFrame {
+            SKeyFrame(CVector3 current_positionV3) :
+               PositionV3(current_positionV3) {}
+            CVector3 PositionV3;
+            std::vector<CVector3> vecPointing;
+         };
+
+         std::vector<SKeyFrame> vecKeyFrame;
       };
 
       std::vector<STrackedEntity> m_vecTrackedEntities;
@@ -55,7 +64,9 @@ namespace argos {
       bool m_bDrawGoalFlag = false;
       bool m_bDrawDebugArrowsFlag = false;
       bool m_bDrawTrackFlag = false;
+      std::vector<UInt32> m_vecDrawTrackKeyFrame;
       std::vector<CColor> m_vecColorMap;
+      UInt32 m_unStepCount;
    };
 }
 

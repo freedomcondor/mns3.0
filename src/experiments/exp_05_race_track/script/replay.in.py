@@ -88,7 +88,7 @@ generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.ar
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
         ["OBSTACLES",         obstacle_xml],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, None, True)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white", True)],
         ["ARENA_SIZE",        arena_size_xml], 
         ["ARENA_CENTER",      arena_center_xml], 
     ]

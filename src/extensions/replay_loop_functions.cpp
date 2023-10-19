@@ -7,23 +7,42 @@ namespace argos {
    /****************************************/
 
    void CReplayLoopFunctions::Init(TConfigurationNode& t_tree) {
+      m_unStepCount = 0;
       /* read log file folder from replay_input_folder.txt */
       std::string strLogFolder = "./logs";
       std::ifstream infile("replay_input_folder.txt"); 
       std::string strDrawGoalFlag = "False";
       std::string strDrawDebugArrowsFlag = "False";
       std::string strDrawTrackFlag = "False";
+      std::string strDrawTrackKeyFrame = "";
       if (!infile.fail()) {
          infile >> strLogFolder;
          infile >> strDrawGoalFlag;
          infile >> strDrawDebugArrowsFlag;
          infile >> strDrawTrackFlag;
+         // read a "\n" and then the content
+         std::getline(infile, strDrawTrackKeyFrame);
+         if (infile.good()) std::getline(infile, strDrawTrackKeyFrame);
+
          if (strDrawGoalFlag == "True")
             m_bDrawGoalFlag = true;
          if (strDrawDebugArrowsFlag == "True")
             m_bDrawDebugArrowsFlag = true;
          if (strDrawTrackFlag == "True")
             m_bDrawTrackFlag = true;
+         // get key frame
+         if (strDrawTrackKeyFrame != "None") {
+            // split by ,
+            std::vector<std::string> vecWordList;
+            std::stringstream strstreamLineStream(strDrawTrackKeyFrame);
+            while (strstreamLineStream.good()) {
+               std::string substr;
+               std::getline(strstreamLineStream, substr, ' ' );
+               vecWordList.push_back(substr);
+            }
+            for (std::string word : vecWordList)
+               m_vecDrawTrackKeyFrame.push_back(std::stoi(word));
+         }
       }
 
       /* create a colormap */
@@ -108,6 +127,8 @@ namespace argos {
          }
          if (m_bDrawTrackFlag == true) {
             s_tracked_entity.vecTrack.push_back(CPositionV3);
+            if (m_unStepCount == m_vecDrawTrackKeyFrame[0])
+               s_tracked_entity.vecKeyFrame.emplace_back(CPositionV3);
          }
          // get Orientation
          if (vecWordList.size() >= 6) {
@@ -136,9 +157,24 @@ namespace argos {
                   CRelativePosition1,
                   CRelativePosition2,
                   s_tracked_entity.CTrackColor,
-                  0.03,
+                  0.10,
                   0.0
                );
+            }
+         }
+
+         // draw KeyFrame
+         if ((s_tracked_entity.vecKeyFrame.size() > 0) &&
+             (s_tracked_entity.DebugEntity != NULL)) {
+            for (STrackedEntity::SKeyFrame keyFrame : s_tracked_entity.vecKeyFrame) {
+               CVector3 CRelativePosition = CVector3(keyFrame.PositionV3 - CPositionV3).Rotate(COrientationQ.Inverse());
+               Real fRadius = 0.3;
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CRelativePosition, fRadius, CColor::BLACK);
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CRelativePosition, fRadius-0.10, CColor::BLACK);
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CRelativePosition+CVector3(0,0,0.10), fRadius, CColor::BLACK);
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CRelativePosition+CVector3(0,0,0.10), fRadius-0.10, CColor::BLACK);
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CRelativePosition+CVector3(0,0,0.20), fRadius, CColor::BLACK);
+               s_tracked_entity.DebugEntity->GetRings().emplace_back(CRelativePosition+CVector3(0,0,0.20), fRadius-0.10, CColor::BLACK);
             }
          }
 
@@ -298,6 +334,9 @@ namespace argos {
             }
          }
       }
+
+      if (m_unStepCount == m_vecDrawTrackKeyFrame[0]) m_vecDrawTrackKeyFrame.erase(m_vecDrawTrackKeyFrame.begin());
+      m_unStepCount++;
    }
    
    /****************************************/
