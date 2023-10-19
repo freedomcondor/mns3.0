@@ -35,7 +35,9 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="ARENA_SIZE" positional_index="grid" center="ARENA_CENTER">
-    <floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/wood_floor.png" />
+    <floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/grey.png" />
+    <!--floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/wood_floor.png" /-->
+    <!--floor id="floor" source="loop_functions" pixels_per_meter="1" color="grey"/-->
     <!-- real scenario -->
     REAL_SCENARIO
 

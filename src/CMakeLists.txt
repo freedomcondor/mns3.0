@@ -100,3 +100,4 @@ add_subdirectory(scripts)
 
 #add copy floor 
 configure_file( qtopengl_extensions/wood_floor.png     floor_texture/wood_floor.png    COPYONLY)
+configure_file( qtopengl_extensions/grey.png           floor_texture/grey.png          COPYONLY)
