@@ -226,7 +226,7 @@ namespace argos {
          const CVector3& cFrom = std::get<0>(t_arrow);
          const CVector3& cTo = std::get<1>(t_arrow);
          const CColor& cColor = std::get<2>(t_arrow);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), 128u);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha()*0.5);
          DrawArrow3(cFrom, cTo);
       }
       for(const auto& t_arrow : c_debug_entity.GetCustomizeArrows()) {
@@ -235,14 +235,14 @@ namespace argos {
          const CColor& cColor = std::get<2>(t_arrow);
          Real fThickness = std::get<3>(t_arrow);
          Real fHead = std::get<4>(t_arrow);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), 128u);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha()*1.0);
          DrawArrow3(cFrom, cTo, fThickness, fHead);
       }
       for(const auto& t_ring : c_debug_entity.GetRings()) {
          const CVector3& cCenter = std::get<0>(t_ring);
          const Real& fRadius = std::get<1>(t_ring);
          const CColor& cColor = std::get<2>(t_ring);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), 128u);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha()*0.5);
          DrawRing3(cCenter, fRadius);
       }
       glPopMatrix();

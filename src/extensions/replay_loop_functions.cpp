@@ -56,14 +56,17 @@ namespace argos {
          if (b == 255 && g > 0 && r == 0) g--;
          if (b == 255 && r < 255 && g == 0) r++;
          if (r == 255 && b > 0 && g == 0) b--;
-         m_vecColorMap.push_back(CColor(r,g,b));
+         m_vecColorMap.push_back(CColor(r,g,b,255));
+         m_vecLightColorMap.push_back(CColor(r,g,b,30));
       }
 
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
       Real fColorMapStepLength = std::floor(m_vecColorMap.size() / tRootEntityVector.size());
       UInt16 unColorMapIndex = 0;
+      UInt16 unEntityCount = 0;
       for(CEntity* pc_entity : tRootEntityVector) {
+         unEntityCount++;
          unColorMapIndex += fColorMapStepLength;
          CComposableEntity* pcComposable = dynamic_cast<CComposableEntity*>(pc_entity);
          if(pcComposable == nullptr) {
@@ -71,12 +74,15 @@ namespace argos {
          }
          try {
             CEmbodiedEntity& cBody = pcComposable->GetComponent<CEmbodiedEntity>("body");
+            CColor cColor = m_vecColorMap[unColorMapIndex];
+            if (unEntityCount > 5)
+               cColor = m_vecLightColorMap[unColorMapIndex];
             try {
                CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
-               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, m_vecColorMap[unColorMapIndex]);
+               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, cColor);
             }
             catch(CARGoSException& ex) {
-               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, m_vecColorMap[unColorMapIndex]);
+               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, cColor);
             }
          }
          catch(CARGoSException& ex) {
@@ -148,7 +154,7 @@ namespace argos {
 
          // draw Track
          if ((m_bDrawTrackFlag == true) &&
-             //(m_unStepCount % 100 == 0) &&
+             (m_unStepCount % 100 == 0) &&
              (s_tracked_entity.vecTrack.size() > 1) &&
              (s_tracked_entity.DebugEntity != NULL)) {
             for (UInt32 i = 1; i < s_tracked_entity.vecTrack.size(); i++) {

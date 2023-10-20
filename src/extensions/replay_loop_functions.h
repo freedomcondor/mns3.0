@@ -66,6 +66,7 @@ namespace argos {
       bool m_bDrawTrackFlag = false;
       std::vector<UInt32> m_vecDrawTrackKeyFrame;
       std::vector<CColor> m_vecColorMap;
+      std::vector<CColor> m_vecLightColorMap;
       UInt32 m_unStepCount;
    };
 }
