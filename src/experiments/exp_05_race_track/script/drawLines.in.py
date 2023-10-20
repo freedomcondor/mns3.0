@@ -42,12 +42,12 @@ if not os.path.isdir(DATADIR) :
 legend = []
 for subfolder in getSubfolders(DATADIR) :
     legend.append(subfolder)
-    data = readDataFrom(subfolder + "result_fastestSpeed_data.txt")
+    #data = readDataFrom(subfolder + "result_fastestSpeed_data.txt")
     #data = readDataFrom(subfolder + "result_slowestSpeed_data.txt")
-    #data = readDataFrom(subfolder + "result_averageSpeed_data.txt")
+    data = readDataFrom(subfolder + "result_averageSpeed_data.txt")
     #if data[880] > 5 :
     #    print(subfolder)
-    drawData(data)
+    drawData(data, "black")
 
     #data = readDataFrom(subfolder + "result_minimum_distances.txt")
     #drawData(data)
