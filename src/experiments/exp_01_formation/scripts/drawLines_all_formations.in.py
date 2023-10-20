@@ -43,15 +43,20 @@ for Experiment_type in Experiment_types :
     #--------------------------------------
     legend = []
     for subfolder in getSubfolders(DATADIR) :
+        Experiment_types[Experiment_type].set_title(Experiment_type)
         #legend.append(subfolder)
         data = readDataFrom(subfolder + "result_data.txt")
-        if data[150] > 0.25 :
-            print(subfolder)
-        drawDataInSubplot(data, Experiment_types[Experiment_type])
+        #if data[150] > 0.25 :
+        #    print(subfolder)
+        drawDataInSubplot(data, Experiment_types[Experiment_type], "black")
         #data = readDataFrom(subfolder + "result_minimum_distances.txt")
         #drawDataInSubplot(data, Experiment_types[Experiment_type])
         #Experiment_types[Experiment_type].set_ylim([0,20])
-        Experiment_types[Experiment_type].set_title(Experiment_type)
+
+        #for subFile in getSubfiles(subfolder + "result_each_robot_error") :
+        #    data = readDataFrom(subFile)
+        #    drawDataInSubplot(data, Experiment_types[Experiment_type])
+        #break
     #plt.legend(legend)
 
 '''

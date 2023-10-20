@@ -43,12 +43,17 @@ legend = []
 for subfolder in getSubfolders(DATADIR) :
     legend.append(subfolder)
     data = readDataFrom(subfolder + "result_data.txt")
-    if data[880] > 5 :
-        print(subfolder)
-    drawData(data)
+    #if data[880] > 5 :
+    #    print(subfolder)
+    drawData(data, "black")
 
-    data = readDataFrom(subfolder + "result_minimum_distances.txt")
-    drawData(data)
+    #data = readDataFrom(subfolder + "result_minimum_distances.txt")
+    #drawData(data)
+
+    #for subFile in getSubfiles(subfolder + "result_each_robot_error") :
+    #    data = readDataFrom(subFile)
+    #    drawData(data)
+    #break
 #plt.legend(legend)
 '''
 

@@ -39,7 +39,7 @@ echo "----------------------------"
 
 #-----------------------------------------------------
 # prepare to run threads
-DATADIR=@CMAKE_MNS_DATA_PATH@/exp_06_scalabilty/$experiment_type/run_data
+DATADIR=@CMAKE_MNS_DATA_PATH@/exp_06_scalability/$experiment_type/run_data
 CODEDIR=$DATADIR/../code
 TMPDIR=@CMAKE_BINARY_DIR@/threads
 #THREADS_LOG_OUTPUT=`pwd`/threads_output.txt
