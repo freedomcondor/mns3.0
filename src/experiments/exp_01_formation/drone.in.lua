@@ -36,6 +36,8 @@ elseif robot.params.structure == "donut_64" then
 elseif robot.params.structure == "donut_48" then
 	nodes = 48 / 4
 	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif robot.params.structure == "cube_512" then
+	structure = generate_cube_morphology(512)
 end
 
 function init()

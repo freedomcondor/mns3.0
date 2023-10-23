@@ -25,6 +25,7 @@ n_drone_index = {
     "screen_64"     :    64,
     "donut_64"      :    64,
     "donut_48"      :    48,
+    "cube_512"      :   512,
 }
 
 structure = Experiment_type
