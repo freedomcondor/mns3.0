@@ -20,8 +20,9 @@ namespace argos {
    public:
 
       using TArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor> >;
-      using TCustomizeArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor, Real, Real> >;
+      using TCustomizeArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor, Real, Real, Real> >; // bodyThickness, HeadThickness, ColorTransparent
       using TRingVec = std::vector<std::tuple<CVector3, Real, CColor> >;
+      using TCustomizeRingVec = std::vector<std::tuple<CVector3, Real, CColor, Real, Real, Real> >; // Thickness, Height, ColorTransparent
       using TMessageVec = std::vector<std::string>;
       
       CDebugDefaultActuator() :
@@ -39,6 +40,7 @@ namespace argos {
          m_pvecArrows = &m_pcDebugEntity->GetArrows();
          m_pvecCustomizeArrows = &m_pcDebugEntity->GetCustomizeArrows();
          m_pvecRings = &m_pcDebugEntity->GetRings();
+         m_pvecCustomizeRings = &m_pcDebugEntity->GetCustomizeRings();
          m_pvecMessages = &m_pcDebugEntity->GetMessages();
       }
 
@@ -65,6 +67,7 @@ namespace argos {
       TCustomizeArrowVec* m_pvecCustomizeArrows;
       TRingVec* m_pvecRings;
       TMessageVec* m_pvecMessages;
+      TCustomizeRingVec* m_pvecCustomizeRings;
    };
 }
 

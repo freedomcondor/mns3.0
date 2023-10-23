@@ -23,6 +23,7 @@ namespace argos {
          // read a "\n" and then the content
          std::getline(infile, strDrawTrackKeyFrame);
          if (infile.good()) std::getline(infile, strDrawTrackKeyFrame);
+         if (infile.good()) infile >> m_unDrawTrackEveryXStep;
 
          if (strDrawGoalFlag == "True")
             m_bDrawGoalFlag = true;
@@ -62,21 +63,22 @@ namespace argos {
 
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
-      Real fColorMapStepLength = std::floor(m_vecColorMap.size() / tRootEntityVector.size());
+      UInt16 unColorMapStepLength = std::floor(m_vecColorMap.size() / tRootEntityVector.size());
+      UInt16 unHardColorEveryXRobots = std::floor(tRootEntityVector.size() / 5);
       UInt16 unColorMapIndex = 0;
       UInt16 unEntityCount = 0;
       for(CEntity* pc_entity : tRootEntityVector) {
          unEntityCount++;
-         unColorMapIndex += fColorMapStepLength;
+         unColorMapIndex += unColorMapStepLength;
          CComposableEntity* pcComposable = dynamic_cast<CComposableEntity*>(pc_entity);
          if(pcComposable == nullptr) {
             continue;
          }
          try {
             CEmbodiedEntity& cBody = pcComposable->GetComponent<CEmbodiedEntity>("body");
-            CColor cColor = m_vecColorMap[unColorMapIndex];
-            if (unEntityCount > 5)
-               cColor = m_vecLightColorMap[unColorMapIndex];
+            CColor cColor = m_vecLightColorMap[unColorMapIndex];
+            if (unEntityCount % unHardColorEveryXRobots == 0)
+               cColor = m_vecColorMap[unColorMapIndex];
             try {
                CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, cColor);
@@ -154,7 +156,7 @@ namespace argos {
 
          // draw Track
          if ((m_bDrawTrackFlag == true) &&
-             (m_unStepCount % 100 == 0) &&
+             (m_unStepCount % m_unDrawTrackEveryXStep == 0) &&
              (s_tracked_entity.vecTrack.size() > 1) &&
              (s_tracked_entity.DebugEntity != NULL)) {
             for (UInt32 i = 1; i < s_tracked_entity.vecTrack.size(); i++) {
@@ -165,7 +167,8 @@ namespace argos {
                   CRelativePosition2,
                   s_tracked_entity.CTrackColor,
                   0.10,
-                  0.0
+                  0.0,
+                  1
                );
             }
          }
@@ -296,9 +299,9 @@ namespace argos {
                   }
                   if (m_bDrawTrackFlag == true) {
                      if (cColor == CColor::WHITE)
-                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03);
+                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03, 1);
                      if (cColor == CColor::BLUE) {
-                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03);
+                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03, 1);
                      }
                   }
                   else {
@@ -332,7 +335,7 @@ namespace argos {
                   CVector3 CRelativePosition = mapPosition[ParentID] - mapPosition[ID];
                   CRelativePosition.Rotate(mapOrientation[ID].Inverse());
                   if (m_bDrawTrackFlag == true) {
-                     s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLACK, 0.05, 0.05);
+                     s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLACK, 0.05, 0.05, 1);
                   }
                   else {
                      s_tracked_entity.DebugEntity->GetArrows().emplace_back(CRelativePosition, CVector3(0,0,0), CColor::BLUE);

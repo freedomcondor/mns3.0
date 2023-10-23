@@ -226,7 +226,7 @@ namespace argos {
          const CVector3& cFrom = std::get<0>(t_arrow);
          const CVector3& cTo = std::get<1>(t_arrow);
          const CColor& cColor = std::get<2>(t_arrow);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha()*0.5);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * 0.5);
          DrawArrow3(cFrom, cTo);
       }
       for(const auto& t_arrow : c_debug_entity.GetCustomizeArrows()) {
@@ -235,15 +235,26 @@ namespace argos {
          const CColor& cColor = std::get<2>(t_arrow);
          Real fThickness = std::get<3>(t_arrow);
          Real fHead = std::get<4>(t_arrow);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha()*1.0);
+         Real fColorTransparent = std::get<5>(t_arrow);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * fColorTransparent);
          DrawArrow3(cFrom, cTo, fThickness, fHead);
       }
       for(const auto& t_ring : c_debug_entity.GetRings()) {
          const CVector3& cCenter = std::get<0>(t_ring);
          const Real& fRadius = std::get<1>(t_ring);
          const CColor& cColor = std::get<2>(t_ring);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha()*0.5);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * 0.5);
          DrawRing3(cCenter, fRadius);
+      }
+      for(const auto& t_ring : c_debug_entity.GetCustomizeRings()) {
+         const CVector3& cCenter = std::get<0>(t_ring);
+         const Real& fRadius = std::get<1>(t_ring);
+         const CColor& cColor = std::get<2>(t_ring);
+         Real fThickness = std::get<3>(t_ring);
+         Real fHeight = std::get<4>(t_ring);
+         Real fColorTransparent = std::get<5>(t_ring);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * fColorTransparent);
+         DrawRing3(cCenter, fRadius, fThickness, fHeight);
       }
       glPopMatrix();
       glDisable(GL_BLEND);
@@ -254,9 +265,13 @@ namespace argos {
    /****************************************/
 
    void CMyQtOpenGLUserFunctions::DrawRing3(const CVector3& c_center, Real f_radius) {
+      DrawRing3(c_center, f_radius, 0.015625 * 2, 0.015625 * 2);
+   }
+
+   void CMyQtOpenGLUserFunctions::DrawRing3(const CVector3& c_center, Real f_radius, Real f_thickness, Real f_height) {
       const CCachedShapes& cCachedShapes = CCachedShapes::GetCachedShapes();
-      const Real fRingHeight = 0.015625 * 2;
-      const Real fRingThickness = 0.015625 * 2;
+      const Real fRingHeight = f_height;
+      const Real fRingThickness = f_thickness;
       const Real fHalfRingThickness = fRingThickness * 0.5;
       const Real fDiameter = 2.0 * f_radius;
       /* draw inner ring surface */

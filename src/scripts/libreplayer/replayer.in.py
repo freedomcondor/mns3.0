@@ -5,7 +5,7 @@ import re
 usage="[usage for replay] example: python3 replay.py -i logs -d -g\n -d to draw debug arrows\n -g to draw virtual frame and goal"
 print(usage)
 
-customizeOpts = "i:gdtk:"
+customizeOpts = "i:gdtk:e:"
 createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 #execfile(createArgosFileName)
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
@@ -17,6 +17,7 @@ DrawGoalFlag = None
 DrawDebugArrowsFlag = None
 DrawTrackFlag = None
 DrawTrackKeyFrame = None
+DrawTrackEveryXStep = None
 for opt, value in optlist:
     if opt == "-i":
         InputFolder = value
@@ -33,6 +34,9 @@ for opt, value in optlist:
     elif opt == "-k":
         DrawTrackKeyFrame = value
         print("DrawTrackKeyFrame provided:", DrawTrackKeyFrame)
+    elif opt == "-e":
+        DrawTrackEveryXStep = value
+        print("DrawTrackEveryXStep provided:", DrawTrackEveryXStep)
     elif opt == "-h":
         print(usage)
         exit()
@@ -52,6 +56,10 @@ if DrawDebugArrowsFlag == None :
 if DrawTrackFlag == None :
     DrawTrackFlag = False
     print("DrawTrackFlag not provided, do not draw by default, use -t to enable.")
+
+if DrawTrackEveryXStep == None :
+    DrawTrackEveryXStep = 1
+    print("DrawTrackEveryXStep not provided, draw every step by default, use -e to specify.")
 
 #----------------------------------------------------------------------------------------------
 # read InputFolder and extract .log
@@ -95,6 +103,7 @@ InputFolderNameFile.write(str(DrawGoalFlag) + "\n")
 InputFolderNameFile.write(str(DrawDebugArrowsFlag) + "\n")
 InputFolderNameFile.write(str(DrawTrackFlag) + "\n")
 InputFolderNameFile.write(str(DrawTrackKeyFrame) + "\n")
+InputFolderNameFile.write(str(DrawTrackEveryXStep) + "\n")
 InputFolderNameFile.close()
 
 
