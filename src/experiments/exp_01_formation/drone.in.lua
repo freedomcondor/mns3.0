@@ -113,14 +113,21 @@ return function()
 	-- fail safe
 	if vns.scalemanager.scale["drone"] == 1 and
 	   vns.api.actuator.flight_preparation.state == "navigation" then
-		--if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
-		--	local target = vns.brainkeeper.brain.positionV3 + vector3(0,0,5)
-		if vns.brainkeeper ~= nil and vns.brainkeeper.parent ~= nil then
-			local target = vns.brainkeeper.parent.positionV3 + vector3(0,0,5)
-			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
+		if robot.params.structure == "donut_48" or
+		   robot.params.structure == "donut_64" then
+			if vns.brainkeeper ~= nil and vns.brainkeeper.parent ~= nil then
+				local target = vns.brainkeeper.parent.positionV3 + vector3(0,0,5)
+				vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
+			--else
+				--vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
+			end
 		else
-			--vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
+			if vns.brainkeeper ~= nil and vns.brainkeeper.parent ~= nil then
+				local target = vns.brainkeeper.parent.positionV3 + vector3(0,0,5)
+				vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
+			end
 		end
+		--end
 		return false, true
 	end
 	
