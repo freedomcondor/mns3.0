@@ -1,0 +1,26 @@
+diff --git a/src/core/simulator/space/space_multi_thread_balance_length.cpp b/src/core/simulator/space/space_multi_thread_balance_length.cpp
+index f89f1c0d..99c6ca8d 100644
+--- a/src/core/simulator/space/space_multi_thread_balance_length.cpp
++++ b/src/core/simulator/space/space_multi_thread_balance_length.cpp
+@@ -218,6 +218,9 @@ namespace argos {
+      MAIN_WAIT_FOR_END_OF(EntityIter);
+    } /* IterateOverControllableEntities() */
+ 
++   void CSpaceMultiThreadBalanceLength::ControllableEntityIterationWaitAbort() {
++     IterateOverControllableEntities(nullptr);
++   } /* ControllableEntitiesIterationWaitAbort() */
+ 
+    /****************************************/
+    /****************************************/
+diff --git a/src/core/simulator/space/space_multi_thread_balance_length.h b/src/core/simulator/space/space_multi_thread_balance_length.h
+index 81598847..610e5ef3 100644
+--- a/src/core/simulator/space/space_multi_thread_balance_length.h
++++ b/src/core/simulator/space/space_multi_thread_balance_length.h
+@@ -36,6 +36,7 @@ namespace argos {
+       virtual void UpdateControllableEntitiesSenseStep();
+       virtual void IterateOverControllableEntities(
+           const TControllableEntityIterCBType& c_cb);
++      virtual void ControllableEntityIterationWaitAbort();
+ 
+    private:
+ 
