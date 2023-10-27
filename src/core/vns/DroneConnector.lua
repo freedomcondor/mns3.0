@@ -16,7 +16,6 @@ function DroneConnector.preStep(vns)
 end
 
 function DroneConnector.postStep(vns)
-	vns.Msg.send("ALLMSG", "droneEstimateLocation", {estimateLocation = vns.api.estimateLocationInRealFrame})
 end
 
 function DroneConnector.step(vns)
@@ -53,12 +52,6 @@ function DroneConnector.step(vns)
 		robotR.seenThrough = {"direct"}
 	end
 
-	--[[
-	robotR.transformAcc = Transform.createAccumulator()
-	robotR.transformAcc: = Transform.createAccumulator()
-	Transform.addAccumulator(robotR.transformAcc, {positionV3 = robotR., orientationQ = orientationQ})
-	--]]
-
 	-- add robots that sees me
 	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
 		if msgM.dataT.mySight[vns.Msg.myIDS()] ~= nil then
@@ -66,15 +59,6 @@ function DroneConnector.step(vns)
 				-- create this drone
 				local quad = {idS = msgM.fromS, robotTypeS = "drone"}
 				Transform.AxCis0(msgM.dataT.mySight[vns.Msg.myIDS()], quad)
-				-- adjust delay by estimate location
-				--[[
-				local estimateLocation = {positionV3 = vector3(), orientationQ = quaternion()}
-				for _, msgM_forEst in ipairs(vns.Msg.getAM(quad.idS, "droneEstimateLocation")) do
-					estimateLocation = msgM_forEst.dataT.estimateLocation
-				end
-				Transform.AxBisC(quad, estimateLocation, quad)
-				Transform.AxCisB(vns.api.estimateLocationInRealFrame, quad, quad)
-				--]]
 				-- add this drone into seen
 				vns.connector.seenRobots[quad.idS] = quad
 				vns.connector.seenRobots[quad.idS].seenThrough = {"seen"}
@@ -87,24 +71,10 @@ function DroneConnector.step(vns)
 	-- add other robots that seen by robots that sees me
 	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do if msgM.dataT.mySight[vns.Msg.myIDS()] ~= nil then
 		-- get estimation from msgM.fromS
-		local overDroneEsti = {positionV3 = vector3(), orientationQ = quaternion()}
-		--[[
-		for _, msgM_forEst in ipairs(vns.Msg.getAM(msgM.fromS, "droneEstimateLocation")) do
-			overDroneEsti = msgM_forEst.dataT.estimateLocation
-		end
-		--]]
 		for idS, robotR in pairs(msgM.dataT.mySight) do if idS ~= vns.Msg.myIDS() then
 			-- idS, robotR is one of such robot
 			-- adjust delay by estimation
-			local robotEsti = {positionV3 = vector3(), orientationQ = quaternion()}
-			--[[
-			for _, msgM_forEst in ipairs(vns.Msg.getAM(idS, "droneEstimateLocation")) do
-				robotEsti = msgM_forEst.dataT.estimateLocation
-			end
-			--]]
 			local overDroneToRobotR = {positionV3 = robotR.positionV3, orientationQ = robotR.orientationQ}
-			Transform.AxCisB(overDroneEsti, robotR, overDroneToRobotR)
-			Transform.AxBisC(overDroneToRobotR, robotEsti, overDroneToRobotR)
 			local quadLoc = Transform.AxBisC(vns.connector.seenRobots[msgM.fromS], overDroneToRobotR)
 
 			if vns.connector.seenRobots[idS] == nil then
@@ -128,21 +98,7 @@ function DroneConnector.step(vns)
 	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
 		for commonIdS, commonRobotRinItsSight in pairs(msgM.dataT.mySight) do if vns.connector.seenRobots[commonIdS] ~= nil and vns.connector.seenRobots[commonIdS].seenThrough[1] == "direct" then
 			-- msgM.fromS is such robot, common Robot is commonRobotRinItsSight or vns.connector.seenRobots[commonIdS]
-			local robotEsti = {positionV3 = vector3(), orientationQ = quaternion()}
-			--[[
-			for _, msgM_forEst in ipairs(vns.Msg.getAM(msgM.fromS, "droneEstimateLocation")) do
-				robotEsti = msgM_forEst.dataT.estimateLocation
-			end
-			--]]
-			local commonEsti = {positionV3 = vector3(), orientationQ = quaternion()}
-			--[[
-			for _, msgM_forEst in ipairs(vns.Msg.getAM(commonIdS, "droneEstimateLocation")) do
-				commonEsti = msgM_forEst.dataT.estimateLocation
-			end
-			--]]
 			local overToCommon = {positionV3 = commonRobotRinItsSight.positionV3, orientationQ = commonRobotRinItsSight.orientationQ}
-			Transform.AxBisC(overToCommon, commonEsti, overToCommon)
-			Transform.AxCisB(robotEsti, overToCommon, overToCommon)
 			local quadLoc = Transform.CxBisA(vns.connector.seenRobots[commonIdS], overToCommon)
 			if vns.connector.seenRobots[msgM.fromS] == nil then
 				local quad = {idS = msgM.fromS, robotTypeS = "drone"}
@@ -169,9 +125,8 @@ function DroneConnector.step(vns)
 
 	for i = 2, vns.api.parameters.report_sight_rounds do
 		-- run a second round of sight report, generate quadcopters
-		local myRobotRT = DeepCopy(vns.connector.seenRobots)
-		vns.Msg.send("ALLMSG", "reportSight_" .. tostring(i), {mySight = myRobotRT})
-		for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight_" .. tostring(i))) do
+		for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
+			-- add robots that seen by my robots
 			if vns.connector.seenRobots[msgM.fromS] ~= nil then
 				local quad = vns.connector.seenRobots[msgM.fromS]
 				-- add what it can see
@@ -187,6 +142,18 @@ function DroneConnector.step(vns)
 						}
 					end
 				end
+			end
+			-- add robots that sees my robots
+			if vns.connector.seenRobots[msgM.fromS] == nil then
+				for commonIdS, commonRobotRinItsSight in pairs(msgM.dataT.mySight) do if vns.connector.seenRobots[commonIdS] ~= nil then
+					local overToCommon = {positionV3 = commonRobotRinItsSight.positionV3, orientationQ = commonRobotRinItsSight.orientationQ}
+					local quadLoc = Transform.CxBisA(vns.connector.seenRobots[commonIdS], overToCommon)
+					if vns.connector.seenRobots[msgM.fromS] == nil then
+						local quad = {idS = msgM.fromS, robotTypeS = "drone", positionV3 = quadLoc.positionV3, orientationQ = quadLoc.orientationQ}
+						vns.connector.seenRobots[quad.idS] = quad
+						vns.connector.seenRobots[quad.idS].seenThrough = {commonIdS}
+					end
+				end end
 			end
 		end
 	end
