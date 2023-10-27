@@ -44,9 +44,18 @@ function generate_cube(n, positionV3, orientationQ)
 				vector3(0, 0, L)
 			},
 			children = {
-			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, false, false),
-			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
-			generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
+--			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, false, false),
+--			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
+--			generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
+
+			generate_cube_line(n - 1, vector3(L, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
+			generate_cube_line(n - 1, vector3(0, L, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
+			generate_cube_line(n - 1, vector3(0, 0, L), quaternion(), {vector3(L,0,0), vector3(0,L,0)}),
+
+			generate_square(n - 1, vector3(L, L, 0), quaternion(), L, L),
+			generate_square(n - 1, vector3(L, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
+			generate_square(n - 1, vector3(0, L, L), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
+
 			generate_cube(n - 1, vector3(L, L, L), quaternion()),
 		}}
 	end

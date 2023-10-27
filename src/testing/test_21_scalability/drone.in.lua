@@ -239,6 +239,9 @@ function init()
 
 	number = tonumber(string.match(robot.id, "%d+"))
 	local baseHeight = 8
+	if n_drone > 300 then
+		baseHeight = 30
+	end
 	local distribute_scale = 4
 	if number % 5 == 1 then
 		api.parameters.droneDefaultStartHeight = baseHeight

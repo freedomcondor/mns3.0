@@ -28,10 +28,19 @@ function generate_cube(n, positionV3, orientationQ)
 				vector3(0, 0, L)
 			},
 			children = {
-			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, true),
-			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
-			generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
-			--generate_cube(n - 1, vector3(L, L, L), quaternion()),
+			--generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, true),
+			--generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
+			--generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
+
+			generate_cube_line(n - 1, vector3(L, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
+			generate_cube_line(n - 1, vector3(0, L, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
+			generate_cube_line(n - 1, vector3(0, 0, L), quaternion(), {vector3(L,0,0), vector3(0,L,0)}),
+
+			generate_cube_square(n - 1, vector3(L, L, 0), quaternion(), L, L),
+			generate_cube_square(n - 1, vector3(L, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
+			generate_cube_square(n - 1, vector3(0, L, L), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
+
+			generate_cube(n - 1, vector3(L, L, L), quaternion()),
 		}}
 	end
 end
@@ -79,7 +88,7 @@ function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, w
 	end
 end
 
-function generate_line(n, positionV3, orientationQ, drawLines)
+function generate_cube_line(n, positionV3, orientationQ, drawLines)
 	if n == 1 then
 		return 
 		{	robotTypeS = "drone",
@@ -96,13 +105,13 @@ function generate_line(n, positionV3, orientationQ, drawLines)
 			orientationQ = orientationQ,
 			drawLines = drawLines_full,
 			children = {
-				generate_line(n - 1, positionV3, orientationQ, drawLines)
+				generate_cube_line(n - 1, positionV3, orientationQ, drawLines)
 			}
 		}
 	end
 end
 
-function generate_square(n, positionV3, orientationQ, X_offset, Y_offset)
+function generate_cube_square(n, positionV3, orientationQ, X_offset, Y_offset)
 	if n == 1 then
 		return 
 		{	robotTypeS = "drone",
@@ -123,9 +132,9 @@ function generate_square(n, positionV3, orientationQ, X_offset, Y_offset)
 				vector3(0, 0, L)
 			},
 			children = {
-				generate_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
-				generate_line(n - 1, vector3(0, Y_offset, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
-				generate_square(n - 1, vector3(X_offset, Y_offset, 0), quaternion(), X_offset, Y_offset),
+				generate_cube_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
+				generate_cube_line(n - 1, vector3(0, Y_offset, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
+				generate_cube_square(n - 1, vector3(X_offset, Y_offset, 0), quaternion(), X_offset, Y_offset),
 			}
 		}
 	end
