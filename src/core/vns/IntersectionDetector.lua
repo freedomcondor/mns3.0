@@ -9,14 +9,20 @@ local IntersectionDetector = {}
 
 function IntersectionDetector.create(vns)
 	vns.intersectionDetector = {}
-	vns.intersectionDetector.switch = true
+	vns.intersectionDetector.switch = false 
+	if vns.api.parameters.mode_2D == true then
+		vns.intersectionDetector.switch = true
+	end
 	vns.intersectionDetector.seenForeignRobots = {}
 	vns.intersectionDetector.intersectionList = {}
 	IntersectionDetector.reset(vns)
 end
 
 function IntersectionDetector.reset(vns)
-	vns.intersectionDetector.switch = true
+	vns.intersectionDetector.switch = false
+	if vns.api.parameters.mode_2D == true then
+		vns.intersectionDetector.switch = true
+	end
 	vns.intersectionDetector.seenForeignRobots = {}
 	vns.intersectionDetector.intersectionList = {}
 end
