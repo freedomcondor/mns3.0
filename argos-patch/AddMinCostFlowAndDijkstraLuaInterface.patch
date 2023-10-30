@@ -1,0 +1,477 @@
+diff --git a/src/core/CMakeLists.txt b/src/core/CMakeLists.txt
+index 613a36e3..201c82f8 100644
+--- a/src/core/CMakeLists.txt
++++ b/src/core/CMakeLists.txt
+@@ -165,6 +165,9 @@ set(ARGOS3_SOURCES_CORE
+   utility/math/matrix/rotationmatrix2.cpp
+   utility/math/matrix/transformationmatrix3.cpp
+   utility/math/matrix/transformationmatrix2.cpp
++  utility/algorithm/sort.cpp
++  utility/algorithm/dijkstra.cpp
++  utility/algorithm/min_cost_flow.cpp
+   ${ARGOS3_HEADERS_CONTROLINTERFACE}
+   control_interface/ci_controller.cpp)
+ # Compile dynamic library loading only if enabled
+@@ -214,7 +217,8 @@ if(ARGOS_WITH_LUA)
+     wrappers/lua/lua_quaternion.cpp
+     wrappers/lua/lua_utility.cpp
+     wrappers/lua/lua_vector2.cpp
+-    wrappers/lua/lua_vector3.cpp)
++    wrappers/lua/lua_vector3.cpp
++    wrappers/lua/lua_min_cost_flow_network.cpp)
+ endif(ARGOS_WITH_LUA)
+ 
+ 
+diff --git a/src/core/utility/algorithm/dijkstra.cpp b/src/core/utility/algorithm/dijkstra.cpp
+new file mode 100644
+index 00000000..fbd79b36
+--- /dev/null
++++ b/src/core/utility/algorithm/dijkstra.cpp
+@@ -0,0 +1,59 @@
++#include "dijkstra.h"
++#include<limits>
++
++namespace argos {
++
++   void CDijkstra::Dijkstra(std::vector<std::vector<Real>> W, std::vector<Real>& D, std::vector<UInt32>& L) {
++      // W is a square of weight
++      // note that w[i][j] maybe minus, but Dijkstra cannot handle minus weight, the result will be wrong
++      // if i j is not connect, please use INF (math.huge in lua, std::numeric_limits<Real>::infinity() in C)
++      // find shortest path from 0 to i
++      // D[i] means the shortest path length from 0 to i
++      // L means the path, L[i] means the last node from the shortest path
++
++      Real INF = std::numeric_limits<Real>::infinity();
++      UInt32 n = W.size();
++
++      // traversed nodes length of node i
++      D.clear();
++      D.push_back(0);
++      for (UInt32 i = 1; i < n; i++) D.push_back(INF);
++
++      // previous node in the shortest path
++      L.clear();
++      for (UInt32 i = 0; i < n; i++) L.push_back(i);
++
++      // untraversed nodes, false means not in the list, traversed, true means in the list untraversed
++      std::vector<bool> T;
++      T.push_back(false);
++      for (UInt32 i = 1; i < n; i++) T.push_back(true);
++
++      for (UInt32 i = 1; i < n; i++) {
++         // find a new shortest node
++         Real dis = INF;
++         UInt32 from = 0;
++         UInt32 to = 0;
++         // from all known nodes
++         for (UInt32 j = 0; j < n; j++) if (T[j] == false)
++            // to all unknown nodes
++            for (UInt32 k = 0; k < n; k++) if (T[k] == true) {
++               // find the shortest edge
++               if (D[j] + W[j][k] < dis) {
++                  dis = D[j] + W[j][k];
++                  from = j;
++                  to = k;
++               }
++            }
++         if (to != 0) {
++            D[to] = dis;
++            L[to] = from;
++            T[to] = false;
++         }
++         else {
++            // no new edges found
++            break;
++         }
++      }
++   }
++
++}
+diff --git a/src/core/utility/algorithm/dijkstra.h b/src/core/utility/algorithm/dijkstra.h
+new file mode 100644
+index 00000000..aedd0ff2
+--- /dev/null
++++ b/src/core/utility/algorithm/dijkstra.h
+@@ -0,0 +1,19 @@
++#ifndef DIJKSTRA_H
++#define DIJKSTRA_H
++
++#include <argos3/core/utility/math/general.h>
++
++namespace argos {
++   class CDijkstra {
++      /**
++       * Find the shortest path from 0 to n-1
++       * W is a n by n 2D array, indicating the weight (cost)
++       * D is an array, D[i] shows the shortest length from 0 to i
++       * L is an array, L[i] shows the i's previous node in the shortest path
++       */
++      public:
++         static void Dijkstra(std::vector<std::vector<Real>> w, std::vector<Real>& D, std::vector<UInt32>& L);
++   };
++}
++
++#endif
+diff --git a/src/core/utility/algorithm/min_cost_flow.cpp b/src/core/utility/algorithm/min_cost_flow.cpp
+new file mode 100644
+index 00000000..3b84742c
+--- /dev/null
++++ b/src/core/utility/algorithm/min_cost_flow.cpp
+@@ -0,0 +1,94 @@
++#include "min_cost_flow.h"
++#include<limits>
++#include "dijkstra.h"
++
++namespace argos {
++
++   void CMinCostFLow::MinCostFlow(std::vector<std::vector<Real>> C, std::vector<std::vector<Real>> W, std::vector<std::vector<Real>>& F) {
++      // w is the weight
++      // c is the capacity  c[i][j] = -1 means no connect
++      // assume the flow is one-directional
++      // if c[j][i] = xxx then c[j][i] = -1
++
++      Real INF = std::numeric_limits<Real>::infinity();
++
++      // n is the number of nodes
++      UInt32 n = C.size();
++
++      F.clear();
++      // f is the flow f[i][j] = flow
++      for (UInt32 i = 0; i < n; i++) {
++         std::vector<Real> line;
++         for (UInt32 j = 0; j < n; j++) {
++            if (C[i][j] == -1)
++               line.push_back(-1);
++            else
++               line.push_back(0);
++         }
++         F.push_back(line);
++      }
++
++      // potential to adjust minus weight
++      std::vector<Real> h;
++      for (UInt32 i = 0; i < n; i++) h.push_back(0);
++      while (1) {
++         // create a substitule graph
++         std::vector<std::vector<Real>> g;
++         for (UInt32 i = 0; i < n; i++) {
++            std::vector<Real> line;
++            for (UInt32 j = 0; j < n; j++) line.push_back(INF);
++            g.push_back(line);
++         }
++
++         for (UInt32 i = 0; i < n; i++)
++            for (UInt32 j = 0; j < n; j++)
++               if (C[i][j] != -1) {
++                  if (F[i][j] <= 0)
++                     g[i][j] = W[i][j] + h[i] - h[j];
++                  else if (F[i][j] >= C[i][j])
++                     g[j][i] = -W[i][j] + h[j] - h[i];
++                  else {
++                     g[i][j] = W[i][j] + h[i] - h[j];
++                     g[j][i] = -W[i][j] + h[j] - h[i];
++                  }
++               }
++
++         // find the shortest path in g
++         std::vector<Real> D;
++         std::vector<UInt32> L;
++         CDijkstra::Dijkstra(g, D, L);
++
++         // if no path in g, the flow is reached, stop
++         if (L[n-1] == n-1)
++            break;
++
++         for (UInt32 i = 0; i < n; i++) h[i] += D[i];
++
++         // find the max increment amount
++         Real amount = INF;
++         UInt32 node = n-1;
++         while (node != 0) {
++            UInt32 from = L[node];
++            Real edgeSpace;
++            if (F[from][node] != -1)
++               edgeSpace = C[from][node] - F[from][node];
++            else
++               edgeSpace = F[node][from];
++            if (edgeSpace < amount)
++               amount = edgeSpace;
++            node = from;
++         }
++
++         // change F
++         node = n-1;
++         while (node != 0) {
++            UInt32 from = L[node];
++            if (F[from][node] != -1)
++               F[from][node] = F[from][node] + amount;
++            else
++               F[node][from] = F[node][from] - amount;
++            node = from;
++         }
++      }
++   }
++}
+diff --git a/src/core/utility/algorithm/min_cost_flow.h b/src/core/utility/algorithm/min_cost_flow.h
+new file mode 100644
+index 00000000..17a9249e
+--- /dev/null
++++ b/src/core/utility/algorithm/min_cost_flow.h
+@@ -0,0 +1,20 @@
++#ifndef MINCOSTFLOW_H
++#define MINCOSTFLOW_H
++
++#include <argos3/core/utility/math/general.h>
++
++namespace argos {
++   class CMinCostFLow {
++      /**
++       * MinCostFlow
++       * w is the weight
++       * c is the capacity  c[i][j] = -1 means no connect
++       * assume the flow is one-directional
++       * if c[j][i] = xxx then c[j][i] = -1
++       */
++      public:
++         static void MinCostFlow(std::vector<std::vector<Real>> C, std::vector<std::vector<Real>> W, std::vector<std::vector<Real>>& F);
++   };
++}
++
++#endif
+diff --git a/src/core/utility/algorithm/sort.cpp b/src/core/utility/algorithm/sort.cpp
+new file mode 100644
+index 00000000..24104439
+--- /dev/null
++++ b/src/core/utility/algorithm/sort.cpp
+@@ -0,0 +1,17 @@
++#include "sort.h"
++
++namespace argos {
++
++   void CSort::Sort(std::vector<Real>& vec) {
++      Real tmp = vec[0];
++      UInt32 n = vec.size();
++      for (UInt32 i = 0; i < n-1; i++)
++         for (UInt32 j = i+1; j < n; j++)
++            if (vec[i] > vec[j]) {
++               tmp = vec[i];
++               vec[i] = vec[j];
++               vec[j] = tmp;
++            }
++   }
++
++}
+diff --git a/src/core/utility/algorithm/sort.h b/src/core/utility/algorithm/sort.h
+new file mode 100644
+index 00000000..bd401e32
+--- /dev/null
++++ b/src/core/utility/algorithm/sort.h
+@@ -0,0 +1,16 @@
++#ifndef SORT_H
++#define SORT_H
++
++#include <argos3/core/utility/math/general.h>
++
++namespace argos {
++   class CSort {
++      /**
++       * Sort a std::vector<Real>
++       */
++      public:
++         static void Sort(std::vector<Real>&);
++   };
++}
++
++#endif
+diff --git a/src/core/wrappers/lua/lua_controller.cpp b/src/core/wrappers/lua/lua_controller.cpp
+index 07ebb5fe..a601d653 100644
+--- a/src/core/wrappers/lua/lua_controller.cpp
++++ b/src/core/wrappers/lua/lua_controller.cpp
+@@ -11,6 +11,7 @@
+ #include <argos3/core/wrappers/lua/lua_utility.h>
+ #include <argos3/core/wrappers/lua/lua_vector2.h>
+ #include <argos3/core/wrappers/lua/lua_vector3.h>
++#include <argos3/core/wrappers/lua/lua_min_cost_flow_network.h>
+ 
+ namespace argos {
+ 
+@@ -166,6 +167,7 @@ namespace argos {
+       CLuaVector2::RegisterType(m_ptLuaState);
+       CLuaVector3::RegisterType(m_ptLuaState);
+       CLuaQuaternion::RegisterType(m_ptLuaState);
++      CLuaMinCostFlowNetwork::RegisterType(m_ptLuaState);
+       /* Create a table that will contain the state of the robot */
+       lua_newtable(m_ptLuaState);
+       /* Set the id of the robot */
+diff --git a/src/core/wrappers/lua/lua_min_cost_flow_network.cpp b/src/core/wrappers/lua/lua_min_cost_flow_network.cpp
+new file mode 100644
+index 00000000..0ee7d9bf
+--- /dev/null
++++ b/src/core/wrappers/lua/lua_min_cost_flow_network.cpp
+@@ -0,0 +1,111 @@
++/**
++ * @file <argos3/core/wrappers/lua/lua_vector3.cpp>
++ *
++ * @author Michael Allwright <allsey87@gmail.com>
++ */
++
++#include "lua_min_cost_flow_network.h"
++
++#include <argos3/core/wrappers/lua/lua_utility.h>
++
++#include <argos3/core/utility/algorithm/sort.h>
++#include <argos3/core/utility/algorithm/dijkstra.h>
++#include <argos3/core/utility/algorithm/min_cost_flow.h>
++
++#include<iostream>
++
++namespace argos {
++
++   /****************************************/
++   /****************************************/
++
++   void CLuaMinCostFlowNetwork::RegisterType(lua_State* pt_state) {
++      /* create a constructor as a global function */
++      lua_pushcfunction(pt_state, LUAARGoSMinCostFlowNetwork);
++      lua_setglobal(pt_state, "ARGoSMinCostFlowNetwork");
++      lua_pushcfunction(pt_state, LUAARGoSDijkstra);
++      lua_setglobal(pt_state, "ARGoSDijkstra");
++   }
++
++   /****************************************/
++   /****************************************/
++
++   void CLuaMinCostFlowNetwork::GetArray(lua_State* pt_state, SInt32 n_table_offset, std::vector<Real>& vec) {
++      if(n_table_offset < 0) {
++         n_table_offset -= 1;
++      }
++      for (UInt32 i = 1; true; i++) {
++         lua_pushinteger(pt_state, i);
++         lua_gettable(pt_state, n_table_offset);
++         if (!lua_isnumber(pt_state, -1))
++            break;
++         vec.push_back(lua_tonumber(pt_state, -1));
++         lua_pop(pt_state, 1);
++      }
++   }
++
++   void CLuaMinCostFlowNetwork::Get2DArray(lua_State* pt_state, SInt32 n_table_offset, std::vector<std::vector<Real>>& vec2D) {
++      if(n_table_offset < 0) {
++         n_table_offset -= 1;
++      }
++      for (UInt32 i = 1; true; i++) {
++         lua_pushinteger(pt_state, i);
++         lua_gettable(pt_state, n_table_offset);
++         if (!lua_istable(pt_state, -1))
++            break;
++         std::vector<Real> vec;
++         GetArray(pt_state, -1, vec);
++         vec2D.push_back(vec);
++         lua_pop(pt_state, 1);
++      }
++   }
++
++   void CLuaMinCostFlowNetwork::PushArray(lua_State* pt_state, std::vector<Real>& vec) {
++      lua_newtable(pt_state);
++      for (UInt32 i = 0; i < vec.size(); i++)
++         CLuaUtility::AddToTable(pt_state, i+1, vec[i]);
++   }
++
++   void CLuaMinCostFlowNetwork::PushArrayUInt32(lua_State* pt_state, std::vector<UInt32>& vec) {
++      lua_newtable(pt_state);
++      for (UInt32 i = 0; i < vec.size(); i++)
++         CLuaUtility::AddToTable(pt_state, i+1, vec[i]);
++   }
++
++   void CLuaMinCostFlowNetwork::Push2DArray(lua_State* pt_state, std::vector<std::vector<Real>>& vec2D) {
++      lua_newtable(pt_state);
++      for (UInt32 i = 0; i < vec2D.size(); i++) {
++         lua_pushnumber(pt_state, i+1);
++         PushArray(pt_state, vec2D[i]);
++         lua_settable(pt_state, -3);
++      }
++   }
++
++   int CLuaMinCostFlowNetwork::LUAARGoSDijkstra(lua_State* pt_state) {
++      std::vector<std::vector<Real>> W;
++      Get2DArray(pt_state, 1, W);
++      lua_settop(pt_state, 0);
++
++      std::vector<Real> D;
++      std::vector<UInt32> L;
++      CDijkstra::Dijkstra(W, D, L);
++
++      PushArray(pt_state, D);
++      std::vector<Real> fL;
++      for (UInt32 i = 0; i < L.size(); i++) fL.push_back(L[i] + 1);
++      PushArray(pt_state, fL);
++      return 2;
++   }
++
++   int CLuaMinCostFlowNetwork::LUAARGoSMinCostFlowNetwork(lua_State* pt_state) {
++      std::vector<std::vector<Real>> C;
++      std::vector<std::vector<Real>> W;
++      Get2DArray(pt_state, 1, C);
++      Get2DArray(pt_state, 2, W);
++      lua_settop(pt_state, 0);
++      std::vector<std::vector<Real>> F;
++      CMinCostFLow::MinCostFlow(C,W,F);
++      Push2DArray(pt_state, F);
++      return 1;
++   }
++}
+diff --git a/src/core/wrappers/lua/lua_min_cost_flow_network.h b/src/core/wrappers/lua/lua_min_cost_flow_network.h
+new file mode 100644
+index 00000000..0ee3b671
+--- /dev/null
++++ b/src/core/wrappers/lua/lua_min_cost_flow_network.h
+@@ -0,0 +1,49 @@
++#ifndef LUA_MIN_COST_FLOW_NETWORK_H
++#define LUA_MIN_COST_FLOW_NETWORK_H
++
++/**
++ * @file <argos3/core/wrappers/lua/lua_vector3.h>
++ *
++ * @author Michael Allwright <allsey87@gmail.com>
++ */
++
++extern "C" {
++#include <lua.h>
++#include <lualib.h>
++#include <lauxlib.h>
++}
++
++#include <string>
++#include <utility>
++
++#include <argos3/core/utility/datatypes/datatypes.h>
++#include<vector>
++
++namespace argos {
++
++   class CLuaMinCostFlowNetwork{
++
++   public:
++
++      static void RegisterType(lua_State* pt_state);
++
++      static void GetArray(lua_State* pt_state, SInt32 n_table_offset, std::vector<Real>& vec);
++
++      static void Get2DArray(lua_State* pt_state, SInt32 n_table_offset, std::vector<std::vector<Real>>& vec2D);
++
++      static void PushArray(lua_State* pt_state, std::vector<Real>& vec);
++
++      static void PushArrayUInt32(lua_State* pt_state, std::vector<UInt32>& vec);
++
++      static void Push2DArray(lua_State* pt_state, std::vector<std::vector<Real>>& vec2D);
++
++      static int LUAARGoSMinCostFlowNetwork(lua_State* pt_state);
++      static int LUAARGoSDijkstra(lua_State* pt_state);
++
++   private:
++
++   };
++
++}
++
++#endif

@@ -1,0 +1,302 @@
+diff --git a/src/core/simulator/space/space.cpp b/src/core/simulator/space/space.cpp
+index 6e26ab13..b3c612b2 100644
+--- a/src/core/simulator/space/space.cpp
++++ b/src/core/simulator/space/space.cpp
+@@ -29,7 +29,10 @@ namespace argos {
+       m_unSimulationClock(0),
+       m_pcFloorEntity(nullptr),
+       m_ptPhysicsEngines(nullptr),
+-      m_ptMedia(nullptr) {}
++      m_ptMedia(nullptr) {
++         system("rm -rf logs_time");
++         system("mkdir -p logs_time");
++      }
+ 
+    /****************************************/
+    /****************************************/
+@@ -65,6 +68,16 @@ namespace argos {
+             Distribute(*itArenaItem);
+          }
+       }
++
++      m_ofTimeLogFile.open("logs_time/space_time.log", std::ofstream::out);
++      m_ofTimeLogFile.precision(10);
++      m_ofTimeLogFile.setf(std::ios::fixed);
++      m_unStepCount = 0;
++
++      clock_gettime(CLOCK_REALTIME, &m_sUpdateStartWallTime);
++      clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &m_sUpdateStartCPUTime);
++      clock_gettime(CLOCK_REALTIME, &m_sLastMeasuredWallTime);
++      clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &m_sLastMeasuredCPUTime);
+    }
+ 
+    /****************************************/
+@@ -77,6 +90,17 @@ namespace argos {
+       for(UInt32 i = 0; i < m_vecEntities.size(); ++i) {
+          m_vecEntities[i]->Reset();
+       }
++      system("rm -rf logs_time");
++      system("mkdir -p logs_time");
++      m_ofTimeLogFile.open("logs_time/space_time.log", std::ofstream::out);
++      m_ofTimeLogFile.precision(10);
++      m_ofTimeLogFile.setf(std::ios::fixed);
++      m_unStepCount = 0;
++
++      clock_gettime(CLOCK_REALTIME, &m_sUpdateStartWallTime);
++      clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &m_sUpdateStartCPUTime);
++      clock_gettime(CLOCK_REALTIME, &m_sLastMeasuredWallTime);
++      clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &m_sLastMeasuredCPUTime);
+    }
+ 
+    /****************************************/
+@@ -116,17 +140,82 @@ namespace argos {
+    /****************************************/
+    /****************************************/
+ 
++   Real CSpace::GetSecond(struct timespec& sTime) {
++      return sTime.tv_sec + 0.0000000001 * sTime.tv_nsec;
++   }
++
+    void CSpace::Update() {
++      m_unStepCount++;
++      struct timespec sCurrentTime;
++      m_ofTimeLogFile << "---- " << m_unStepCount << " ---------------------------------------" << std::endl;
++
++                                             // 1 Total step time
++                                             m_ofTimeLogFile << "1_TotalStepTime___________________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sUpdateStartWallTime) << ", ";
++                                             m_sUpdateStartWallTime = sCurrentTime;
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sUpdateStartCPUTime) << std::endl;
++                                             m_sUpdateStartCPUTime = sCurrentTime;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
++
+       /* Increase the simulation clock */
+       IncreaseSimulationClock();
++                                             // 2 increaseSimulationClock
++                                             m_ofTimeLogFile << "2_IncreaseSimulationClock_________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /* Perform the 'act' phase for controllable entities */
+       UpdateControllableEntitiesAct();
++                                             // 3 UpdateControllableEntitiesAct
++                                             m_ofTimeLogFile << "3_UpdateControllableEntitiesAct___, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /* Update the physics engines */
+       UpdatePhysics();
++                                             // 4 UpdatePhysics
++                                             m_ofTimeLogFile << "4_UpdatePhysics___________________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /* Update media */
+       UpdateMedia();
++                                             // 5 UpdateMedia
++                                             m_ofTimeLogFile << "5_UpdateMedia_____________________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /* Call loop functions */
+       m_cSimulator.GetLoopFunctions().PreStep();
++                                             // 6 LoopFunctionPreStep
++                                             m_ofTimeLogFile << "6_LoopFunctionPreStep_____________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /*
+        * If the loop functions did not use ARGoS threads during PreStep(), tell
+        * the waiting thread pool to continue.
+@@ -134,6 +223,15 @@ namespace argos {
+       if (!ControllableEntityIterationEnabled()) {
+         ControllableEntityIterationWaitAbort();
+       }
++                                             // 7 ControllableEntityIterationWaitAbort
++                                             m_ofTimeLogFile << "7_ContrEntityIterationWaitAbort___, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /*
+        * Reset callback to NULL to disable entity iteration for PostStep()
+        * unless enabled again by the loop functions.
+@@ -141,8 +239,26 @@ namespace argos {
+       m_cbControllableEntityIter = nullptr;
+       /* Perform the 'sense+step' phase for controllable entities */
+       UpdateControllableEntitiesSenseStep();
++                                             // 8 UpdateControllableEntitiesSenseStep
++                                             m_ofTimeLogFile << "8_ControllableEntitiesSenseStep___, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /* Call loop functions */
+       m_cSimulator.GetLoopFunctions().PostStep();
++                                             // 9 UpdateControllableEntitiesSenseStep
++                                             m_ofTimeLogFile << "9_LoopFunctionPostStep____________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+ 
+       /*
+        * If the loop functions did not use ARGoS threads during PostStep(), tell
+@@ -151,6 +267,15 @@ namespace argos {
+       if (!ControllableEntityIterationEnabled()) {
+         ControllableEntityIterationWaitAbort();
+       }
++                                             // 10 UpdateControllableEntitiesSenseStep
++                                             m_ofTimeLogFile << "10_ContrEntityIterationWaitAbort__, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
+       /*
+        * Reset callback to NULL to disable entity iteration for next PreStep()
+        * unless enabled again by the loop functions.
+@@ -159,6 +284,16 @@ namespace argos {
+       /* Flush logs */
+       LOG.Flush();
+       LOGERR.Flush();
++                                             // 11 LogFlush 
++                                             m_ofTimeLogFile << "11_LogFlush_______________________, ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
++                                             m_sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredCPUTime) << std::endl;
++                                             m_sLastMeasuredCPUTime = sCurrentTime;
++                                             m_ofTimeLogFile.flush();
+    }
+ 
+    /****************************************/
+diff --git a/src/core/simulator/space/space.h b/src/core/simulator/space/space.h
+index 5f60797e..9340d293 100644
+--- a/src/core/simulator/space/space.h
++++ b/src/core/simulator/space/space.h
+@@ -502,10 +502,18 @@ namespace argos {
+       /** Callback for iterating over entities from within the loop functions */
+       TControllableEntityIterCBType m_cbControllableEntityIter{nullptr};
+ 
++      Real GetSecond(struct timespec& sTime);
++      struct timespec m_sUpdateStartWallTime;
++      struct timespec m_sUpdateStartCPUTime;
++      struct timespec m_sLastMeasuredWallTime;
++      struct timespec m_sLastMeasuredCPUTime;
++      std::ofstream m_ofTimeLogFile;
++      UInt32 m_unStepCount;
++
+   private:
+       TMapPerType& GetEntitiesByTypeImpl(const std::string& str_type) const;
+ 
+-   };
++  };
+ 
+    /****************************************/
+    /****************************************/
+diff --git a/src/core/simulator/space/space_multi_thread_balance_quantity.cpp b/src/core/simulator/space/space_multi_thread_balance_quantity.cpp
+index d1d6ca85..b7537b05 100644
+--- a/src/core/simulator/space/space_multi_thread_balance_quantity.cpp
++++ b/src/core/simulator/space/space_multi_thread_balance_quantity.cpp
+@@ -99,6 +99,8 @@ namespace argos {
+       for(UInt32 i = 0; i < CSimulator::GetInstance().GetNumThreads(); ++i) {
+          /* Create the struct with the info to launch the thread */
+          m_psUpdateThreadData[i] = new SUpdateThreadData(i, this);
++         m_psUpdateThreadData[i]->ThreadTimeLog.precision(10);
++         m_psUpdateThreadData[i]->ThreadTimeLog.setf(std::ios::fixed);
+          /* Create the thread */
+          if((nErrors = pthread_create(m_ptUpdateThreads + i,
+                                       nullptr,
+@@ -464,10 +466,35 @@ namespace argos {
+      /* Cope with the fact that there may be less entities than threads */
+      if (c_range.GetSpan() > 0) {
+        /* This thread has entities */
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "---- " << m_unStepCount << " ---------------------------------------" << std::endl;
+        for (size_t i = c_range.GetMin(); i < c_range.GetMax(); ++i) {
+          if (m_vecControllableEntities[i]->IsEnabled()) {
++                                             struct timespec sLastMeasuredWallTime;
++                                             struct timespec sLastMeasuredCPUTime;
++                                             struct timespec sCurrentTime;
++                                             clock_gettime(CLOCK_REALTIME, &sLastMeasuredWallTime);
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sLastMeasuredCPUTime);
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "    ---- " << m_vecControllableEntities[i]->GetRootEntity().GetId() << "----------------------" << std::endl;
+            m_vecControllableEntities[i]->Sense();
++                                             // 1 Sense 
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "        1_Sense__________ , ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredWallTime) << ", ";
++                                             sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredCPUTime) << std::endl;
++                                             sLastMeasuredCPUTime = sCurrentTime;
+            m_vecControllableEntities[i]->ControlStep();
++                                             // 2 ControlStep 
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "        2_ControlStep___  , ";
++                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredWallTime) << ", ";
++                                             sLastMeasuredWallTime = sCurrentTime;
++
++                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sCurrentTime);
++                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredCPUTime) << std::endl;
++                                             sLastMeasuredCPUTime = sCurrentTime;
+          }
+        }
+        pthread_testcancel();
+diff --git a/src/core/simulator/space/space_multi_thread_balance_quantity.h b/src/core/simulator/space/space_multi_thread_balance_quantity.h
+index df01dad7..fe311e9b 100644
+--- a/src/core/simulator/space/space_multi_thread_balance_quantity.h
++++ b/src/core/simulator/space/space_multi_thread_balance_quantity.h
+@@ -22,11 +22,13 @@ namespace argos {
+       struct SUpdateThreadData {
+          UInt32 ThreadId;
+          CSpaceMultiThreadBalanceQuantity* Space;
++         std::ofstream ThreadTimeLog;
+ 
+          SUpdateThreadData(UInt32 un_thread_id,
+                            CSpaceMultiThreadBalanceQuantity* pc_space) :
+             ThreadId(un_thread_id),
+-            Space(pc_space) {}
++            Space(pc_space),
++            ThreadTimeLog("logs_time/thread_time_" + std::to_string(un_thread_id) + ".log") {}
+       };
+ 
+       /****************************************/
