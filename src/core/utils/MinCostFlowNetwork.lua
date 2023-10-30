@@ -95,7 +95,7 @@ function MinCostFlowNetwork(c, w)
 		end
 
 		-- find the shortest path for the graph
-		local LuaStackScaleLimit = 15
+		local LuaStackScaleLimit = 15 -- 15, assuming stack has 255 slots, matrix can be at most 16x16
 		local D, L
 
 		if n > LuaStackScaleLimit then

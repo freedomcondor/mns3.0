@@ -1,9 +1,7 @@
 -- Allocator -----------------------------------------
 ------------------------------------------------------
 logger.register("Allocator")
---local Arrangement = require("Arrangement")
 local MinCostFlowNetwork = require("MinCostFlowNetwork")
-local CppMinCostFlowNetwork = require("CppMinCostFlowNetwork")
 local DeepCopy = require("DeepCopy")
 local BaseNumber = require("BaseNumber")
 local Transform = require("Transform")
