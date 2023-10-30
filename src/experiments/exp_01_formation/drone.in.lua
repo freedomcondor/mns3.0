@@ -36,6 +36,9 @@ elseif robot.params.structure == "donut_64" then
 elseif robot.params.structure == "donut_48" then
 	nodes = 48 / 4
 	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+-- demo
+elseif robot.params.structure == "cube_216" then
+	structure = generate_cube_morphology(216)
 elseif robot.params.structure == "cube_512" then
 	structure = generate_cube_morphology(512)
 end
@@ -49,10 +52,11 @@ function init()
 
 	number = tonumber(string.match(robot.id, "%d+"))
 	local baseHeight = 8
+	local distribute_scale = 4
 	if robot.params.structure == "cube_512" then
 		baseHeight = 30
+		distribute_scale = 8
 	end
-	local distribute_scale = 4
 	if number % 5 == 1 then
 		api.parameters.droneDefaultStartHeight = baseHeight
 	elseif number % 5 == 2 then

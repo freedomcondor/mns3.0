@@ -25,6 +25,7 @@ n_drone_index = {
     "screen_64"     :    64,
     "donut_64"      :    64,
     "donut_48"      :    48,
+    "cube_216"      :   216,
     "cube_512"      :   512,
 }
 
@@ -51,7 +52,7 @@ yoffset = 0
 x_scale = 1.2
 y_scale = 1.2
 if n_drone == 512 :
-    y_scale = 2
+    y_scale = 1.7
 drone_locations = generate_random_locations(n_drone,
                                             offset -half_side_length*x_scale, yoffset -half_side_length*y_scale,          # origin location
                                             offset -half_side_length*x_scale, offset  +half_side_length*x_scale,      # random x range
@@ -82,7 +83,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
         ''' + parameters_txt, {"ideal_mode":False, "velocity_mode":True})],
 
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False)],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white")],
     ]
 )
 

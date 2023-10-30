@@ -27,82 +27,7 @@ function generate_cube(n, positionV3, orientationQ)
 	if positionV3 == nil then positionV3 = vector3() end
 	if orientationQ == nil then orientationQ = quaternion() end
 
-	if n == 1 then
-		return
-		{	robotTypeS = "drone",
-			positionV3 = positionV3,
-			orientationQ = orientationQ,
-		}
-	else
-		return
-		{	robotTypeS = "drone",
-			positionV3 = positionV3,
-			orientationQ = orientationQ,
-			drawLines = {
-				vector3(L, 0, 0),
-				vector3(0, L, 0),
-				vector3(0, 0, L)
-			},
-			children = {
---			generate_rectangular(n - 1, vector3(L, 0, 0), quaternion(), L, L, false, false),
---			generate_rectangular(n - 1, vector3(0, L, 0), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
---			generate_rectangular(n - 1, vector3(0, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
-
-			generate_cube_line(n - 1, vector3(L, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
-			generate_cube_line(n - 1, vector3(0, L, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
-			generate_cube_line(n - 1, vector3(0, 0, L), quaternion(), {vector3(L,0,0), vector3(0,L,0)}),
-
-			generate_square(n - 1, vector3(L, L, 0), quaternion(), L, L),
-			generate_square(n - 1, vector3(L, 0, L), quaternion(-math.pi/2, vector3(0, 1, 0)) * quaternion(-math.pi/2, vector3(1, 0, 0)), L, L),
-			generate_square(n - 1, vector3(0, L, L), quaternion(math.pi/2, vector3(0, 0, 1)) * quaternion(math.pi/2, vector3(1, 0, 0)), L, L),
-
-			generate_cube(n - 1, vector3(L, L, L), quaternion()),
-		}}
-	end
-end
-
-function generate_rectangular(n, positionV3, orientationQ, X_offset, Y_offset, with_sub_cube)
-	local sub_cube = nil
-	if with_sub_cube == true then
-		sub_cube = generate_cube(n, vector3(0, L, L), quaternion())
-	end
-	if n == 1 then
-		return 
-		{	robotTypeS = "drone",
-			positionV3 = positionV3,
-			orientationQ = orientationQ,
-			drawLines = {
-				vector3(0, L, 0),
-				vector3(0, 0, L)
-			},
-			children = {
-			{	robotTypeS = "drone",
-				positionV3 = vector3(0, Y_offset, 0),
-				orientationQ = quaternion(),
-				drawLines = {
-					vector3(0, 0, L),
-				}
-			},
-			sub_cube
-		}}
-	else
-		return 
-		{	robotTypeS = "drone",
-			positionV3 = positionV3,
-			orientationQ = orientationQ,
-			drawLines = {
-				vector3(L, 0, 0),
-				vector3(0, L, 0),
-				vector3(0, 0, L)
-			},
-			calcBaseValue = baseValueFunction,
-			children = {
-				generate_cube_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
-				generate_square(n, vector3(0, Y_offset, 0), quaternion(), X_offset, Y_offset),
-				sub_cube
-			}
-		}
-	end
+	return generate_square(n, n, true, positionV3, orientationQ)
 end
 
 function generate_cube_line(n, positionV3, orientationQ, drawLines)
@@ -128,31 +53,54 @@ function generate_cube_line(n, positionV3, orientationQ, drawLines)
 	end
 end
 
-function generate_square(n, positionV3, orientationQ, X_offset, Y_offset)
+function generate_square(m, n, drawlineYFlag, positionV3, orientationQ)
+	-- n x n square
+	-- m squares left including myself
+	-- square grows X and Z
+	-- next square goes to Y
+	local node
 	if n == 1 then
-		return 
-		{	robotTypeS = "drone",
+		node = {
+			robotTypeS = "drone",
 			positionV3 = positionV3,
 			orientationQ = orientationQ,
-			drawLines = {
-				vector3(0, 0, L),
-			}
 		}
+		if drawlineYFlag == true then
+			node.drawLines = {vector3(0, L, 0)}
+		end
 	else
-		return 
-		{	robotTypeS = "drone",
+		local X_drawLines = {vector3(L, 0, 0)}
+		local Z_drawLines = {vector3(0, 0, L)}
+		local Y_drawLines = {vector3(L, 0, 0),
+		                     vector3(0, 0, L)
+		                    }
+		if drawlineYFlag == true then
+			table.insert(X_drawLines, vector3(0, L, 0))
+			table.insert(Z_drawLines, vector3(0, L, 0))
+			table.insert(Y_drawLines, vector3(0, L, 0))
+		end
+		node = {
+			robotTypeS = "drone",
 			positionV3 = positionV3,
 			orientationQ = orientationQ,
-			drawLines = {
-				vector3(L, 0, 0),
-				vector3(0, L, 0),
-				vector3(0, 0, L)
-			},
+			drawLines = Y_drawLines,
 			children = {
-				generate_cube_line(n - 1, vector3(X_offset, 0, 0), quaternion(), {vector3(0,L,0), vector3(0,0,L)}),
-				generate_cube_line(n - 1, vector3(0, Y_offset, 0), quaternion(), {vector3(L,0,0), vector3(0,0,L)}),
-				generate_square(n - 1, vector3(X_offset, Y_offset, 0), quaternion(), X_offset, Y_offset),
+				generate_cube_line(n - 1, vector3(L, 0, 0), quaternion(), Z_drawLines),
+				generate_cube_line(n - 1, vector3(0, 0, L), quaternion(), X_drawLines),
+				generate_square(1, n - 1, drawlineYFlag, vector3(L, 0, L), quaternion()),
 			}
 		}
 	end
+	if m ~= 1 then
+		if m - 1 == 1 then
+			drawlineYFlag = false
+		end
+		local child = generate_square(m - 1, n, drawlineYFlag, vector3(0, L, 0), quaternion())
+		if node.children == nil then
+			node.children = {}
+		end
+		table.insert(node.children, child)
+		node.calcBaseValue = baseValueFunction
+	end
+	return node
 end
