@@ -72,6 +72,9 @@ function MinCostFlowNetwork(c, w)
 		end
 	end
 
+	local h = {}
+	for i = 1, n do h[i] = 0 end
+
 	while true do
 		-- create a substitule graph
 		local g = {}
@@ -80,22 +83,40 @@ function MinCostFlowNetwork(c, w)
 			for j = 1, n do
 				if c[i][j] ~= nil then
 					if f[i][j] <= 0 then
-						g[i][j] = w[i][j]
+						g[i][j] = w[i][j] + h[i] - h[j]
 					elseif f[i][j] >= c[i][j] then
-						g[j][i] = -w[i][j]
+						g[j][i] = -w[i][j] + h[j] - h[i]
 					else
-						g[i][j] = w[i][j]
-						g[j][i] = -w[i][j]
+						g[i][j] = w[i][j] + h[i] - h[j]
+						g[j][i] = -w[i][j] + h[j] - h[i]
 					end
 				end
 			end
 		end
 
 		-- find the shortest path for the graph
-		local D, L = Dijkstra(g)
+		local LuaStackScaleLimit = 15
+		local D, L
+
+		if n > LuaStackScaleLimit then
+			D, L = Dijkstra(g)
+		else
+			for i = 1, n do
+				for j = 1, n do
+					if g[i][j] == nil then g[i][j] = math.huge end
+				end
+			end
+			D, L = ARGoSDijkstra(g)
+			for i = 1, n do
+				if D[i] == math.huge then D[i] = nil end
+			end
+		end
+
 		if D[n] == nil then
 			break
 		end
+
+		for i = 1, n do h[i] = h[i] + (D[i] or math.huge) end
 
 		-- find the max increment amount
 		local amount = INF

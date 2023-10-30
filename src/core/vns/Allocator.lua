@@ -3,6 +3,7 @@
 logger.register("Allocator")
 --local Arrangement = require("Arrangement")
 local MinCostFlowNetwork = require("MinCostFlowNetwork")
+local CppMinCostFlowNetwork = require("CppMinCostFlowNetwork")
 local DeepCopy = require("DeepCopy")
 local BaseNumber = require("BaseNumber")
 local Transform = require("Transform")
@@ -1025,16 +1026,20 @@ function Allocator.GraphMatch(sourceList, targetList, originCost, type)
 		for j = 1, #targetList do
 			--cost[i][j] = (sourceSum + 1) ^ reverseIndex[originCost[i][j]]
 			if (sourceSum + 1) ^ (#orderList + 1) > 2 ^ 31 then
-				cost[i][j] = BaseNumber:createWithInc(sourceSum + 1, reverseIndex[originCost[i][j]])
+				--cost[i][j] = BaseNumber:createWithInc(sourceSum + 1, reverseIndex[originCost[i][j]])
+				cost[i][j] = originCost[i][j] * originCost[i][j]
 			else
-				cost[i][j] = (sourceSum + 1) ^ reverseIndex[originCost[i][j]]
+				--cost[i][j] = (sourceSum + 1) ^ reverseIndex[originCost[i][j]]
+				cost[i][j] = originCost[i][j] * originCost[i][j]
 			end
 			---[[
 			if sourceList[i].index.robotTypeS ~= targetList[j].index.robotTypeS or
 			   sourceList[i].index.robotTypeS ~= type then
 				if (sourceSum + 1) ^ (#orderList + 1) > 2 ^ 31 then
-					cost[i][j] = cost[i][j] + BaseNumber:createWithInc(sourceSum + 1, #orderList + 1)
+					--cost[i][j] = cost[i][j] + BaseNumber:createWithInc(sourceSum + 1, #orderList + 1)
+					cost[i][j] = cost[i][j] + 2 ^ 31
 				else
+					--cost[i][j] = cost[i][j] + (sourceSum + 1) ^ (#orderList + 1)
 					cost[i][j] = cost[i][j] + (sourceSum + 1) ^ (#orderList + 1)
 				end
 			end
@@ -1086,7 +1091,29 @@ function Allocator.GraphMatch(sourceList, targetList, originCost, type)
 		end
 	end
 
-	local F = MinCostFlowNetwork(C, W)
+	local LuaStackScaleLimit = 11 -- assuming max slots is 255, then C and W each can't be higher than 121
+	local F
+	if n > LuaStackScaleLimit then
+		F = MinCostFlowNetwork(C, W)
+	else
+		local F_argos
+		for i = 1, n do
+			for j = 1, n do
+				if C[i][j] == nil then C[i][j] = -1 end
+				if W[i][j] == nil then W[i][j] = math.huge end
+			end
+		end
+
+		F_argos = ARGoSMinCostFlowNetwork(C, W)
+
+		F = {}
+		for i = 1, n do
+			F[i] = {}
+			for j = 1, n do
+				if (F_argos[i][j] ~= -1) then F[i][j] = F_argos[i][j] end
+			end
+		end
+	end
 
 	for i = 1, #sourceList do
 		if sourceList[i].to == nil then
