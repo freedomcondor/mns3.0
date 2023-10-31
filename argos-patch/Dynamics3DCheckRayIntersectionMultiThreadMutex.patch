@@ -1,0 +1,22 @@
+diff --git a/src/plugins/simulator/physics_engines/dynamics3d/dynamics3d_engine.cpp b/src/plugins/simulator/physics_engines/dynamics3d/dynamics3d_engine.cpp
+index 28b18863..99c7b8df 100644
+--- a/src/plugins/simulator/physics_engines/dynamics3d/dynamics3d_engine.cpp
++++ b/src/plugins/simulator/physics_engines/dynamics3d/dynamics3d_engine.cpp
+@@ -199,6 +199,7 @@ namespace argos {
+ 
+    /****************************************/
+    /****************************************/
++   static pthread_mutex_t tMultiThreadMutex = PTHREAD_MUTEX_INITIALIZER;
+ 
+    void CDynamics3DEngine::CheckIntersectionWithRay(TEmbodiedEntityIntersectionData& t_data,
+                                                     const CRay3& c_ray) const {
+@@ -215,7 +216,9 @@ namespace argos {
+          cResult.m_flags |= btTriangleRaycastCallback::kF_UseGjkConvexCastRaytest;
+       */
+       /* Run the ray test */
++      pthread_mutex_lock(&tMultiThreadMutex);
+       m_cWorld.rayTest(cRayStart, cRayEnd, cResult);
++      pthread_mutex_unlock(&tMultiThreadMutex);
+       /* Examine the results */
+       if (cResult.hasHit() && cResult.m_collisionObject->getUserPointer() != nullptr) {
+          Real f_t = (cResult.m_hitPointWorld - cRayStart).length() / c_ray.GetLength();

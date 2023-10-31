@@ -1,5 +1,5 @@
 diff --git a/src/core/simulator/space/space.cpp b/src/core/simulator/space/space.cpp
-index 6e26ab13..b3c612b2 100644
+index 6e26ab13..c930bed7 100644
 --- a/src/core/simulator/space/space.cpp
 +++ b/src/core/simulator/space/space.cpp
 @@ -29,7 +29,10 @@ namespace argos {
@@ -195,7 +195,7 @@ index 6e26ab13..b3c612b2 100644
        /* Flush logs */
        LOG.Flush();
        LOGERR.Flush();
-+                                             // 11 LogFlush 
++                                             // 11 LogFlush
 +                                             m_ofTimeLogFile << "11_LogFlush_______________________, ";
 +                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
 +                                             m_ofTimeLogFile << GetSecond(sCurrentTime) - GetSecond(m_sLastMeasuredWallTime) << ", ";
@@ -233,7 +233,7 @@ index 5f60797e..9340d293 100644
     /****************************************/
     /****************************************/
 diff --git a/src/core/simulator/space/space_multi_thread_balance_quantity.cpp b/src/core/simulator/space/space_multi_thread_balance_quantity.cpp
-index d1d6ca85..b7537b05 100644
+index d1d6ca85..675d3429 100644
 --- a/src/core/simulator/space/space_multi_thread_balance_quantity.cpp
 +++ b/src/core/simulator/space/space_multi_thread_balance_quantity.cpp
 @@ -99,6 +99,8 @@ namespace argos {
@@ -259,7 +259,7 @@ index d1d6ca85..b7537b05 100644
 +                                             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &sLastMeasuredCPUTime);
 +                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "    ---- " << m_vecControllableEntities[i]->GetRootEntity().GetId() << "----------------------" << std::endl;
             m_vecControllableEntities[i]->Sense();
-+                                             // 1 Sense 
++                                             // 1 Sense
 +                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "        1_Sense__________ , ";
 +                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
 +                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredWallTime) << ", ";
@@ -269,7 +269,7 @@ index d1d6ca85..b7537b05 100644
 +                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredCPUTime) << std::endl;
 +                                             sLastMeasuredCPUTime = sCurrentTime;
             m_vecControllableEntities[i]->ControlStep();
-+                                             // 2 ControlStep 
++                                             // 2 ControlStep
 +                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << "        2_ControlStep___  , ";
 +                                             clock_gettime(CLOCK_REALTIME, &sCurrentTime);
 +                                             m_psUpdateThreadData[un_id]->ThreadTimeLog << GetSecond(sCurrentTime) - GetSecond(sLastMeasuredWallTime) << ", ";
