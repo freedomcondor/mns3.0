@@ -2,6 +2,13 @@ local L = 5
 
 DeepCopy = require("DeepCopy")
 
+local baseValueFunction_target = function(base, current, target)
+	return (current - target):length()
+end
+
+local baseValueFunction_0 = function(base, current, target)
+	return 0
+end
 local baseValueFunction = function(base, current, target)
 	local base_target_V3 = target - base
 	local base_current_V3 = current - base
@@ -13,7 +20,7 @@ local baseValueFunction = function(base, current, target)
 		local x2 = dot ^ 2
 		local l = base_current_V3:length()
 		local y2 = l ^ 2 - x2
-		elliptic_distance2 = (1/4) * x2 + y2
+		elliptic_distance2 = (1/16) * x2 + y2
 		return elliptic_distance2
 	end
 end
@@ -27,7 +34,7 @@ function generate_cube(n, positionV3, orientationQ)
 	if positionV3 == nil then positionV3 = vector3() end
 	if orientationQ == nil then orientationQ = quaternion() end
 
-	return generate_square(n, n, true, positionV3, orientationQ)
+	return generate_square(n, n, n, true, positionV3, orientationQ)
 end
 
 function generate_cube_line(n, positionV3, orientationQ, drawLines)
@@ -53,7 +60,7 @@ function generate_cube_line(n, positionV3, orientationQ, drawLines)
 	end
 end
 
-function generate_square(m, n, drawlineYFlag, positionV3, orientationQ)
+function generate_square(m, n, totalN, drawlineYFlag, positionV3, orientationQ)
 	-- n x n square
 	-- m squares left including myself
 	-- square grows X and Z
@@ -87,7 +94,7 @@ function generate_square(m, n, drawlineYFlag, positionV3, orientationQ)
 			children = {
 				generate_cube_line(n - 1, vector3(L, 0, 0), quaternion(), Z_drawLines),
 				generate_cube_line(n - 1, vector3(0, 0, L), quaternion(), X_drawLines),
-				generate_square(1, n - 1, drawlineYFlag, vector3(L, 0, L), quaternion()),
+				generate_square(1, n - 1, totalN, drawlineYFlag, vector3(L, 0, L), quaternion()),
 			}
 		}
 	end
@@ -95,12 +102,14 @@ function generate_square(m, n, drawlineYFlag, positionV3, orientationQ)
 		if m - 1 == 1 then
 			drawlineYFlag = false
 		end
-		local child = generate_square(m - 1, n, drawlineYFlag, vector3(0, L, 0), quaternion())
+		local child = generate_square(m - 1, n, totalN, drawlineYFlag, vector3(0, L, 0), quaternion())
 		if node.children == nil then
 			node.children = {}
 		end
 		table.insert(node.children, child)
-		node.calcBaseValue = baseValueFunction
+	end
+	if totalN == n then
+		node.calcBaseValue = baseValueFunction_target
 	end
 	return node
 end
