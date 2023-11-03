@@ -27,6 +27,7 @@ n_drone_index = {
     "donut_48"      :    48,
     "cube_216"      :   216,
     "cube_512"      :   512,
+    "cube_1000"     :  1000,
 }
 
 structure = Experiment_type
@@ -51,19 +52,26 @@ offset = 0
 yoffset = 0
 x_scale = 1.2
 y_scale = 1.2
+near_limit = 1.5
+far_limit = 3
 if n_drone == 512 :
-    y_scale = 1.7
+    y_scale = 1.5
+if n_drone == 1000 :
+    near_limit = 1.25
 drone_locations = generate_random_locations(n_drone,
                                             offset -half_side_length*x_scale, yoffset -half_side_length*y_scale,          # origin location
                                             offset -half_side_length*x_scale, offset  +half_side_length*x_scale,      # random x range
                                             yoffset-half_side_length*y_scale, yoffset + half_side_length*y_scale, # random y range
-                                            1.5, 3,           # near limit and far limit
+                                            near_limit, far_limit,           # near limit and far limit
                                             10000)              # attempt count
 
 drone_xml = generate_drones(drone_locations, 1, 12)                  # from label 1 generate drone xml tags, communication range 4.2
 
 parameters = generate3DdroneParameters()
 parameters["structure"] = structure
+
+if n_drone == 1000 :
+    parameters["drone_flight_preparation_state_duration"] = 50
 
 parameters_txt = generateParametersText(parameters)
 

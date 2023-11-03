@@ -41,6 +41,8 @@ elseif robot.params.structure == "cube_216" then
 	structure = generate_cube_morphology(216)
 elseif robot.params.structure == "cube_512" then
 	structure = generate_cube_morphology(512)
+elseif robot.params.structure == "cube_1000" then
+	structure = generate_cube_morphology(1000)
 end
 
 function init()
@@ -53,20 +55,20 @@ function init()
 	number = tonumber(string.match(robot.id, "%d+"))
 	local baseHeight = 8
 	local distribute_scale = 4
+	local layers = 5
 	if robot.params.structure == "cube_512" then
 		baseHeight = 30
 		distribute_scale = 8
 	end
-	if number % 5 == 1 then
-		api.parameters.droneDefaultStartHeight = baseHeight
-	elseif number % 5 == 2 then
-		api.parameters.droneDefaultStartHeight = baseHeight + 1 * distribute_scale
-	elseif number % 5 == 3 then
-		api.parameters.droneDefaultStartHeight = baseHeight + 2 * distribute_scale
-	elseif number % 5 == 4 then
-		api.parameters.droneDefaultStartHeight = baseHeight + 3 * distribute_scale
-	elseif number % 5 == 0 then
-		api.parameters.droneDefaultStartHeight = baseHeight + 4 * distribute_scale
+	if robot.params.structure == "cube_1000" then
+		baseHeight = 50
+		distribute_scale = 5
+		layers = 10
+	end
+	for i = 1, layers do
+		if number % layers == (i % layers) then
+			api.parameters.droneDefaultStartHeight = baseHeight + (i - 1) * distribute_scale
+		end
 	end
 
 	api.debug.show_all = true

@@ -28,7 +28,7 @@ end
 ---- take off preparation -------------------
 api.actuator.flight_preparation = {
 	state = "pre_flight",
-	state_duration = 25,
+	state_duration = api.parameters.droneFlightPreparationStateDuration,
 	state_count = 0,
 }
 
