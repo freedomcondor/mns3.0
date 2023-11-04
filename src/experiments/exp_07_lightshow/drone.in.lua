@@ -99,15 +99,15 @@ function init()
 	reset()
 
 	number = tonumber(string.match(robot.id, "%d+"))
-	local base_height = api.parameters.droneDefaultStartHeight + 5
+	local base_height = api.parameters.droneDefaultStartHeight + 10
 	if number % 3 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 3 == 2 then
-		api.parameters.droneDefaultStartHeight = base_height + 4
+		api.parameters.droneDefaultStartHeight = base_height + 6
 	elseif number % 3 == 0 then
-		api.parameters.droneDefaultStartHeight = base_height + 8
+		api.parameters.droneDefaultStartHeight = base_height + 12
 	end
-	--api.debug.show_all = true
+	api.debug.show_all = true
 end
 
 function reset()
@@ -115,7 +115,7 @@ function reset()
 	if vns.idS == "drone1" then vns.idN = 1 end
 	vns.setGene(vns, gene)
 	vns.setMorphology(vns, structure_screen)
-	--vns.setMorphology(vns, structure_man)
+	--vns.setMorphology(vns, structure_man1)
 
 	bt = BT.create(
 		vns.create_vns_node(vns,
@@ -142,7 +142,8 @@ function step()
 	--api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 
-	local LED_zone = vns.Parameters.driver_stop_zone * 2
+	--local LED_zone = vns.Parameters.driver_stop_zone * 10
+	local LED_zone = vns.Parameters.driver_arrive_zone
 	-- show morphology lines
 	if vns.goal.positionV3:length() < LED_zone then
 		api.debug.showMorphologyLines(vns, true)
@@ -261,9 +262,9 @@ return function()
 	   vns.api.actuator.flight_preparation.state == "navigation" then
 		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
 			local target = vns.brainkeeper.brain.positionV3 + vector3(3,0,5)
-			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.1, vector3())
+			vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
 		else
-			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
+			vns.Spreader.emergency_after_core(vns, vector3(0,0,0.5), vector3())
 		end
 		return false, true
 	end

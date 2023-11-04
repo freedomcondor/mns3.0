@@ -1,5 +1,7 @@
 require("trussGenerator")
 
+local L = 5
+
 local baseValueFunction = function(base, current, target)
 	return 0
 end
@@ -54,7 +56,6 @@ end
 
 function create_truck(th)
 	local th = th or 0
-	local L = 1.5
 	local thick = L * 2
 
 	-- left back body

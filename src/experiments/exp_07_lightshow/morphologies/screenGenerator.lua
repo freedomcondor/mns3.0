@@ -1,4 +1,4 @@
-local L = 1.5
+local L = 5
 
 function generate_screen_square(n, positionV3, orientationQ)
 	if positionV3 == nil then positionV3 = vector3() end

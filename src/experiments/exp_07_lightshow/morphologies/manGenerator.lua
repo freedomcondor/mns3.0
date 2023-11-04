@@ -5,10 +5,10 @@ local DeepCopy = require("DeepCopy")
 local light_blue = "128, 128, 255"
 local grey_color = "200, 200, 200"
 
-function create_shoulder(positionV3, orientationQ, shoulder_angle_Z, shoulder_angle_Y, fore_arm_angle_Z, fore_arm_angle_Y)
-	local L = 1.5
-	local thick = L * 1.7
+local L = 5
 
+function create_shoulder(positionV3, orientationQ, shoulder_angle_Z, shoulder_angle_Y, fore_arm_angle_Z, fore_arm_angle_Y)
+	local thick = L * 1.7
 	local shoulder_orientationQ = quaternion(-math.pi/2, vector3(0,1,0)) *
 	                              quaternion(math.pi, vector3(1,0,0)) *
 	                              quaternion(shoulder_angle_Z * math.pi/180, vector3(0,0,1)) *
@@ -37,11 +37,10 @@ function create_arm(L, thick, color, color_fore_arm, positionV3, orientationQ, a
 end
 
 function create_chest(color, positionV3, orientationQ)
-	L = 1.5
-	scale = 0.75
+	local scale = 0.75
 	return 
 	{	robotTypeS = "drone",
-		positionV3 = positionV3 or vector3(L * 0.5, 0, -L*scale*1.5),
+		positionV3 = positionV3 or vector3(L * 0.75, 0, -L*scale*1.5),
 		orientationQ = orientationQ or quaternion(),
 		lightShowLED = color,
 		children = {
@@ -92,7 +91,6 @@ function create_body(option)
 	local right_fore_arm_Z = option.right_fore_arm_Z or 30    -- + front
 	local right_fore_arm_Y = option.right_fore_arm_Y or 30    -- + inside
 
-	local L = 1.5
 	local node = create_sphere12("blue")
 	table.insert(node.children, create_chest(light_blue))
 
