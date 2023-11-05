@@ -273,6 +273,36 @@ namespace argos {
                   }
                   s_tracked_entity.DebugEntity->GetRings().emplace_back(cVecMiddle, fRadius, cColor);
                }
+               if (strDrawType == "customize_ring") {
+                  CVector3 cVecMiddle = CVector3(
+                     std::stod(vecWordList[nCurrentIdx + 1]),
+                     std::stod(vecWordList[nCurrentIdx + 2]),
+                     std::stod(vecWordList[nCurrentIdx + 3])
+                  );
+                  Real fRadius = std::stod(vecWordList[nCurrentIdx + 4]);
+                  nCurrentIdx += 5;
+                  CColor cColor;
+                  if (std::isdigit(vecWordList[nCurrentIdx][0])) {
+                     cColor.Set(std::stod(vecWordList[nCurrentIdx]),
+                                std::stod(vecWordList[nCurrentIdx + 1]),
+                                std::stod(vecWordList[nCurrentIdx + 2])
+                     );
+                     nCurrentIdx += 3;
+                  }
+                  else {
+                     cColor.Set(vecWordList[nCurrentIdx]);
+                     nCurrentIdx ++;
+                  }
+                  Real fThickness = std::stod(vecWordList[nCurrentIdx]);
+                  Real fHeight = std::stod(vecWordList[nCurrentIdx + 1]);
+                  Real fColorTransparent = std::stod(vecWordList[nCurrentIdx + 2]);
+                  s_tracked_entity.DebugEntity->GetCustomizeRings().emplace_back(cVecMiddle,
+                                                                                 fRadius,
+                                                                                 cColor,
+                                                                                 fThickness,
+                                                                                 fHeight,
+                                                                                 fColorTransparent);
+               }
                else if (strDrawType == "arrow") {
                   CVector3 cVecBegin = CVector3(
                      std::stod(vecWordList[nCurrentIdx + 1]),
@@ -297,16 +327,41 @@ namespace argos {
                      cColor.Set(vecWordList[nCurrentIdx]);
                      nCurrentIdx ++;
                   }
-                  if (m_bDrawTrackFlag == true) {
-                     if (cColor == CColor::WHITE)
-                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03, 1);
-                     if (cColor == CColor::BLUE) {
-                        s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin, cVecEnd, CColor::BLACK, 0.05, 0.03, 1);
-                     }
+                  s_tracked_entity.DebugEntity->GetArrows().emplace_back(cVecBegin, cVecEnd, cColor);
+               }
+               else if (strDrawType == "customize_arrow") {
+                  CVector3 cVecBegin = CVector3(
+                     std::stod(vecWordList[nCurrentIdx + 1]),
+                     std::stod(vecWordList[nCurrentIdx + 2]),
+                     std::stod(vecWordList[nCurrentIdx + 3])
+                  );
+                  CVector3 cVecEnd = CVector3(
+                     std::stod(vecWordList[nCurrentIdx + 4]),
+                     std::stod(vecWordList[nCurrentIdx + 5]),
+                     std::stod(vecWordList[nCurrentIdx + 6])
+                  );
+                  nCurrentIdx += 7;
+                  CColor cColor;
+                  if (std::isdigit(vecWordList[nCurrentIdx][0])) {
+                     cColor.Set(std::stod(vecWordList[nCurrentIdx]),
+                                std::stod(vecWordList[nCurrentIdx + 1]),
+                                std::stod(vecWordList[nCurrentIdx + 2])
+                     );
+                     nCurrentIdx += 3;
                   }
                   else {
-                     s_tracked_entity.DebugEntity->GetArrows().emplace_back(cVecBegin, cVecEnd, cColor);
+                     cColor.Set(vecWordList[nCurrentIdx]);
+                     nCurrentIdx ++;
                   }
+                  Real fBodyThickness = std::stod(vecWordList[nCurrentIdx]);
+                  Real fHeadThickness = std::stod(vecWordList[nCurrentIdx + 1]);
+                  Real fColorTransparent = std::stod(vecWordList[nCurrentIdx + 2]);
+                  s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin,
+                                                                                  cVecEnd,
+                                                                                  cColor,
+                                                                                  fBodyThickness,
+                                                                                  fHeadThickness,
+                                                                                  fColorTransparent);
                }
                else {
                   nCurrentIdx ++;

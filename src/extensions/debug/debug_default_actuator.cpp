@@ -17,37 +17,51 @@ namespace argos {
    int CDebugDefaultActuator::LuaDrawArrow(lua_State* pt_lua_state) {
       /* check parameters */
       int nArgCount = lua_gettop(pt_lua_state);
-      if(nArgCount != 3 && nArgCount != 5) {
-         const char* pchErrMsg = "robot.debug.draw_arrow() expects a 3 or 5 arguments";
+      if((nArgCount != 3) && (nArgCount != 6)) {
+         const char* pchErrMsg = "robot.debug.draw_arrow() expects a 3 or 6 arguments";
          return luaL_error(pt_lua_state, pchErrMsg);
       }
+      /* Get from and to */
       luaL_checktype(pt_lua_state, 1, LUA_TUSERDATA);
       const CVector3& cFrom = CLuaVector3::ToVector3(pt_lua_state, 1);
       luaL_checktype(pt_lua_state, 2, LUA_TUSERDATA);
       const CVector3& cTo = CLuaVector3::ToVector3(pt_lua_state, 2);
       /* Get color */
+      luaL_checktype(pt_lua_state, 3, LUA_TSTRING);
+      std::stringstream strColorString(lua_tostring(pt_lua_state, 3));
+      std::vector<std::string> vecColorParameters;
+      while( strColorString.good() )
+      {
+         std::string substr;
+         getline(strColorString, substr, ',');
+         vecColorParameters.push_back(substr);
+      }
       CColor cColor;
-      if(nArgCount == 3) {
-         luaL_checktype(pt_lua_state, 3, LUA_TSTRING);
+      if(vecColorParameters.size() == 1) {
          try {
-            cColor.Set(lua_tostring(pt_lua_state, 3));
+            cColor.Set(vecColorParameters[0]);
          }
          catch(CARGoSException& ex) {
             return luaL_error(pt_lua_state, ex.what());
          }
       }
       else {
-         luaL_checktype(pt_lua_state, 3, LUA_TNUMBER);
-         luaL_checktype(pt_lua_state, 4, LUA_TNUMBER);
-         luaL_checktype(pt_lua_state, 5, LUA_TNUMBER);
-         cColor.Set(lua_tonumber(pt_lua_state, 3),
-                    lua_tonumber(pt_lua_state, 4),
-                    lua_tonumber(pt_lua_state, 5));
+         cColor.Set(std::stoi(vecColorParameters[0]),
+                    std::stoi(vecColorParameters[1]),
+                    std::stoi(vecColorParameters[2]));
       }
       /* write to the actuator */
       CDebugDefaultActuator* pcDebugActuator = 
          CLuaUtility::GetDeviceInstance<CDebugDefaultActuator>(pt_lua_state, "debug");
-      pcDebugActuator->m_pvecArrows->emplace_back(cFrom, cTo, cColor);
+      if (nArgCount == 3) {
+         pcDebugActuator->m_pvecArrows->emplace_back(cFrom, cTo, cColor);
+      }
+      else {
+         Real fBodyThinkness = lua_tonumber(pt_lua_state, 4);
+         Real fHeadThinkness = lua_tonumber(pt_lua_state, 5);
+         Real fColorTransparent = lua_tonumber(pt_lua_state, 6);
+         pcDebugActuator->m_pvecCustomizeArrows->emplace_back(cFrom, cTo, cColor, fBodyThinkness, fHeadThinkness, fColorTransparent);
+      }
       return 0;
    }
 #endif
@@ -59,37 +73,52 @@ namespace argos {
    int CDebugDefaultActuator::LuaDrawRing(lua_State* pt_lua_state) {
       /* check parameters */
       int nArgCount = lua_gettop(pt_lua_state);
-      if(nArgCount != 3 && nArgCount != 5) {
-         const char* pchErrMsg = "robot.debug.draw_ring() expects a 3 or 5 arguments";
+      if((nArgCount != 3) && (nArgCount != 6)) {
+         const char* pchErrMsg = "robot.debug.draw_ring() expects a 3 or 6 arguments";
          return luaL_error(pt_lua_state, pchErrMsg);
       }
+      /* Get middle and radius */
       luaL_checktype(pt_lua_state, 1, LUA_TUSERDATA);
       const CVector3& cCenter = CLuaVector3::ToVector3(pt_lua_state, 1);
       luaL_checktype(pt_lua_state, 2, LUA_TNUMBER);
       Real fRadius = lua_tonumber(pt_lua_state, 2);
       /* Get color */
+      luaL_checktype(pt_lua_state, 3, LUA_TSTRING);
+      std::stringstream strColorString(lua_tostring(pt_lua_state, 3));
+      std::vector<std::string> vecColorParameters;
+      while( strColorString.good() )
+      {
+         std::string substr;
+         getline(strColorString, substr, ',');
+         vecColorParameters.push_back(substr);
+      }
       CColor cColor;
-      if(nArgCount == 3) {
-         luaL_checktype(pt_lua_state, 3, LUA_TSTRING);
+      if(vecColorParameters.size() == 1) {
          try {
-            cColor.Set(lua_tostring(pt_lua_state, 3));
+            cColor.Set(vecColorParameters[0]);
          }
          catch(CARGoSException& ex) {
             return luaL_error(pt_lua_state, ex.what());
          }
       }
       else {
-         luaL_checktype(pt_lua_state, 3, LUA_TNUMBER);
-         luaL_checktype(pt_lua_state, 4, LUA_TNUMBER);
-         luaL_checktype(pt_lua_state, 5, LUA_TNUMBER);
-         cColor.Set(lua_tonumber(pt_lua_state, 3),
-                    lua_tonumber(pt_lua_state, 4),
-                    lua_tonumber(pt_lua_state, 5));
+         cColor.Set(std::stoi(vecColorParameters[0]),
+                    std::stoi(vecColorParameters[1]),
+                    std::stoi(vecColorParameters[2]));
       }
       /* write to the actuator */
       CDebugDefaultActuator* pcDebugActuator = 
          CLuaUtility::GetDeviceInstance<CDebugDefaultActuator>(pt_lua_state, "debug");
-      pcDebugActuator->m_pvecRings->emplace_back(cCenter, fRadius, cColor);
+      if (nArgCount == 3) {
+         pcDebugActuator->m_pvecRings->emplace_back(cCenter, fRadius, cColor);
+      }
+      else {
+         Real fThinkness = lua_tonumber(pt_lua_state, 4);
+         Real fHeight = lua_tonumber(pt_lua_state, 5);
+         Real fColorTransparent = lua_tonumber(pt_lua_state, 6);
+         pcDebugActuator->m_pvecCustomizeRings->emplace_back(cCenter, fRadius, cColor, fThinkness, fHeight, fColorTransparent);
+      }
+
       return 0;
    }
 #endif

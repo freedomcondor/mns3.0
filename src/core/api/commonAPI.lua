@@ -121,36 +121,30 @@ function api.debug.drawArrow(color, begin, finish, essential)
 	if api.debug.show_all == false then return end
 	if api.debug.show_all ~= true and essential ~= true then return end
 	if robot.debug == nil then return end
-	-- parse color
-	local colorArray = {}
-	for word in string.gmatch(color, '([^,]+)') do
-		colorArray[#colorArray + 1] = word
+	robot.debug.draw_arrow(begin, finish, color)
+	if api.debug.recordSwitch == true then
+		api.debug.record = api.debug.record ..
+		                   "," .. "arrow" ..
+		                   "," .. tostring(begin) ..
+		                   "," .. tostring(finish) ..
+		                   "," .. color
 	end
-	-- draw
-	if tonumber(colorArray[1]) == nil then
-		robot.debug.draw_arrow(begin, finish, color)
-		if api.debug.recordSwitch == true then
-			api.debug.record = api.debug.record ..
-			                   "," .. "arrow" ..
-			                   "," .. tostring(begin) ..
-			                   "," .. tostring(finish) ..
-			                   "," .. color
-		end
-	else
-		robot.debug.draw_arrow(begin, finish,
-		                       tonumber(colorArray[1]),
-		                       tonumber(colorArray[2]),
-		                       tonumber(colorArray[3])
-		                      )
-		if api.debug.recordSwitch == true then
-			api.debug.record = api.debug.record ..
-			                   "," .. "arrow" ..
-			                   "," .. tostring(begin) ..
-			                   "," .. tostring(finish) ..
-			                   "," .. colorArray[1] ..
-			                   "," .. colorArray[2] ..
-			                   "," .. colorArray[3] 
-		end
+end
+
+function api.debug.drawCustomizeArrow(color, begin, finish, bodyThinkness, headThinkness, colorTransparent, essential)
+	if api.debug.show_all == false then return end
+	if api.debug.show_all ~= true and essential ~= true then return end
+	if robot.debug == nil then return end
+	robot.debug.draw_arrow(begin, finish, color, bodyThinkness, headThinkness, colorTransparent)
+	if api.debug.recordSwitch == true then
+		api.debug.record = api.debug.record ..
+		                   "," .. "customize_arrow" ..
+		                   "," .. tostring(begin) ..
+		                   "," .. tostring(finish) ..
+		                   "," .. color ..
+		                   "," .. bodyThinkness ..
+		                   "," .. headThinkness ..
+		                   "," .. colorTransparent
 	end
 end
 
@@ -158,36 +152,30 @@ function api.debug.drawRing(color, middle, radius, essential)
 	if api.debug.show_all == false then return end
 	if api.debug.show_all ~= true and essential ~= true then return end
 	if robot.debug == nil then return end
-	-- parse color
-	local colorArray = {}
-	for word in string.gmatch(color, '([^,]+)') do
-		colorArray[#colorArray + 1] = word
+	robot.debug.draw_ring(middle, radius, color) -- 0,0,255 (blue)
+	if api.debug.recordSwitch == true then
+		api.debug.record = api.debug.record ..
+		                   "," .. "ring" ..
+		                   "," .. tostring(middle) ..
+		                   "," .. tostring(radius) ..
+		                   "," .. color
 	end
-	if tonumber(colorArray[1]) == nil then
-		robot.debug.draw_ring(middle, radius, color) -- 0,0,255 (blue)
-		if api.debug.recordSwitch == true then
-			api.debug.record = api.debug.record ..
-			                   "," .. "ring" ..
-			                   "," .. tostring(middle) ..
-			                   "," .. tostring(radius) ..
-			                   "," .. color
-		end
-	else
-		robot.debug.draw_ring(middle, radius,
-		                       tonumber(colorArray[1]),
-		                       tonumber(colorArray[2]),
-		                       tonumber(colorArray[3])
-		                     )
-		if api.debug.recordSwitch == true then
-			api.debug.record = api.debug.record ..
-			                   "," .. "ring" ..
-			                   "," .. tostring(middle) ..
-			                   "," .. tostring(radius) ..
-			                   "," .. colorArray[1] ..
-			                   "," .. colorArray[2] ..
-			                   "," .. colorArray[3] 
-		end
-	
+end
+
+function api.debug.drawCustomizeRing(color, middle, radius, thinkness, height, colorTransparent, essential)
+	if api.debug.show_all == false then return end
+	if api.debug.show_all ~= true and essential ~= true then return end
+	if robot.debug == nil then return end
+	robot.debug.draw_ring(middle, radius, color, thinkness, height, colorTransparent) -- 0,0,255 (blue)
+	if api.debug.recordSwitch == true then
+		api.debug.record = api.debug.record ..
+		                   "," .. "customize_ring" ..
+		                   "," .. tostring(middle) ..
+		                   "," .. tostring(radius) ..
+		                   "," .. color ..
+		                   "," .. thinkness ..
+		                   "," .. height ..
+		                   "," .. colorTransparent
 	end
 end
 
@@ -339,10 +327,14 @@ function api.debug.showMorphologyLightShowLEDs(vns, essential)
 	--if vns.allocator ~= nil and vns.allocator.target.lightShowLED ~= nil then
 		local color = vns.allocator.target.lightShowLED or "white"
 
-		local r = 0.15
-		api.debug.drawRing(color, vector3(0,0,0), r, true)
-		api.debug.drawRing(color, vector3(0,0,0.1), r, true)
-		api.debug.drawRing(color, vector3(0,0,0.2), r, true)
+		local r = 0.3
+		api.debug.drawCustomizeRing(color,
+		                           vector3(0,0,0),
+		                           r,
+		                           0.02,  -- thickness
+		                           0.20,  -- height
+		                           1.0,   -- color transparent
+		                           true)
 	--end
 end
 

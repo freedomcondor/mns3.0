@@ -48,6 +48,7 @@ namespace argos {
          m_pvecArrows->clear();
          m_pvecCustomizeArrows->clear();
          m_pvecRings->clear();
+         m_pvecCustomizeRings->clear();
          m_pvecMessages->clear();
       }
 
