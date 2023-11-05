@@ -85,10 +85,26 @@ local gene = {
 }
 --]]
 
+-- overwrite default function
 -- called when a child lost its parent
 function VNS.Allocator.resetMorphology(vns)
 	--vns.Allocator.setMorphology(vns, structure_man)
 	vns.Allocator.setMorphology(vns, structure_screen)
+end
+
+function api.debug.showMorphologyLines(vns, essential)
+	if vns.allocator ~= nil and vns.allocator.target.drawLines ~= nil then
+		local color = vns.allocator.target.drawLinesColor or "gray50"
+		for i, vec in ipairs(vns.allocator.target.drawLines) do
+			vns.api.debug.drawCustomizeArrow(color,
+			                                 vector3(0,0,0),
+			                                 vns.api.virtualFrame.V3_VtoR(vec),
+			                                 0.10,
+			                                 0.10,
+			                                 1,
+			                                 essential)
+		end
+	end
 end
 
 function init()
@@ -107,7 +123,7 @@ function init()
 	elseif number % 3 == 0 then
 		api.parameters.droneDefaultStartHeight = base_height + 12
 	end
-	api.debug.show_all = true
+	--api.debug.show_all = true
 end
 
 function reset()
@@ -128,6 +144,7 @@ function reset()
 
 	lastTime = startTime
 end
+
 
 
 function step()
