@@ -59,16 +59,17 @@ namespace argos {
          std::vector<SKeyFrame> vecKeyFrame;
       };
 
-      std::vector<STrackedEntity> m_vecTrackedEntities;
+      static bool m_bDrawGoalFlag;
+      static bool m_bDrawDebugArrowsFlag;
+      static bool m_bDrawTrackFlag;
+      static UInt32 m_unDrawTrackEveryXStep;
+      static std::vector<UInt32> m_vecDrawTrackKeyFrame;
+      static UInt32 m_unStepCount;
+      static bool m_bFinishSignal;
 
-      bool m_bDrawGoalFlag = false;
-      bool m_bDrawDebugArrowsFlag = false;
-      bool m_bDrawTrackFlag = false;
-      UInt32 m_unDrawTrackEveryXStep = 1;
-      std::vector<UInt32> m_vecDrawTrackKeyFrame;
-      std::vector<CColor> m_vecColorMap;
-      std::vector<CColor> m_vecLightColorMap;
-      UInt32 m_unStepCount;
+      static std::vector<STrackedEntity> m_vecTrackedEntities;
+      static std::map<std::string, UInt32> m_mapEntityIDTrackedEntityIndex;
+      static void EntityMultiThreadIteration(CControllableEntity* cControllableEntity);
    };
 }
 

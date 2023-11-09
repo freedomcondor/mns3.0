@@ -120,6 +120,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/replayer_template.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
+        ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["DRONES",            drone_xml],
         ["PIPUCKS",           pipuck_xml],
         ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, True)],

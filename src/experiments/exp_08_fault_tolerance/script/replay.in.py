@@ -73,6 +73,7 @@ generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.ar
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
         ["TOTALLENGTH",       str((Experiment_length or 0)/5)],
+        ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
         ["OBSTACLES",         obstacle_xml],
