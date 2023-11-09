@@ -6,11 +6,39 @@ namespace argos {
    /****************************************/
    /****************************************/
 
+   // Declaration of static variables
+   std::vector<CMyLoopFunctions::STrackedEntity> CMyLoopFunctions::m_vecTrackedEntities;
+   std::map<std::string, UInt32> CMyLoopFunctions::m_mapEntityIDTrackedEntityIndex;
+
+   /****************************************/
+   /****************************************/
+
+   void CMyLoopFunctions::EntityMultiThreadIteration(CControllableEntity* cControllableEntity) {
+      /* get tracked entity from cControllableEntity id */
+      STrackedEntity& s_tracked_entity = m_vecTrackedEntities[
+         m_mapEntityIDTrackedEntityIndex[cControllableEntity->GetRootEntity().GetId()]
+      ];
+      /* Store position, orientation and debug message */
+      SAnchor& s_origin_anchor = s_tracked_entity.EmbodiedEntity->GetOriginAnchor();
+      s_tracked_entity.LogFile << s_origin_anchor.Position << ',' << s_origin_anchor.Orientation;
+      if(s_tracked_entity.DebugEntity) {
+         CDebugEntity::TMessageVec& tMessageVec = s_tracked_entity.DebugEntity->GetMessages();
+         for(std::string strMessage: tMessageVec) {
+            s_tracked_entity.LogFile << ',' << strMessage;
+         }
+      }
+      s_tracked_entity.LogFile << std::endl;
+   }
+
+   /****************************************/
+   /****************************************/
+
    void CMyLoopFunctions::Init(TConfigurationNode& t_tree) {
       system("rm -rf logs");
       system("mkdir -p logs");
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
+      UInt32 unEntityCount = 0;
       for(CEntity* pc_entity : tRootEntityVector) {
          CComposableEntity* pcComposable = dynamic_cast<CComposableEntity*>(pc_entity);
          if(pcComposable == nullptr) {
@@ -25,6 +53,8 @@ namespace argos {
             catch(CARGoSException& ex) {
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr);
             }
+            m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
+            unEntityCount++;
          }
          catch(CARGoSException& ex) {
             /* only track entities with bodies */
@@ -37,17 +67,7 @@ namespace argos {
    /****************************************/
 
    void CMyLoopFunctions::PostStep() {
-      for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
-         SAnchor& s_origin_anchor = s_tracked_entity.EmbodiedEntity->GetOriginAnchor();
-         s_tracked_entity.LogFile << s_origin_anchor.Position << ',' << s_origin_anchor.Orientation;
-         if(s_tracked_entity.DebugEntity) {
-            CDebugEntity::TMessageVec& tMessageVec = s_tracked_entity.DebugEntity->GetMessages();
-            for(std::string strMessage: tMessageVec) {
-               s_tracked_entity.LogFile << ',' << strMessage;
-            }
-         }
-         s_tracked_entity.LogFile << std::endl;
-      }
+      GetSpace().IterateOverControllableEntities(EntityMultiThreadIteration);
    }
    
    /****************************************/
