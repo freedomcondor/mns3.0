@@ -577,7 +577,15 @@ function Allocator.multi_branch_allocate(vns, branches)
 		}
 	end
 
-	-- create a cost matrix
+	-- check max priority
+	local max_priority = 1
+	for j = 1, #targetList do
+		if targetList[j].index.priority ~= nil and targetList[j].index.priority > max_priority then
+			max_priority = targetList[j].index.priority
+		end
+	end
+	-- create a cost matrix and check max cost
+	local max_cost = 0
 	local originCost = {}
 	for i = 1, #sourceList do originCost[i] = {} end
 	for i = 1, #sourceList do
@@ -585,9 +593,15 @@ function Allocator.multi_branch_allocate(vns, branches)
 			local targetPosition = vector3(targetList[j].index.positionV3)
 			local relativeVector = sourceList[i].index.positionV3 - targetPosition
 			if vns.api.parameters.mode_2D == true then relativeVector.z = 0 end
-			originCost[i][j] = relativeVector:length()
-			if targetList[j].index.priority ~= nil then
-				originCost[i][j] = originCost[i][j] * targetList[j].index.priority
+			originCost[i][j] = relativeVector:length() * relativeVector:length()
+			if originCost[i][j] > max_cost then max_cost = originCost[i][j] end
+		end
+	end
+	-- create a cost matrix and check max cost
+	if max_priority > 1 then
+		for i = 1, #sourceList do
+			for j = 1, #targetList do
+				originCost[i][j] = originCost[i][j] + (max_priority - (targetList[j].index.priority or 1)) * max_cost
 			end
 		end
 	end
@@ -822,7 +836,15 @@ function Allocator.allocate(vns, branches)
 		}
 	end
 
-	-- create a cost matrix
+	-- check max priority
+	local max_priority = 1
+	for j = 1, #targetList do
+		if targetList[j].index.priority ~= nil and targetList[j].index.priority > max_priority then
+			max_priority = targetList[j].index.priority
+		end
+	end
+	-- create a cost matrix and check max cost
+	local max_cost = 0
 	local originCost = {}
 	for i = 1, #sourceList do originCost[i] = {} end
 	for i = 1, #sourceList do
@@ -830,9 +852,15 @@ function Allocator.allocate(vns, branches)
 			local targetPosition = vector3(targetList[j].index.positionV3)
 			local relativeVector = sourceList[i].index.positionV3 - targetPosition
 			if vns.api.parameters.mode_2D == true then relativeVector.z = 0 end
-			originCost[i][j] = relativeVector:length()
-			if targetList[j].index.priority ~= nil then
-				originCost[i][j] = originCost[i][j] * targetList[j].index.priority
+			originCost[i][j] = relativeVector:length() * relativeVector:length()
+			if originCost[i][j] > max_cost then max_cost = originCost[i][j] end
+		end
+	end
+	-- create a cost matrix and check max cost
+	if max_priority > 1 then
+		for i = 1, #sourceList do
+			for j = 1, #targetList do
+				originCost[i][j] = originCost[i][j] + (max_priority - (targetList[j].index.priority or 1)) * max_cost
 			end
 		end
 	end
@@ -846,6 +874,8 @@ function Allocator.allocate(vns, branches)
 	Allocator.GraphMatch(sourceList, targetList, originCost, "reference_pipuck")
 
 	--[[
+	logger("originCost")
+	logger(originCost)
 	logger("sourceList")
 	for i, source in ipairs(sourceList) do
 		logger(i, source.index.idS or source.index.idN, source.index.robotTypeS)
@@ -987,61 +1017,17 @@ end
 
 -------------------------------------------------------------------------------
 function Allocator.GraphMatch(sourceList, targetList, originCost, type)
-	-- create a enhanced cost matrix
-	-- and orderlist, to sort everything in originCost
-	local orderList = {}
-	local count = 0
-	for i = 1, #sourceList do
-		for j = 1, #targetList do
-			count = count + 1
-			orderList[count] = originCost[i][j]
-		end
-	end
-
-	-- sort orderlist
-	for i = 1, #orderList - 1 do
-		for j = i + 1, #orderList do
-			if orderList[i] > orderList[j] then
-				local temp = orderList[i]
-				orderList[i] = orderList[j]
-				orderList[j] = temp
-			end
-		end
-	end
-
-	-- calculate sum for sourceList
-	local sourceSum = 0
-	for i = 1, #sourceList do
-		sourceSum = sourceSum + (sourceList[i].number[type] or 0)
-	end
-	-- create a reverse index
-	local reverseIndex = {}
-	for i = 1, #orderList do reverseIndex[orderList[i]] = i end
 	-- create an enhanced cost matrix
 	local cost = {}
 	for i = 1, #sourceList do
 		cost[i] = {}
 		for j = 1, #targetList do
-			--cost[i][j] = (sourceSum + 1) ^ reverseIndex[originCost[i][j]]
-			if (sourceSum + 1) ^ (#orderList + 1) > 2 ^ 31 then
-				--cost[i][j] = BaseNumber:createWithInc(sourceSum + 1, reverseIndex[originCost[i][j]])
-				cost[i][j] = originCost[i][j] * originCost[i][j]
-			else
-				--cost[i][j] = (sourceSum + 1) ^ reverseIndex[originCost[i][j]]
-				cost[i][j] = originCost[i][j] * originCost[i][j]
-			end
-			---[[
+			--cost[i][j] = originCost[i][j] * originCost[i][j]  -- the square happens in originCost
+			cost[i][j] = originCost[i][j]
 			if sourceList[i].index.robotTypeS ~= targetList[j].index.robotTypeS or
 			   sourceList[i].index.robotTypeS ~= type then
-				if (sourceSum + 1) ^ (#orderList + 1) > 2 ^ 31 then
-					--cost[i][j] = cost[i][j] + BaseNumber:createWithInc(sourceSum + 1, #orderList + 1)
-					cost[i][j] = cost[i][j] + 2 ^ 31
-				else
-					--cost[i][j] = cost[i][j] + (sourceSum + 1) ^ (#orderList + 1)
-					cost[i][j] = cost[i][j] + (sourceSum + 1) ^ (#orderList + 1)
-				end
+				cost[i][j] = cost[i][j] + 2 ^ 31
 			end
-			--]]
 		end
 	end
 
