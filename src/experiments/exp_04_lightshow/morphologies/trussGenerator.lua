@@ -53,7 +53,7 @@ return {
 		positionV3 = vector3(L*0.5, L*0.5, thick),
 		orientationQ = quaternion(),
 		drawLines = {vector3(-L, 0, 0)},
-		priority = 0.01,
+		priority = 3,
 		drawLinesColor = color,
 		lightShowLED = color,
 	},
@@ -87,7 +87,7 @@ function create_beam(n, L, thick, color, positionV3, orientationQ, children)
 		{	robotTypeS = "drone",
 			positionV3 = vector3(L*0.5, 0, thick),
 			orientationQ = quaternion(),
-			priority = 0.01,
+			priority = 3,
 			lightShowLED = color,
 		},
 	}}

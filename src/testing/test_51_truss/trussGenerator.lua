@@ -29,7 +29,7 @@ return {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(0, -L, 0),
 		orientationQ = quaternion(),
-		priority = 0.1,
+		priority = 2,
 		drawLines = {
 			vector3(L, 0, 0),
 			vector3(L*0.5, L*0.5, L*1.5),
@@ -39,7 +39,7 @@ return {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*0.5, -L*0.5, L*1.5),
 		orientationQ = quaternion(),
-		priority = 0.01,
+		priority = 3,
 		drawLines = {
 			vector3(L*0.5, L*0.5, -L*1.5),
 			vector3(L*0.5, -L*0.5, -L*1.5),
@@ -49,7 +49,7 @@ return {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*0.5, -L*0.5, -L*1.5),
 		orientationQ = quaternion(),
-		priority = 0.01,
+		priority = 3,
 		drawLines = {
 			vector3(L*0.5, L*0.5,  L*1.5),
 			vector3(L*0.5, -L*0.5, L*1.5),
@@ -70,7 +70,7 @@ return {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*0.5, L*0.5, L*1.5),
 		orientationQ = quaternion(),
-		priority = 0.01,
+		priority = 3,
 		drawLines = {
 			vector3(L*0.5, -L*0.5, -L*1.5),
 			vector3(-L*0.5, -L*0.5, -L*1.5),
@@ -93,7 +93,7 @@ return {
 	{	robotTypeS = "drone",
 		positionV3 = vector3(L*0.5, -L*0.5, L*1.5),
 		orientationQ = quaternion(),
-		priority = 0.01,
+		priority = 3,
 		drawLines = {
 			vector3(L*0.5, L*0.5, -L*1.5),
 			vector3(-L*0.5, L*0.5, -L*1.5),
