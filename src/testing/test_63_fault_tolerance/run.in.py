@@ -11,7 +11,7 @@ n_drone = 100
 # calculate side
 n_side = n_drone ** (1.0/3)
 
-L = 1.5
+L = 5
 
 half_side_length = (n_side-1) * L * 0.5
 
@@ -21,40 +21,27 @@ arena_z_center = arena_size / 2 - 2
 offset = 0
 yoffset = 0
 y_scale = 1.2
-if n_drone == 512 :
-    y_scale = 1.7
 drone_locations = generate_random_locations(n_drone,
-                                            offset -half_side_length,     yoffset-half_side_length,               # origin location
+                                            offset -half_side_length,     yoffset-half_side_length,          # origin location
                                             offset -half_side_length*1.2, offset+half_side_length*1.2,       # random x range
-                                            yoffset-half_side_length*y_scale, yoffset + half_side_length*y_scale,                     # random y range
-                                            0.5, 1.5,           # near limit and far limit
+                                            yoffset-half_side_length*1.2, yoffset+half_side_length*1.2,      # random y range
+                                            1.5, 3,             # near limit and far limit
                                             10000)              # attempt count
 
-drone_xml = generate_drones(drone_locations, 1, 4.2)                  # from label 1 generate drone xml tags, communication range 4.2
+drone_xml = generate_drones(drone_locations, 1, 12)                  # from label 1 generate drone xml tags, communication range 4.2
 
 obstacle_xml = ""
 
-parameters = '''
-    mode_2D="false"
-    drone_real_noise="false"
-    drone_tilt_sensor="true"
+parameters = generate3DdroneParameters()
+parameters['driver_default_speed'] = 0.5
+parameters['driver_slowdown_zone'] = 5.0
+parameters['driver_stop_zone'] = 0.3
+parameters['driver_arrive_zone'] = 3.0
+parameters['dangerzone_drone'] = 3.0
+parameters['dangerzone_aerial_obstacle'] = 3.0
 
-    drone_label="1, 1000"
-
-    safezone_drone_drone="5"
-    dangerzone_drone="0.5"
-
-    second_report_sight="false"
-
-    driver_default_speed="0.3"
-    driver_slowdown_zone="1.0"
-    driver_stop_zone="0.15"
-    driver_arrive_zone="1.0"
-
-    n_drone="{}"
-
-    drone_velocity_mode="true"
-'''.format(n_drone)
+parameters['n_drone'] = n_drone
+parameters_txt = generateParametersText(parameters)
 
 # generate argos file
 generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 
@@ -69,7 +56,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["DRONES",            drone_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters, {"velocity_mode":True})],
+        ''' + parameters_txt, {"velocity_mode":True})],
 #        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, None)],
     ]
 )

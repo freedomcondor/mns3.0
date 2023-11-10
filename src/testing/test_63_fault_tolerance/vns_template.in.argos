@@ -21,7 +21,7 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="ARENA_SIZE, ARENA_SIZE, ARENA_SIZE" positional_index="grid" center="0, 0, ARENA_Z_CENTER">
-    <floor id="floor" source="image" path="floor_texture/wood_floor.png" />
+    <floor id="floor" source="image" path="floor_texture/grey_floor.png" />
     <!-- real scenario -->
     REAL_SCENARIO
 
@@ -69,7 +69,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl lua_editor="false" show_boundary="false">
+    <qt-opengl lua_editor="false" show_boundary="false" background_color="white">
       <user_functions library="@CMAKE_BINARY_DIR@/libmy_qtopengl_extensions"
                       label="my_qtopengl_user_functions" />
       <camera>
