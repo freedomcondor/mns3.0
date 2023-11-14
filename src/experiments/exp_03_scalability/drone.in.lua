@@ -269,7 +269,7 @@ return function()
 		end
 	-- forward
 	elseif state == "forward" and vns.parentR == nil then
-		vns.intersectionDetector.switch = true
+		--vns.intersectionDetector.switch = true
 		lastScale = vns.scalemanager.scale["drone"]
 		-- switch formations based on swarm size
 		if vns.scalemanager.scale["drone"] == n_drone then
@@ -375,7 +375,7 @@ return function()
 		end
 
 	elseif state == "split" then
-		vns.intersectionDetector.switch = false
+		--vns.intersectionDetector.switch = false
 		if vns.allocator.target.split == true then
 			-- rebellion
 			if vns.parentR ~= nil then
@@ -480,7 +480,7 @@ return function()
 			end
 		end
 	elseif state == "end" then
-		vns.intersectionDetector.switch = true
+		--vns.intersectionDetector.switch = true
 		if vns.parentR == nil then
 			lastScale = vns.scalemanager.scale["drone"]
 			-- switch formations based on swarm size
