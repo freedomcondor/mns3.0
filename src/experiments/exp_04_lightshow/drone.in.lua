@@ -23,43 +23,32 @@ n_screen_side       = math.ceil(n_drone ^ (1/2))
 
 local structure_screen = generate_screen_square(n_screen_side)
 
-local structure_man1 = create_body{
-	right_shoulder_Z = 145,
-	right_shoulder_Y = -15,
-	right_fore_arm_Z = 15,
-	right_fore_arm_Y = 25,
-}
+-- structure mans
+local structure_mans = {}
+local structure_mans_n = 4
+local right_shoulder_Y_left = -20
+local right_shoulder_Y_right = -5
+local right_shoulder_Y_range = right_shoulder_Y_right - right_shoulder_Y_left
+local right_shoulder_Y_step = right_shoulder_Y_range / (structure_mans_n - 1)
+for i = 1, structure_mans_n do
+	structure_mans[i] = create_body{
+		right_shoulder_Z = 145,
+		right_shoulder_Y = right_shoulder_Y_left + right_shoulder_Y_step * (i-1),
+		right_fore_arm_Z = 15,
+		right_fore_arm_Y = 25,
+	}
+end
 
-local structure_man2 = create_body{
-	right_shoulder_Z = 145,
-	right_shoulder_Y = -12,
-	right_fore_arm_Z = 15,
-	right_fore_arm_Y = 30,
-}
-
-local structure_man3 = create_body{
-	right_shoulder_Z = 145,
-	right_shoulder_Y = -10,
-	right_fore_arm_Z = 15,
-	right_fore_arm_Y = 35,
-}
-
-local structure_man4 = create_body{
-	right_shoulder_Z = 145,
-	right_shoulder_Y = -8,
-	right_fore_arm_Z = 15,
-	right_fore_arm_Y = 40,
-}
-
-local structure_man5 = DeepCopy(structure_man3)
-local structure_man6 = DeepCopy(structure_man2)
-
-local structure_truck1 = create_truck(10)
-local structure_truck2 = create_truck(20)
-local structure_truck3 = create_truck(30)
-local structure_truck4 = create_truck(40)
-local structure_truck5 = create_truck(50)
-local structure_truck6 = create_truck(60)
+-- structure trucks
+local structure_trucks = {}
+local structure_trucks_n = 7
+local wheel_degree_left = 0
+local wheel_degree_right = 60
+local wheel_degree_range = wheel_degree_right - wheel_degree_left
+local wheel_degree_step = wheel_degree_range / (structure_trucks_n - 1)
+for i = 1, structure_trucks_n do
+	structure_trucks[i] = create_truck(wheel_degree_step * (i-1))
+end
 
 local gene = {
 	robotTypeS = "drone",
@@ -67,23 +56,15 @@ local gene = {
 	orientationQ = quaternion(),
 	children = {
 		structure_screen,
-
-		structure_truck1,
-		structure_truck2,
-		structure_truck3,
-		structure_truck4,
-		structure_truck5,
-		structure_truck6,
-
-		structure_man1,
-		structure_man2,
-		structure_man3,
-		structure_man4,
-		structure_man5,
-		structure_man6,
 	}
 }
---]]
+
+for i = 1, structure_trucks_n do
+	table.insert(gene.children, structure_trucks[i])
+end
+for i = 1, structure_mans_n do
+	table.insert(gene.children, structure_mans[i])
+end
 
 -- overwrite default function
 -- called when a child lost its parent
@@ -160,7 +141,7 @@ function step()
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
 
 	--local LED_zone = vns.Parameters.driver_stop_zone * 10
-	local LED_zone = vns.Parameters.driver_arrive_zone
+	local LED_zone = vns.Parameters.driver_arrive_zone * 1.5
 	-- show morphology lines
 	if vns.goal.positionV3:length() < LED_zone then
 		api.debug.showMorphologyLines(vns, true)
@@ -176,24 +157,27 @@ function destroy()
 end
 
 function create_navigation_node(vns)
-	state = "init"
-	waitNextState = "init"
-	stateCount = 0
+	local state = "init"
+	local subState = 3
+	local waitNextState = "init"
+	local waitNextSubState = 3
+	local stateCount = 0
 
-	local function sendChilrenNewState(vns, newState)
+	local function sendChilrenNewState(vns, newState, newSubState)
 		for idS, childR in pairs(vns.childrenRT) do
-			vns.Msg.send(idS, "switch_to_state", {state = newState})
+			vns.Msg.send(idS, "switch_to_state", {state = newState, subState = newSubState})
 		end
 	end
 
-	local function newState(vns, _newState)
+	local function newState(vns, _newState, _newSubState)
 		stateCount = 0
 		state = _newState
+		subState = _newSubState
 	end
 
-	local function switchAndSendNewState(vns, _newState)
-		newState(vns, _newState)
-		sendChilrenNewState(vns, _newState)
+	local function switchAndSendNewState(vns, _newState, _newSubState)
+		newState(vns, _newState, _newSubState)
+		sendChilrenNewState(vns, _newState, _newSubState)
 	end
 
 	local function generate_map_index(map)
@@ -270,7 +254,7 @@ return function()
 	stateCount = stateCount + 1
 	-- if I receive switch state cmd from parent
 	if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "switch_to_state")) do
-		switchAndSendNewState(vns, msgM.dataT.state)
+		switchAndSendNewState(vns, msgM.dataT.state, msgM.dataT.subState)
 	end end
 
 	-- fail safe
@@ -290,36 +274,37 @@ return function()
 	-- init
 	if state == "init" then
 		if api.stepCount > 200 then
-			waitNextState = 3
+			waitNextState = "countDown"
+			waitNextSubState = 3
 			switchAndSendNewState(vns, "wait")
 		end
 	elseif state == "wait" then
 		if vns.parentR == nil and stateCount > 30 then
 			if vns.driver.all_arrive == true then
-				switchAndSendNewState(vns, waitNextState)
+				switchAndSendNewState(vns, waitNextState, waitNextSubState)
 			end
 		end
 	-- count Down
-	elseif state == 3 or state == 2 or state == 1 then
+	elseif state == "countDown" then
 		-- parent log state
 		if vns.parentR == nil then
-			logger("--- count state : ", state)
+			logger("--- count state : ", state, subState)
 		end
 		-- all robots, check index and turn on led
 		local index = vns.allocator.target.idN
 		local index_base = structure_screen.idN
 		index = index - index_base + 1
-		if map_index[state][index] == 1 then
+		if map_index[subState][index] == 1 then
 			vns.allocator.target.lightShowLED = "red"
 		else
 			vns.allocator.target.lightShowLED = nil
 		end
 
 		if vns.parentR == nil and stateCount > 30 then
-			if state == 1 then
+			if subState == 1 then
 				switchAndSendNewState(vns, "rebellian")
 			else
-				switchAndSendNewState(vns, state - 1)
+				switchAndSendNewState(vns, "countDown", subState - 1)
 			end
 		end
 	elseif state == "rebellian" then
@@ -344,59 +329,39 @@ return function()
 			if vns.scalemanager.scale:totalNumber() == n_drone then
 				vns.allocator.mode_switch = "allocate"
 				--vns.setMorphology(vns, structure_man)
-				vns.setMorphology(vns, structure_truck1)
-				waitNextState = "truck1"
+				vns.setMorphology(vns, structure_trucks[1])
+				waitNextState = "truck"
+				subState = 1
 				switchAndSendNewState(vns, "wait")
 			end
 		end
-	elseif state == "truck1" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_truck2)
-		waitNextState = "truck2"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "truck2" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_truck3)
-		waitNextState = "truck3"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "truck3" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_truck4)
-		waitNextState = "truck4"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "truck4" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_truck5)
-		waitNextState = "truck5"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "truck5" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_truck6)
-		waitNextState = "truck6"
+	elseif state == "truck" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_trucks[subState])
+		if subState == structure_trucks_n then
+			waitNextState = "man_up"
+			waitNextSubState = 1
+		else
+			waitNextSubState = subState + 1
+		end
 		switchAndSendNewState(vns, "wait")
 
-	elseif state == "truck6" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man1)
-		waitNextState = "man1"
+	elseif state == "man_up" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_mans[subState])
+		if subState == structure_mans_n then
+			waitNextState = "man_down"
+			waitNextSubState = structure_mans_n
+		else
+			waitNextSubState = subState + 1
+		end
 		switchAndSendNewState(vns, "wait")
-	elseif state == "man1" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man2)
-		waitNextState = "man2"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "man2" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man3)
-		waitNextState = "man3"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "man3" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man4)
-		waitNextState = "man4"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "man4" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man5)
-		waitNextState = "man5"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "man5" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man6)
-		waitNextState = "man6"
-		switchAndSendNewState(vns, "wait")
-	elseif state == "man6" and vns.parentR == nil then
-		vns.setMorphology(vns, structure_man1)
-		waitNextState = "man1"
+	elseif state == "man_down" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_mans[subState])
+		if subState == 1 then
+			waitNextState = "man_up"
+			waitNextSubState = 1
+		else
+			waitNextSubState = subState - 1
+		end
 		switchAndSendNewState(vns, "wait")
 	end
 end end
