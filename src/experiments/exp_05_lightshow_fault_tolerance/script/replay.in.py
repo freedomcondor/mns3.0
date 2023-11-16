@@ -2,6 +2,8 @@ replayerFile = "@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer.py"
 #execfile(createArgosFileName)
 exec(compile(open(replayerFile, "rb").read(), replayerFile, 'exec'))
 
+arena_size_xml = "300, 300, 300"
+arena_center_xml = "0,0,149"
 #----------------------------------------------------------------------------------------------
 # generate argos file
 #generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.argos", 

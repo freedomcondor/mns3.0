@@ -11,6 +11,7 @@ local BT = require("BehaviorTree")
 Transform = require("Transform")
 
 require("screenGenerator")
+require("morphologyGenerateCube")
 require("manGenerator")
 require("truckGenerator")
 
@@ -22,6 +23,7 @@ local n_drone = tonumber(robot.params.n_drone)
 n_screen_side       = math.ceil(n_drone ^ (1/2))
 
 local structure_screen = generate_screen_square(n_screen_side)
+local structure_cube_30 = generate_reinforcement_cube_30()
 
 -- structure mans
 local structure_mans = {}
@@ -56,6 +58,7 @@ local gene = {
 	orientationQ = quaternion(),
 	children = {
 		structure_screen,
+		structure_cube_30,
 	}
 }
 
@@ -77,7 +80,8 @@ end
 
 function api.debug.showMorphologyLines(vns, essential)
 	if vns.allocator ~= nil and vns.allocator.target.drawLines ~= nil then
-		local color = vns.allocator.target.drawLinesColor or "gray50"
+		--local color = vns.allocator.target.drawLinesColor or "gray50"
+		local color = "white"
 		for i, vec in ipairs(vns.allocator.target.drawLines) do
 			vns.api.debug.drawCustomizeArrow(color,
 			                                 vector3(0,0,0),
@@ -88,6 +92,22 @@ function api.debug.showMorphologyLines(vns, essential)
 			                                 essential)
 		end
 	end
+end
+
+function api.debug.showMorphologyLightShowLEDs(vns, essential)
+	--if vns.allocator ~= nil and vns.allocator.target.lightShowLED ~= nil then
+		--local color = vns.allocator.target.lightShowLED or "white"
+		local color = "white"
+
+		local r = 0.3
+		api.debug.drawCustomizeRing(color,
+		                           vector3(0,0,0),
+		                           r,
+		                           0.02,  -- thickness
+		                           0.20,  -- height
+		                           1.0,   -- color transparent
+		                           true)
+	--end
 end
 
 function init()
@@ -156,10 +176,14 @@ function step()
 	--local LED_zone = vns.Parameters.driver_stop_zone * 10
 	local LED_zone = vns.Parameters.driver_arrive_zone * 1.5
 	-- show morphology lines
-	if vns.goal.positionV3:length() < LED_zone and vns.failed ~= true then
+	--if vns.goal.positionV3:length() < LED_zone and vns.failed ~= true then
+	if vns.driver.all_arrive == true and
+	   vns.failed ~= true and
+	   vns.scalemanager.scale:totalNumber() > 3 then
 		api.debug.showMorphologyLines(vns, true)
-		api.debug.showMorphologyLightShowLEDs(vns, true)
 	end
+
+	api.debug.showMorphologyLightShowLEDs(vns, true)
 
 	if vns.parentR == nil then
 		vns.api.virtualFrame.logicOrientationQ = quaternion()
@@ -183,7 +207,7 @@ return function()
 	if number > reinforceID then
 		if vns.api.stepCount < takeOffStep then
 			robot.flight_system.ready = function() return false end
-			vns.setMorphology(vns, structure_screen)
+			vns.setMorphology(vns, structure_cube_30)
 			return false, false
 		elseif vns.api.stepCount == takeOffStep then
 			robot.flight_system.ready = function() return true end
@@ -203,7 +227,7 @@ function create_reinforcement_navigation_node(vns)
 		function() if number > reinforceID then return false, true else return false, false end end,
 		function()
 			if vns.parentR == nil then
-				vns.setMorphology(vns, structure_screen)
+				vns.setMorphology(vns, structure_cube_30)
 				if state == "wait" then
 					if vns.scalemanager.scale:totalNumber() == reinforceGroupNumber and
 					   vns.driver.all_arrive == true then
@@ -221,23 +245,23 @@ function create_failure_node(vns)
 vns.failed = false
 return function()
 	if vns.failed == true then
-		if robot.flight_system.position.z > 2.0 then
+		if robot.flight_system.position.z > 5.0 then
 			vns.api.setSpeed(0,0,-5, 0.4)
 		else
-			vns.api.setSpeed(0,0,0, 0.4)
+			vns.api.setSpeed(0,0,-robot.flight_system.position.z, 0.0)
 		end
 		return false, false
 	end
 
-	if vns.api.stepCount == 1000 and vns.allocator.target.failure == "failure_1" then
+	if vns.api.stepCount == 800 and vns.allocator.target.failure == "failure_1" then
 		vns.failed = true
 	end
 
-	if vns.api.stepCount == 1500 and vns.allocator.target.failure == "failure_1" then
+	if vns.api.stepCount == 1300 and vns.allocator.target.failure == "failure_1" then
 		vns.failed = true
 	end
 
-	if vns.api.stepCount == 2000 and vns.allocator.target.failure == "failure_2" then
+	if vns.api.stepCount == 1800 and vns.allocator.target.failure == "failure_2" then
 		vns.failed = true
 	end
 

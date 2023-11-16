@@ -43,26 +43,27 @@ namespace argos {
       m_unStepCount++ ;
 
       // wind
-      /*
       CVector3 cWindBaseNormalVector = CVector3(1, 0, 0).Normalize();
       Real fWindDiviation = 5;
       Real fWindSpeed = 0.5;
-      UInt32 unWindStartStep = 1000;
-      UInt32 unWindEndStep = 1150;
+      UInt32 unWindStartStep = 3600;
+      UInt32 unWindEndStep = 3700;
       if ((unWindStartStep < m_unStepCount) && (m_unStepCount < unWindEndStep))
          for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
-            CVector3 cCurrentPositionV3 = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Position;
-            CQuaternion cCurrentOrientationQ = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Orientation;
+            Real fCurrentHeight = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Position.GetZ();
+            if (fCurrentHeight > 2) {
+               CVector3 cCurrentPositionV3 = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Position;
+               CQuaternion cCurrentOrientationQ = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Orientation;
 
-            Real fSideWind = m_pcRNG->Uniform(CRange<Real>(-fWindDiviation, fWindDiviation));
-            CVector3 cWind = cWindBaseNormalVector + CVector3(fSideWind, fSideWind, fSideWind);
-            cWind = cWind.Normalize() * fWindSpeed;
-            if (s_tracked_entity.Entity->GetId() == "drone1" ) { cWind.SetY(0); cWind.SetZ(0);}
+               Real fSideWind = m_pcRNG->Uniform(CRange<Real>(-fWindDiviation, fWindDiviation));
+               CVector3 cWind = cWindBaseNormalVector + CVector3(fSideWind, fSideWind, fSideWind/2);
+               cWind = cWind.Normalize() * fWindSpeed;
+               if (s_tracked_entity.Entity->GetId() == "drone1" ) { cWind.SetY(0); cWind.SetZ(0);}
 
-            s_tracked_entity.EmbodiedEntity->MoveTo(cCurrentPositionV3 + cWind,
-                                                   cCurrentOrientationQ);
+               s_tracked_entity.EmbodiedEntity->MoveTo(cCurrentPositionV3 + cWind,
+                                                       cCurrentOrientationQ);
+            }
          }
-      */
 
       // log locations
       for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
