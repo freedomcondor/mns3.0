@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="MULTITHREADS" />
+    <experiment length="TOTALLENGTH" ticks_per_second="5" random_seed="RANDOMSEED" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <!-- Drone Controller -->
+    <lua_controller id="drone">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+    <!-- Pipuck Controller -->
+    <lua_controller id="pipuck">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="ARENA_SIZE" positional_index="grid" center="ARENA_CENTER">
+    <floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/dark_green_floor.png" />
+    <!--floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/wood_floor.png" /-->
+    <!--floor id="floor" source="loop_functions" pixels_per_meter="1" color="grey"/-->
+    <!-- real scenario -->
+    REAL_SCENARIO
+
+    <!-- drones -->
+    DRONES
+    <!-- pipucks -->
+    PIPUCKS
+    <!-- walls -->
+    WALL 
+    <!-- target -->
+    TARGET
+    <!-- random obstacles-->
+    OBSTACLES
+  </arena>
+
+  <!-- Physics engines, Media, Loop functions and visualization -->
+  SIMULATION_SETUP
+
+</argos-configuration>

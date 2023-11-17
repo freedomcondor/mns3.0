@@ -42,7 +42,7 @@ parameters['n_drone'] = n_drone
 parameters_txt = generateParametersText(parameters)
 
 # generate argos file
-generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos", 
+generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
                     "vns.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py

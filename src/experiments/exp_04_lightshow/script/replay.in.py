@@ -4,7 +4,7 @@ exec(compile(open(replayerFile, "rb").read(), replayerFile, 'exec'))
 
 #----------------------------------------------------------------------------------------------
 # generate argos file
-generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.argos", 
+generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/replayer_template.argos",
                     "replay.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py

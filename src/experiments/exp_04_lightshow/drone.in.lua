@@ -73,9 +73,9 @@ function VNS.Allocator.resetMorphology(vns)
 	vns.Allocator.setMorphology(vns, structure_screen)
 end
 
-function api.debug.showMorphologyLines(vns, essential)
+function api.debug.showMorphologyLines(vns, color)
 	if vns.allocator ~= nil and vns.allocator.target.drawLines ~= nil then
-		local color = vns.allocator.target.drawLinesColor or "gray50"
+		--local color = vns.allocator.target.drawLinesColor or "gray50"
 		for i, vec in ipairs(vns.allocator.target.drawLines) do
 			vns.api.debug.drawCustomizeArrow(color,
 			                                 vector3(0,0,0),
@@ -83,9 +83,22 @@ function api.debug.showMorphologyLines(vns, essential)
 			                                 0.10,
 			                                 0.10,
 			                                 1,
-			                                 essential)
+			                                 true)
 		end
 	end
+end
+
+function api.debug.showMorphologyLightShowLEDs(vns, color)
+	--if vns.allocator ~= nil and vns.allocator.target.lightShowLED ~= nil then
+		--local color = vns.allocator.target.lightShowLED or "white"
+		api.debug.drawCustomizeRing(color,
+		                           vector3(0,0,0),
+		                           0.5,   -- radius
+		                           0.05,  -- thickness
+		                           0.30,  -- height
+		                           1.0,   -- color transparent
+		                           true)
+	--end
 end
 
 function init()
@@ -143,9 +156,19 @@ function step()
 	--local LED_zone = vns.Parameters.driver_stop_zone * 10
 	local LED_zone = vns.Parameters.driver_arrive_zone * 1.5
 	-- show morphology lines
-	if vns.goal.positionV3:length() < LED_zone then
-		api.debug.showMorphologyLines(vns, true)
-		api.debug.showMorphologyLightShowLEDs(vns, true)
+	if vns.screenCountDown ~= nil then
+		api.debug.showMorphologyLightShowLEDs(vns, vns.screenCountDown)
+	elseif vns.goal.positionV3:length() < LED_zone and
+	       (vector3(1,0,0):rotate(vns.goal.orientationQ) - vector3(1,0,0)):length() < 0.1 and
+	       vns.allocator.target.idN > 0 and
+	       vns.failed ~= true and
+	       vns.scalemanager.scale:totalNumber() > 5 then
+		api.debug.showMorphologyLightShowLEDs(vns, "cyan")
+		if vns.driver.all_arrive == true then
+			api.debug.showMorphologyLines(vns, "cyan")
+		end
+	else
+		api.debug.showMorphologyLightShowLEDs(vns, "white")
 	end
 
 	vns.logLoopFunctionInfo(vns)
@@ -296,8 +319,10 @@ return function()
 		index = index - index_base + 1
 		if map_index[subState][index] == 1 then
 			vns.allocator.target.lightShowLED = "red"
+			vns.screenCountDown = "red"
 		else
 			vns.allocator.target.lightShowLED = nil
+			vns.screenCountDown = nil
 		end
 
 		if vns.parentR == nil and stateCount > 30 then
@@ -308,6 +333,7 @@ return function()
 			end
 		end
 	elseif state == "rebellian" then
+		vns.screenCountDown = nil
 		local index = vns.allocator.target.idN
 		local index_base = structure_screen.idN
 		index = index - index_base + 1
