@@ -61,7 +61,7 @@ api.actuator.flight_preparation.run_state_velocity_control_mode = function()
 			api.actuator.newPosition.x = 0
 			api.actuator.newPosition.y = 0
 			if robot.flight_system.position.z < api.parameters.droneDefaultStartHeight then
-				api.actuator.newPosition.z = (api.parameters.droneDefaultStartHeight - robot.flight_system.position.z) / 3;
+				api.actuator.newPosition.z = (api.parameters.droneDefaultStartHeight - robot.flight_system.position.z) * api.parameters.droneTakeOffKp;
 			else
 				api.actuator.newPosition.z = 0
 			end

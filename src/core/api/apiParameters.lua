@@ -14,6 +14,7 @@ local Parameters = {
 	droneDefaultHeight = tonumber(robot.params.drone_default_height or 1.5),
 	droneDefaultStartHeight = tonumber(robot.params.drone_default_start_height or 1.5),
 	droneFlightPreparationStateDuration = tonumber(robot.params.drone_flight_preparation_state_duration or 25),
+	droneTakeOffKp = tonumber(robot.params.droneTakeOffKp or 0.4),
 
 	---- Pipucks ------------------------
 	pipuckWheelSpeedLimit = tonumber(robot.params.pipuck_wheel_speed_limit or 0.1),
