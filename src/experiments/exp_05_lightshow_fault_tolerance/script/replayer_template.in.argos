@@ -54,6 +54,76 @@
   </arena>
 
   <!-- Physics engines, Media, Loop functions and visualization -->
-  SIMULATION_SETUP
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <pointmass3d id="pm3d" iterations="10" />
+    <dynamics3d id="dyn3d" iterations="25" >
+      <gravity g="9.8" />
+      <floor />
+      <srocs />
+    </dynamics3d>
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <directional_led id="directional_leds" index="grid" grid_size="20,20,20"/>
+    <tag id="tags" index="grid" grid_size="20,20,20" />
+    <radio id="nfc" index="grid" grid_size="20,20,20" />
+    <radio id="wifi" index="grid" grid_size="20,20,20" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <loop_functions library="@CMAKE_BINARY_DIR@/libreplay_loop_functions"
+                  label="replay_loop_functions" />
+  <!--loop_functions library="@CMAKE_BINARY_DIR@/libmy_extensions"
+                  label="my_loop_functions" /-->
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl lua_editor="false" show_boundary="false" background_color="50,50,50,0">
+      <user_functions library="@CMAKE_BINARY_DIR@/libmy_qtopengl_extensions"
+                      label="my_qtopengl_user_functions" />
+      <camera>
+        <placements>
+          <placement index="0" position="72.9629,46.2454,56.5441" look_at="-13.8936,1.16682,43.715" up="0,0,1" lens_focal_length="30" />
+          <placement index="1" position="57.9746,90.4443,73.926" look_at="20.1912,-6.56502,36.1109" up="0,0,1" lens_focal_length="30" />
+          <placement index="2" position="23.5738,3.11862,27.1188" look_at="41.306,-6.90394,15.5516" up="0,0,1" lens_focal_length="30" />
+          <placement index="3" position="5.94589,5.23693,99.3061" look_at="68.1702,-23.1393,71.699" up="0,0,1" lens_focal_length="30" />
+          <placement index="4" position="97.0393,58.5229,94.7197" look_at="43.1906,1.34789,69.6851" up="0,0,1" lens_focal_length="30" />
+          <placement index="5" position="90.7136,46.3857,89.3561" look_at="38.7969,11.055,67.2644" up="0,0,1" lens_focal_length="30" />
+          <placement index="6" position="83.7472,42.5107,61.0778" look_at="34.4666,17.5503,51.5976" up="0,0,1" lens_focal_length="30" />
+          <placement index="7" position="95.1426,57.8474,64.4569" look_at="41.7243,17.4875,51.5976" up="0,0,1" lens_focal_length="30" />
+        </placements>
+        <timeline loop="4500">
+          <keyframe placement="0" step="1" />
+          <keyframe placement="0" step="720" />
+          <keyframe placement="0" step="2300" />
+          <interpolate />
+          <keyframe placement="1" step="2350" />
+          <interpolate />
+          <keyframe placement="2" step="2400" />
+          <interpolate />
+          <keyframe placement="3" step="2500" />
+          <keyframe placement="3" step="2750" />
+          <interpolate />
+          <keyframe placement="4" step="2864" />
+          <interpolate />
+          <keyframe placement="5" step="3000" />
+          <interpolate />
+          <keyframe placement="6" step="3750" />
+          <interpolate />
+          <keyframe placement="7" step="3950" />
+        </timeline>
+      </camera>
+    </qt-opengl>
+  </visualization>
 
 </argos-configuration>
