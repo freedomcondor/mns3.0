@@ -78,10 +78,9 @@ function VNS.Allocator.resetMorphology(vns)
 	vns.Allocator.setMorphology(vns, structure_mans[1])
 end
 
-function api.debug.showMorphologyLines(vns, essential)
+function api.debug.showMorphologyLines(vns, color)
 	if vns.allocator ~= nil and vns.allocator.target.drawLines ~= nil then
 		--local color = vns.allocator.target.drawLinesColor or "gray50"
-		local color = "white"
 		for i, vec in ipairs(vns.allocator.target.drawLines) do
 			vns.api.debug.drawCustomizeArrow(color,
 			                                 vector3(0,0,0),
@@ -89,22 +88,19 @@ function api.debug.showMorphologyLines(vns, essential)
 			                                 0.10,
 			                                 0.10,
 			                                 1,
-			                                 essential)
+			                                 true)
 		end
 	end
 end
 
-function api.debug.showMorphologyLightShowLEDs(vns, essential)
+function api.debug.showMorphologyLightShowLEDs(vns, color)
 	--if vns.allocator ~= nil and vns.allocator.target.lightShowLED ~= nil then
 		--local color = vns.allocator.target.lightShowLED or "white"
-		local color = "white"
-
-		local r = 0.3
 		api.debug.drawCustomizeRing(color,
 		                           vector3(0,0,0),
-		                           r,
-		                           0.02,  -- thickness
-		                           0.20,  -- height
+		                           0.5,   -- radius
+		                           0.05,  -- thickness
+		                           0.30,  -- height
 		                           1.0,   -- color transparent
 		                           true)
 	--end
@@ -119,6 +115,9 @@ function init()
 
 	local number = tonumber(string.match(robot.id, "%d+"))
 	local base_height = api.parameters.droneDefaultStartHeight + 65
+	if number > 100 then
+		base_height = base_height + 10
+	end
 	if number % 5 == 1 then
 		api.parameters.droneDefaultStartHeight = base_height
 	elseif number % 5 == 2 then
@@ -135,6 +134,7 @@ end
 function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 2 end
+	if vns.idS == "drone101" then vns.idN = 1.3 end
 	vns.setGene(vns, gene)
 	vns.setMorphology(vns, structure_mans[1])
 
@@ -177,13 +177,33 @@ function step()
 	local LED_zone = vns.Parameters.driver_arrive_zone * 1.5
 	-- show morphology lines
 	--if vns.goal.positionV3:length() < LED_zone and vns.failed ~= true then
+	--[[
 	if vns.driver.all_arrive == true and
 	   vns.failed ~= true and
 	   vns.scalemanager.scale:totalNumber() > 3 then
 		api.debug.showMorphologyLines(vns, true)
 	end
+	--]]
 
-	api.debug.showMorphologyLightShowLEDs(vns, true)
+	local number = tonumber(string.match(robot.id, "%d+"))
+	--if number > 100 and vns.scalemanager.scale:totalNumber() <= 30 then
+	if vns.reinforcement == true then
+		-- reinforcement team
+		api.debug.showMorphologyLightShowLEDs(vns, "yellow")
+	elseif vns.goal.positionV3:length() < LED_zone and
+	       (vector3(1,0,0):rotate(vns.goal.orientationQ) - vector3(1,0,0)):length() < 0.1 and
+	       vns.allocator.target.idN > 0 and
+	       vns.failed ~= true and
+	       vns.scalemanager.scale:totalNumber() > 5 then
+		api.debug.showMorphologyLightShowLEDs(vns, "cyan")
+		if vns.driver.all_arrive == true then
+			api.debug.showMorphologyLines(vns, "cyan")
+		end
+	elseif vns.failed == true then
+		api.debug.showMorphologyLightShowLEDs(vns, "red")
+	else
+		api.debug.showMorphologyLightShowLEDs(vns, "white")
+	end
 
 	if vns.parentR == nil then
 		vns.api.virtualFrame.logicOrientationQ = quaternion()
@@ -197,12 +217,16 @@ function destroy()
 	api.destroy()
 end
 
-local takeOffStep = 2500
+local takeOffStep = 2380
 local reinforceID = 100
 local reinforceGroupNumber = 30
 
 function create_reinforcement_node(vns)
 	local number = tonumber(string.match(robot.id, "%d+"))
+	if number > reinforceID then
+		vns.reinforcement = true
+		api.actuator.flight_preparation.state_duration = 50
+	end
 return function()
 	if number > reinforceID then
 		if vns.api.stepCount < takeOffStep then
@@ -213,8 +237,12 @@ return function()
 			robot.flight_system.ready = function() return true end
 			return false, true
 		elseif vns.api.stepCount > takeOffStep then
+			if vns.scalemanager.scale:totalNumber() > 50 then
+				vns.reinforcement = false
+			end
 			return false, true
 		end
+
 	else
 		return false, true
 	end
