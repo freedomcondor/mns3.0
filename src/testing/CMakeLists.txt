@@ -9,6 +9,7 @@ add_subdirectory(test_06_3DdroneObstacles)
 add_subdirectory(test_07_chain)
 
 add_subdirectory(test_11_formation)
+add_subdirectory(test_12_formation_transfer)
 add_subdirectory(test_21_scalability)
 
 add_subdirectory(test_31_learner)
