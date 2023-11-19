@@ -26,7 +26,7 @@ local baseValueFunction = function(base, current, target)
 end
 
 function generate_cube_morphology(n) -- n is number of drones
-	side_n = math.ceil(n ^ (1/3))
+	local side_n = math.ceil(n ^ (1/3))
 	return generate_cube(side_n, vector3(), quaternion())
 end
 
