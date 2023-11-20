@@ -11,7 +11,7 @@ local BT = require("BehaviorTree")
 
 require("morphologyGenerateCube")
 
-structure_cube_125 = generate_radical_cube_morphology(125)
+structure_cube_125 = generate_sliced_cube_morphology(125)
 
 -- datas ----------------
 local bt
