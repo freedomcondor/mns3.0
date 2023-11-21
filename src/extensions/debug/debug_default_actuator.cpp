@@ -127,6 +127,60 @@ namespace argos {
    /****************************************/
 
 #ifdef ARGOS_WITH_LUA
+   int CDebugDefaultActuator::LuaDrawHalo(lua_State* pt_lua_state) {
+      /* check parameters */
+      int nArgCount = lua_gettop(pt_lua_state);
+      if(nArgCount != 5) {
+         const char* pchErrMsg = "robot.debug.draw_halo() expects a 3 arguments";
+         return luaL_error(pt_lua_state, pchErrMsg);
+      }
+      /* Get middle and radius */
+      luaL_checktype(pt_lua_state, 1, LUA_TUSERDATA);
+      const CVector3& cCenter = CLuaVector3::ToVector3(pt_lua_state, 1);
+      luaL_checktype(pt_lua_state, 2, LUA_TNUMBER);
+      Real fRadius = lua_tonumber(pt_lua_state, 2);
+      /* Get halo radius and max transparency */
+      luaL_checktype(pt_lua_state, 3, LUA_TNUMBER);
+      Real fHaloRadius = lua_tonumber(pt_lua_state, 3);
+      luaL_checktype(pt_lua_state, 4, LUA_TNUMBER);
+      Real fMaxTransparency = lua_tonumber(pt_lua_state, 4);
+      /* Get color */
+      luaL_checktype(pt_lua_state, 5, LUA_TSTRING);
+      std::stringstream strColorString(lua_tostring(pt_lua_state, 5));
+      std::vector<std::string> vecColorParameters;
+      while( strColorString.good() )
+      {
+         std::string substr;
+         getline(strColorString, substr, ',');
+         vecColorParameters.push_back(substr);
+      }
+      CColor cColor;
+      if(vecColorParameters.size() == 1) {
+         try {
+            cColor.Set(vecColorParameters[0]);
+         }
+         catch(CARGoSException& ex) {
+            return luaL_error(pt_lua_state, ex.what());
+         }
+      }
+      else {
+         cColor.Set(std::stoi(vecColorParameters[0]),
+                    std::stoi(vecColorParameters[1]),
+                    std::stoi(vecColorParameters[2]));
+      }
+      /* write to the actuator */
+      CDebugDefaultActuator* pcDebugActuator =
+         CLuaUtility::GetDeviceInstance<CDebugDefaultActuator>(pt_lua_state, "debug");
+      pcDebugActuator->m_pvecHalos->emplace_back(cCenter, fRadius, fHaloRadius, fMaxTransparency, cColor);
+
+      return 0;
+   }
+#endif
+
+   /****************************************/
+   /****************************************/
+
+#ifdef ARGOS_WITH_LUA
    int CDebugDefaultActuator::LuaWrite(lua_State* pt_lua_state) {
       /* check parameters */
       int nArgCount = lua_gettop(pt_lua_state);
@@ -152,6 +206,7 @@ namespace argos {
       CLuaUtility::AddToTable(pt_lua_state, "_instance", this);
       CLuaUtility::AddToTable(pt_lua_state, "draw_arrow", CDebugDefaultActuator::LuaDrawArrow);
       CLuaUtility::AddToTable(pt_lua_state, "draw_ring", CDebugDefaultActuator::LuaDrawRing);
+      CLuaUtility::AddToTable(pt_lua_state, "draw_halo", CDebugDefaultActuator::LuaDrawHalo);
       CLuaUtility::AddToTable(pt_lua_state, "write", CDebugDefaultActuator::LuaWrite);
       CLuaUtility::CloseRobotStateTable(pt_lua_state);
    }

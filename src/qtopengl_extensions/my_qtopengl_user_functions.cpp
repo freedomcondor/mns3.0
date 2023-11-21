@@ -256,6 +256,16 @@ namespace argos {
          glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * fColorTransparent);
          DrawRing3(cCenter, fRadius, fThickness, fHeight);
       }
+      glDepthMask(GL_FALSE);
+      for(const auto& t_halo: c_debug_entity.GetHalos()) {
+         const CVector3& cCenter = std::get<0>(t_halo);
+         const Real& fRadius = std::get<1>(t_halo);
+         const Real& fHaloRadius = std::get<2>(t_halo);
+         const Real& fMaxTransparency = std::get<3>(t_halo);
+         const CColor& cColor = std::get<4>(t_halo);
+         DrawRingHalo3(cCenter, fRadius, fHaloRadius, fMaxTransparency, cColor);
+      }
+      glDepthMask(GL_TRUE);
       glPopMatrix();
       glDisable(GL_BLEND);
       glEnable(GL_LIGHTING);
@@ -337,6 +347,27 @@ namespace argos {
       glScalef(fArrowThickness, fArrowThickness, cArrow.Length() - fArrowHead);
       glCallList(cCachedShapes.GetCylinder());
       glPopMatrix();
+   }
+
+   /****************************************/
+   /****************************************/
+
+   void CMyQtOpenGLUserFunctions::DrawRingHalo3(
+         const CVector3& c_center,
+         Real f_radius,
+         Real f_halo_radius,
+         Real f_max_transparency,
+         CColor cColor
+   ) {
+      UInt16 unSliceNumber = 2; // change this number for nicer rendering
+
+      Real fHaloStepDistance = f_halo_radius / unSliceNumber;
+
+      for (UInt16 i = 1; i <= unSliceNumber; i++) {
+         Real fBrightness = f_max_transparency - i * (f_max_transparency / unSliceNumber);
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * fBrightness);
+         DrawRing3(c_center - CVector3(0,0,i * fHaloStepDistance), 0, 2 * f_radius + 2 * i * fHaloStepDistance, i * fHaloStepDistance * 2);
+      }
    }
 
    /****************************************/

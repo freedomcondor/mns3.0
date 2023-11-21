@@ -290,6 +290,34 @@ namespace argos {
                                                                                  fHeadThickness,
                                                                                  fColorTransparent);
             }
+            if (strDrawType == "ring_halo") {
+               CVector3 cVecMiddle = CVector3(
+                  std::stod(vecWordList[nCurrentIdx + 1]),
+                  std::stod(vecWordList[nCurrentIdx + 2]),
+                  std::stod(vecWordList[nCurrentIdx + 3])
+               );
+               Real fRadius = std::stod(vecWordList[nCurrentIdx + 4]);
+               Real fHaloRadius = std::stod(vecWordList[nCurrentIdx + 5]);
+               Real fMaxTransparency = std::stod(vecWordList[nCurrentIdx + 6]);
+               nCurrentIdx += 7;
+               CColor cColor;
+               if (std::isdigit(vecWordList[nCurrentIdx][0])) {
+                  cColor.Set(std::stod(vecWordList[nCurrentIdx]),
+                              std::stod(vecWordList[nCurrentIdx + 1]),
+                              std::stod(vecWordList[nCurrentIdx + 2])
+                  );
+                  nCurrentIdx += 3;
+               }
+               else {
+                  cColor.Set(vecWordList[nCurrentIdx]);
+                  nCurrentIdx ++;
+               }
+               s_tracked_entity.DebugEntity->GetHalos().emplace_back(cVecMiddle,
+                                                                     fRadius,
+                                                                     fHaloRadius,
+                                                                     fMaxTransparency,
+                                                                     cColor);
+            }
             else {
                nCurrentIdx ++;
             }

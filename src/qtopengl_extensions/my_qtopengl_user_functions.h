@@ -46,7 +46,13 @@ namespace argos {
       void DrawArrow3(const CVector3& c_from, const CVector3& c_to, Real f_arrow_thickness, Real f_arrow_head);
       void DrawRing3(const CVector3& c_center, Real f_radius);
       void DrawRing3(const CVector3& c_center, Real f_radius, Real f_thickness, Real f_height);
-
+      void DrawRingHalo3(
+         const CVector3& c_center,
+         Real f_radius,
+         Real f_halo_radius,
+         Real f_max_transparency,
+         CColor cColor
+      );
    };
 
    class QMouseWheelEventHandler : public QObject {

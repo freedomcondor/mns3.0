@@ -23,6 +23,7 @@ namespace argos {
       using TCustomizeArrowVec = std::vector<std::tuple<CVector3, CVector3, CColor, Real, Real, Real> >; // bodyThickness, HeadThickness, ColorTransparent
       using TRingVec = std::vector<std::tuple<CVector3, Real, CColor> >;
       using TCustomizeRingVec = std::vector<std::tuple<CVector3, Real, CColor, Real, Real, Real> >; // Thickness, Height, ColorTransparent
+      using THaloVec = std::vector<std::tuple<CVector3, Real, Real, Real, CColor> >; // Position, Radius, HaloRadius, MaxTransparency
       using TMessageVec = std::vector<std::string>;
       
       CDebugDefaultActuator() :
@@ -41,6 +42,7 @@ namespace argos {
          m_pvecCustomizeArrows = &m_pcDebugEntity->GetCustomizeArrows();
          m_pvecRings = &m_pcDebugEntity->GetRings();
          m_pvecCustomizeRings = &m_pcDebugEntity->GetCustomizeRings();
+         m_pvecHalos = &m_pcDebugEntity->GetHalos();
          m_pvecMessages = &m_pcDebugEntity->GetMessages();
       }
 
@@ -49,6 +51,7 @@ namespace argos {
          m_pvecCustomizeArrows->clear();
          m_pvecRings->clear();
          m_pvecCustomizeRings->clear();
+         m_pvecHalos->clear();
          m_pvecMessages->clear();
       }
 
@@ -57,6 +60,7 @@ namespace argos {
 #ifdef ARGOS_WITH_LUA
       static int LuaDrawArrow(lua_State* pt_lua_state);
       static int LuaDrawRing(lua_State* pt_lua_state);
+      static int LuaDrawHalo(lua_State* pt_lua_state);
       static int LuaWrite(lua_State* pt_lua_state);
       virtual void CreateLuaState(lua_State* pt_lua_state);
 #endif
@@ -67,8 +71,9 @@ namespace argos {
       TArrowVec* m_pvecArrows;
       TCustomizeArrowVec* m_pvecCustomizeArrows;
       TRingVec* m_pvecRings;
-      TMessageVec* m_pvecMessages;
       TCustomizeRingVec* m_pvecCustomizeRings;
+      THaloVec * m_pvecHalos;
+      TMessageVec* m_pvecMessages;
    };
 }
 

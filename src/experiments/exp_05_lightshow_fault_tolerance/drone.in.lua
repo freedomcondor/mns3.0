@@ -94,16 +94,8 @@ function api.debug.showMorphologyLines(vns, color)
 end
 
 function api.debug.showMorphologyLightShowLEDs(vns, color)
-	--if vns.allocator ~= nil and vns.allocator.target.lightShowLED ~= nil then
-		--local color = vns.allocator.target.lightShowLED or "white"
-		api.debug.drawCustomizeRing(color,
-		                           vector3(0,0,0),
-		                           0.5,   -- radius
-		                           0.05,  -- thickness
-		                           0.30,  -- height
-		                           1.0,   -- color transparent
-		                           true)
-	--end
+	api.debug.drawCustomizeRing(color, vector3(0,0,0.2), 0.25, 0.03, 0.03, 1, true)
+	api.debug.drawHalo(color, vector3(0,0,0.2), 0.25, 0.7, 0.1, true)
 end
 
 function init()

@@ -21,6 +21,7 @@ namespace argos {
       using TRingVec = std::vector<std::tuple<CVector3, Real, CColor> >;
       using TCustomizeRingVec = std::vector<std::tuple<CVector3, Real, CColor, Real, Real, Real> >; // Thickness, Height, ColorTransparent
       using TMessageVec = std::vector<std::string>;
+      using THaloVec = std::vector<std::tuple<CVector3, Real, Real, Real, CColor> >; // Position, Radius, HaloRadius, MaxTransparency
 
       CDebugEntity(CComposableEntity* pc_parent,
                    const std::string& str_id) :
@@ -48,6 +49,10 @@ namespace argos {
          return m_vecCustomizeRings;
       }
 
+      THaloVec& GetHalos() {
+         return m_vecHalos;
+      }
+
       TMessageVec& GetMessages() {
          return m_vecMessages;
       }
@@ -57,6 +62,7 @@ namespace argos {
       TCustomizeArrowVec m_vecCustomizeArrows;
       TRingVec m_vecRings;
       TCustomizeRingVec m_vecCustomizeRings;
+      THaloVec m_vecHalos;
       TMessageVec m_vecMessages;
    };
 }

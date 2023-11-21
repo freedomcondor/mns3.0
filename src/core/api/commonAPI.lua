@@ -179,6 +179,22 @@ function api.debug.drawCustomizeRing(color, middle, radius, thinkness, height, c
 	end
 end
 
+function api.debug.drawHalo(color, middle, radius, halo_radius, max_transparency, essential)
+	if api.debug.show_all == false then return end
+	if api.debug.show_all ~= true and essential ~= true then return end
+	if robot.debug == nil then return end
+	robot.debug.draw_halo(middle, radius, halo_radius, max_transparency, color) -- 0,0,255 (blue)
+	if api.debug.recordSwitch == true then
+		api.debug.record = api.debug.record ..
+		                   "," .. "ring_halo" ..
+		                   "," .. tostring(middle) ..
+		                   "," .. tostring(radius) ..
+		                   "," .. tostring(halo_radius) ..
+		                   "," .. tostring(max_transparency) ..
+		                   "," .. color
+	end
+end
+
 function api.debug.showVirtualFrame(essential)
 	local upOffset = vector3(0,0,0.1)
 	local offset = api.virtualFrame.positionV3 + upOffset
