@@ -346,9 +346,10 @@ return function()
 			logger("--- I'm  ", robot.id, "I'm waiting ", vns.scalemanager.scale:totalNumber())
 			if vns.scalemanager.scale:totalNumber() == n_drone then
 				vns.allocator.mode_switch = "allocate"
-				--vns.setMorphology(vns, structure_man)
-				vns.setMorphology(vns, structure_trucks[1])
-				waitNextState = "truck"
+				--vns.setMorphology(vns, structure_trucks[1])
+				vns.setMorphology(vns, structure_mans[1])
+				--waitNextState = "truck"
+				waitNextState = "man_up"
 				subState = 1
 				switchAndSendNewState(vns, "wait")
 			end
