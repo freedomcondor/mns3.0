@@ -1,7 +1,7 @@
-configure_file( drone.in.lua          simu_code/drone.lua)
-configure_file( trussGenerator.lua    simu_code/trussGenerator.lua)
-configure_file( manGenerator.lua      simu_code/manGenerator.lua)
-configure_file( sphere12Generator.lua simu_code/sphere12Generator.lua)
+configure_file( drone.in.lua               simu_code/drone.lua)
+configure_file( complexTrussGenerator.lua  simu_code/complexTrussGenerator.lua)
+configure_file( manGenerator.lua           simu_code/manGenerator.lua)
+configure_file( sphere20Generator.lua      simu_code/sphere20Generator.lua)
 
 configure_file( vns_template.in.argos      simu_code/vns_template.argos)
 configure_file( run.in.py                  simu_code/run.py)

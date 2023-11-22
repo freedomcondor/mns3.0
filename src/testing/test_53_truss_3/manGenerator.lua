@@ -1,5 +1,5 @@
 require("trussGenerator")
-require("sphere12Generator")
+require("sphere20Generator")
 local DeepCopy = require("DeepCopy")
 
 local light_blue = "128, 128, 255"
@@ -91,22 +91,22 @@ function create_body(option)
 	local right_fore_arm_Z = option.right_fore_arm_Z or 30    -- + front
 	local right_fore_arm_Y = option.right_fore_arm_Y or 30    -- + inside
 
-	local node = create_sphere12("blue")
+	local node = create_sphere20("blue")
 	--table.insert(node.children, create_chest(light_blue))
 
-	table.insert(node.children, create_shoulder(vector3(L*0.25, L*0.25, -L*0.5),
+	table.insert(node.children, create_shoulder(vector3(-L*0.1, L*0.25, -L*0.4),
 	                                            quaternion(math.pi/2, vector3(0,0,1)),
 	                                            -left_shoulder_Z, left_shoulder_Y,          -- shoulder Z and Y
 	                                            -left_fore_arm_Z, left_fore_arm_Y           -- fore arm z and Y
 	                                           )
 	            )
-	table.insert(node.children, create_shoulder(vector3(L*0.25, -L*0.25, -L*0.5),
+	table.insert(node.children, create_shoulder(vector3(-L*0.1, -L*0.25, -L*0.4),
 	                                            quaternion(-math.pi/2, vector3(0,0,1)),
 	                                            right_shoulder_Z, right_shoulder_Y,
 	                                            right_fore_arm_Z, right_fore_arm_Y)
 	            )
 
-	local spine, tail = create_complex_beam(2, L, L, "red", vector3(0, 0, -L), quaternion(math.pi/2, vector3(0,1,0)))
+	local spine, tail = create_complex_beam(2, L, L, "red", vector3(-L*0.35, 0, -L*0.9), quaternion(math.pi/2, vector3(0,1,0)))
 	table.insert(node.children, spine)
 	tail.children = {}
 	table.insert(tail.children,

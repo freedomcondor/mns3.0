@@ -156,6 +156,7 @@ function create_complex_beam(n, L, thick, color, positionV3, orientationQ, child
 		{	robotTypeS = "drone",
 			positionV3 = vector3(half_L, quater_L, 0),
 			orientationQ = quaternion(),
+			calcBaseValue = baseValueFunction,
 		}
 	local tail_node = {
 		robotTypeS = "drone",

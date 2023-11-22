@@ -13,12 +13,13 @@ local BT = require("BehaviorTree")
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
-require("trussGenerator")
+require("complexTrussGenerator")
 require("manGenerator")
+require("sphere20Generator")
 local n_drone = tonumber(robot.params.n_drone)
 local structure = create_complex_beam(3, 5, 7)
 --local structure = create_body()
---local structure = create_sphere12()
+--local structure = create_sphere20()
 
 function init()
 	api.linkRobotInterface(VNS)
@@ -61,7 +62,7 @@ function step()
 	bt()
 	vns.postStep(vns)
 	api.postStep()
-	--[[
+	---[[
 	api.debug.showChildren(vns, {drawOrientation = false})
 	if vns.goal.positionV3:length() < vns.Parameters.driver_stop_zone * 2 then
 		api.debug.showMorphologyLines(vns, true)
