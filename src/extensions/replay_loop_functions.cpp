@@ -290,7 +290,7 @@ namespace argos {
                                                                                  fHeadThickness,
                                                                                  fColorTransparent);
             }
-            if (strDrawType == "ring_halo") {
+            else if (strDrawType == "ring_halo") {
                CVector3 cVecMiddle = CVector3(
                   std::stod(vecWordList[nCurrentIdx + 1]),
                   std::stod(vecWordList[nCurrentIdx + 2]),
