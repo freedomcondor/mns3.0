@@ -43,6 +43,12 @@ local pz2 = vector3( phi,  rev_phi, 0) * L_rate
 local pz3 = vector3(-phi, -rev_phi, 0) * L_rate
 local pz4 = vector3(-phi,  rev_phi, 0) * L_rate
 
+local extra1 = vector3(0, 0, -0.5) * L_rate
+local extra2 = vector3( 0.5, 0.5, 0.5) * L_rate
+local extra3 = vector3( 0.5,-0.5, 0.5) * L_rate
+local extra4 = vector3(-0.5, 0.5, 0.5) * L_rate
+local extra5 = vector3(-0.5,-0.5, 0.5) * L_rate
+
 function drawLines_tmp(myself, points)
 	local relative_points = {}
 	for i, point in ipairs(points) do
@@ -60,6 +66,28 @@ return
 	drawLines_tmp = drawLines_tmp(py3, {py1, pl3, pl4}),
 	label = "morphology20",
 	children = {
+	-- extra 5
+	{	robotTypeS = "drone",
+		positionV3 = extra1 - py3,
+		orientationQ = quaternion(),
+		children = {
+		{	robotTypeS = "drone",
+			positionV3 = extra2 - extra1,
+			orientationQ = quaternion(),
+		},
+		{	robotTypeS = "drone",
+			positionV3 = extra3 - extra1,
+			orientationQ = quaternion(),
+		},
+		{	robotTypeS = "drone",
+			positionV3 = extra4 - extra1,
+			orientationQ = quaternion(),
+		},
+		{	robotTypeS = "drone",
+			positionV3 = extra5 - extra1,
+			orientationQ = quaternion(),
+		},
+	}},
 	{	robotTypeS = "drone",
 		-- py1
 		positionV3 = py1 - py3,
