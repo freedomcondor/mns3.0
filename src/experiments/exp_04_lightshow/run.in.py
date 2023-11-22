@@ -6,7 +6,7 @@ import os
 
 # drone and pipuck
 
-n_drone = 100
+n_drone = 306
 
 # calculate side
 n_side = n_drone ** (1.0/3)
@@ -22,7 +22,8 @@ offset = 0
 yoffset = 0
 y_scale = 1.2
 drone_locations = generate_random_locations(n_drone,
-                                            offset -half_side_length,     yoffset-half_side_length,          # origin location
+#                                            offset -half_side_length,     yoffset-half_side_length,          # origin location
+                                            offset,     yoffset-half_side_length,          # origin location
                                             offset -half_side_length*1.2, offset+half_side_length*1.2,       # random x range
                                             yoffset-half_side_length*1.2, yoffset+half_side_length*1.2,      # random y range
                                             1.5, 3,             # near limit and far limit
@@ -35,8 +36,10 @@ parameters['driver_default_speed'] = 0.5
 parameters['driver_slowdown_zone'] = 5.0
 parameters['driver_stop_zone'] = 0.3
 parameters['driver_arrive_zone'] = 3.0
-parameters['dangerzone_drone'] = 3.0
-parameters['dangerzone_aerial_obstacle'] = 3.0
+parameters['dangerzone_drone'] = 2.2
+parameters['deadzone_drone'] = 1
+parameters['dangerzone_aerial_obstacle'] = 2.2
+parameters['deadzone_aerial_obstacle'] = 1
 
 parameters['n_drone'] = n_drone
 parameters_txt = generateParametersText(parameters)
