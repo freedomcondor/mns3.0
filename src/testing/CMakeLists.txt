@@ -20,6 +20,7 @@ add_subdirectory(test_40_multithreads)
 add_subdirectory(test_50_truss_reference)
 add_subdirectory(test_51_truss)
 add_subdirectory(test_52_truss_2)
+add_subdirectory(test_53_truss_3)
 
 add_subdirectory(test_60_3Dgates)
 add_subdirectory(test_61_split_and_merge)
