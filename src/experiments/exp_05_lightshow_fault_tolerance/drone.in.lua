@@ -10,10 +10,8 @@ local VNS = require("VNS")
 local BT = require("BehaviorTree")
 Transform = require("Transform")
 
-require("screenGenerator")
 require("morphologyGenerateCube")
 require("manGenerator")
-require("truckGenerator")
 
 -- datas ----------------
 local bt
@@ -21,9 +19,9 @@ local bt
 
 local n_drone = tonumber(robot.params.n_drone)
 
-local mainGroupNumber = 100
+local mainGroupNumber = 306
 
-local structure_cube_30 = generate_reinforcement_cube_30()
+local structure_reinforcement_cube = generate_cube_morphology(87)
 
 -- structure mans
 local structure_mans = {}
@@ -46,7 +44,7 @@ local gene = {
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
-		structure_cube_30,
+		structure_reinforcement_cube,
 	}
 }
 
@@ -91,7 +89,7 @@ function init()
 	reset()
 
 	local number = tonumber(string.match(robot.id, "%d+"))
-	local base_height = api.parameters.droneDefaultStartHeight + 65
+	local base_height = api.parameters.droneDefaultStartHeight + 60
 	if number > mainGroupNumber then
 		base_height = base_height + 10
 	end
@@ -111,7 +109,7 @@ end
 function reset()
 	vns.reset(vns)
 	if vns.idS == "drone1" then vns.idN = 2 end
-	if vns.idS == "drone101" then vns.idN = 1.3 end
+	if vns.idS == "drone" .. tostring(mainGroupNumber + 1) then vns.idN = 1.3 end
 	vns.setGene(vns, gene)
 	vns.setMorphology(vns, structure_mans[1])
 
@@ -194,9 +192,9 @@ function destroy()
 	api.destroy()
 end
 
-local takeOffStep = 1900
+local takeOffStep = 2300
 local reinforceID = mainGroupNumber
-local reinforceGroupNumber = 30
+local reinforceGroupNumber = 87
 
 function create_reinforcement_node(vns)
 	local number = tonumber(string.match(robot.id, "%d+"))
@@ -208,13 +206,13 @@ return function()
 	if number > reinforceID then
 		if vns.api.stepCount < takeOffStep then
 			robot.flight_system.ready = function() return false end
-			vns.setMorphology(vns, structure_cube_30)
+			vns.setMorphology(vns, structure_reinforcement_cube)
 			return false, false
 		elseif vns.api.stepCount == takeOffStep then
 			robot.flight_system.ready = function() return true end
 			return false, true
 		elseif vns.api.stepCount > takeOffStep then
-			if vns.scalemanager.scale:totalNumber() > 50 then
+			if vns.scalemanager.scale:totalNumber() > reinforceGroupNumber * 1.5 then
 				vns.reinforcement = false
 			end
 			return false, true
@@ -232,7 +230,7 @@ function create_reinforcement_navigation_node(vns)
 		function() if number > reinforceID then return false, true else return false, false end end,
 		function()
 			if vns.parentR == nil then
-				vns.setMorphology(vns, structure_cube_30)
+				vns.setMorphology(vns, structure_reinforcement_cube)
 				if state == "wait" then
 					if vns.scalemanager.scale:totalNumber() == reinforceGroupNumber and
 					   vns.driver.all_arrive == true then

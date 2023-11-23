@@ -1,4 +1,4 @@
-local L = 5
+local L = 3
 
 DeepCopy = require("DeepCopy")
 
@@ -28,14 +28,6 @@ end
 function generate_cube_morphology(n) -- n is number of drones
 	side_n = math.ceil(n ^ (1/3))
 	return generate_cube(side_n, vector3(), quaternion())
-end
-
-function generate_reinforcement_cube_30()
-	local node = generate_cube_morphology(27)
-	local extra_3 = generate_cube_line(3, vector3(L, 0, 0), quaternion(), {})
-	extra_3.positionV3 = vector3(0, L, -L)
-	table.insert(node.children, extra_3)
-	return node
 end
 
 function generate_cube(n, positionV3, orientationQ)

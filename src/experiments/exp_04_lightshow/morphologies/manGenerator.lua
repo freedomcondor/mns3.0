@@ -36,49 +36,6 @@ function create_arm(L, thick, color, color_fore_arm, positionV3, orientationQ, a
 	return node
 end
 
-function create_chest(color, positionV3, orientationQ)
-	local scale = 0.75
-	return 
-	{	robotTypeS = "drone",
-		positionV3 = positionV3 or vector3(L * 0.75, 0, -L*scale*1.5),
-		orientationQ = orientationQ or quaternion(),
-		lightShowLED = color,
-		children = {
-		{	robotTypeS = "drone",
-			positionV3 = vector3(0, L * scale, -L*scale*0.5),
-			orientationQ = quaternion(),
-			lightShowLED = color,
-			children = {
-			{	robotTypeS = "drone",
-				positionV3 = vector3(0, L * scale, 0),
-				orientationQ = quaternion(),
-				lightShowLED = color,
-			},
-			{	robotTypeS = "drone",
-				positionV3 = vector3(-L*0.5, L*0.5*scale, 0),
-				orientationQ = quaternion(),
-				lightShowLED = color,
-			},
-		}},
-		{	robotTypeS = "drone",
-			positionV3 = vector3(0, -L * scale, -L*scale*0.5),
-			orientationQ = quaternion(),
-			lightShowLED = color,
-			children = {
-			{	robotTypeS = "drone",
-				positionV3 = vector3(0, -L * scale, 0),
-				orientationQ = quaternion(),
-				lightShowLED = color,
-			},
-			{	robotTypeS = "drone",
-				positionV3 = vector3(-L*0.5, -L*0.5*scale, 0),
-				orientationQ = quaternion(),
-				lightShowLED = color,
-			},
-		}}
-	}}
-end
-
 function create_body(option)
 	local option = option or {}
 	local left_shoulder_Z = option.left_shoulder_Z or -15   -- + front
@@ -92,7 +49,6 @@ function create_body(option)
 	local right_fore_arm_Y = option.right_fore_arm_Y or 30    -- + inside
 
 	local node = create_sphere20("blue")
-	--table.insert(node.children, create_chest(light_blue))
 
 	table.insert(node.children, create_shoulder(vector3(-L*0.1, L*0.25, -L*0.4),
 	                                            quaternion(math.pi/2, vector3(0,0,1)),
