@@ -1,0 +1,53 @@
+diff --git a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
+index fe755fd4..c912412a 100644
+--- a/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
++++ b/src/plugins/simulator/visualizations/qt-opengl/qtopengl_widget.cpp
+@@ -159,12 +159,43 @@ namespace argos {
+       DrawArena();
+       /* Draw the objects */
+       CEntity::TVector& vecEntities = m_cSpace.GetRootEntityVector();
+-      for(auto itEntities = vecEntities.begin();
+-          itEntities != vecEntities.end();
+-          ++itEntities) {
++      /* Sort objects from far to near to the camera */
++      /* Create a SortNode */
++      struct SortNode {
++         SortNode(UInt16 _index, Real _value):
++            Index(_index),
++            Value(_value) {}
++         UInt16 Index;
++         Real Value;
++      };
++      std::vector<struct SortNode> vecSortNodes;
++      std::vector<struct SortNode> vecNoPositionEntityIndex;
++      for(UInt16 i = 0; i < vecEntities.size(); i++) {
++         CComposableEntity* pcComposable = dynamic_cast<CComposableEntity*>(vecEntities[i]);
++         if(pcComposable == nullptr) {
++            vecNoPositionEntityIndex.emplace_back(i, 0);
++         }
++         else {
++            CVector3 CEntityPosition = pcComposable->GetComponent<CEmbodiedEntity>("body").GetOriginAnchor().Position;
++            vecSortNodes.emplace_back(i, (CEntityPosition - m_cCamera.GetPosition()).Length());
++         }
++      }
++      /* Sort */
++      auto cmpfunc = [&](const auto & a, const auto & b) {
++         return ( a.Value > b.Value );
++      };
++      std::sort(vecSortNodes.begin(), vecSortNodes.end(), cmpfunc);
++      /* draw, first iterate noPositionEntities, and then sorted entities */
++      for (UInt16 i = 0; i < vecNoPositionEntityIndex.size(); i++) {
++         glPushMatrix();
++         CallEntityOperation<CQTOpenGLOperationDrawNormal, CQTOpenGLWidget, void>(*this, *vecEntities[vecNoPositionEntityIndex[i].Index]);
++         m_cUserFunctions.Call(*vecEntities[vecNoPositionEntityIndex[i].Index]);
++         glPopMatrix();
++      }
++      for (UInt16 i = 0; i < vecSortNodes.size(); i++) {
+          glPushMatrix();
+-         CallEntityOperation<CQTOpenGLOperationDrawNormal, CQTOpenGLWidget, void>(*this, **itEntities);
+-         m_cUserFunctions.Call(**itEntities);
++         CallEntityOperation<CQTOpenGLOperationDrawNormal, CQTOpenGLWidget, void>(*this, *vecEntities[vecSortNodes[i].Index]);
++         m_cUserFunctions.Call(*vecEntities[vecSortNodes[i].Index]);
+          glPopMatrix();
+       }
+       /* Draw the selected object, if necessary */
