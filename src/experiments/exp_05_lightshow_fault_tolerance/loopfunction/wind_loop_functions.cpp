@@ -9,6 +9,8 @@ namespace argos {
    void CMyLoopFunctions::Init(TConfigurationNode& t_tree) {
       m_unStepCount = 0;
       m_pcRNG = CRandom::CreateRNG("argos");
+      m_bWindSignal = false;
+      m_unWindEndStep = 0;
 
       system("rm -rf logs");
       system("mkdir -p logs");
@@ -46,21 +48,23 @@ namespace argos {
       CVector3 cWindBaseNormalVector = CVector3(1, 0, 0).Normalize();
       Real fWindDiviation = 5;
       Real fWindSpeed = 0.5;
-      UInt32 unWindStartStep = 3800;
-      UInt32 unWindEndStep = 3950;
-      if ((unWindStartStep < m_unStepCount) && (m_unStepCount < unWindEndStep))
+      UInt32 unWindPeriod = 150;
+      Real fEffectLowest = 2;
+      if ((m_bWindSignal == true) && (m_unStepCount < m_unWindEndStep))
          for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
             Real fCurrentHeight = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Position.GetZ();
-            if (fCurrentHeight > 2) {
+            if (fCurrentHeight > fEffectLowest) {
                CVector3 cCurrentPositionV3 = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Position;
                CQuaternion cCurrentOrientationQ = s_tracked_entity.EmbodiedEntity->GetOriginAnchor().Orientation;
 
                Real fSideWind = m_pcRNG->Uniform(CRange<Real>(-fWindDiviation, fWindDiviation));
                CVector3 cWind = cWindBaseNormalVector + CVector3(fSideWind, fSideWind, fSideWind/3);
                cWind = cWind.Normalize() * fWindSpeed;
-               if (s_tracked_entity.Entity->GetId() == "drone1" ) { cWind.SetY(0); cWind.SetZ(0);}
+               if (s_tracked_entity.Entity->GetId() == m_strNewBrain ) { cWind.SetY(0); cWind.SetZ(0);}
 
-               s_tracked_entity.EmbodiedEntity->MoveTo(cCurrentPositionV3 + cWind,
+               CVector3 v3NewPosition = cCurrentPositionV3 + cWind;
+               if (v3NewPosition.GetZ() < fEffectLowest) v3NewPosition.SetZ(fEffectLowest);
+               s_tracked_entity.EmbodiedEntity->MoveTo(v3NewPosition,
                                                        cCurrentOrientationQ);
             }
          }
@@ -71,8 +75,20 @@ namespace argos {
          s_tracked_entity.LogFile << s_origin_anchor.Position << ',' << s_origin_anchor.Orientation;
          if(s_tracked_entity.DebugEntity) {
             CDebugEntity::TMessageVec& tMessageVec = s_tracked_entity.DebugEntity->GetMessages();
+            // Parse message and check for wind signal
             for(std::string strMessage: tMessageVec) {
-               s_tracked_entity.LogFile << ',' << strMessage;
+               if (strMessage == "wind") {
+                  m_bWindSignal = true;
+                  m_unWindEndStep = m_unStepCount + unWindPeriod;
+               }
+               else if (strMessage.rfind("newBrain:", 0) == 0) {
+                  std::string prefix = "newBrain:";
+                  m_strNewBrain = strMessage.erase(0, prefix.length());
+                  std::cout << m_strNewBrain << std::endl;
+               }
+               else {
+                  s_tracked_entity.LogFile << ',' << strMessage;
+               }
             }
          }
          s_tracked_entity.LogFile << std::endl;

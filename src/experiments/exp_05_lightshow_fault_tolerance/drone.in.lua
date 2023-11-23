@@ -20,9 +20,9 @@ local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
 local n_drone = tonumber(robot.params.n_drone)
-n_screen_side       = math.ceil(n_drone ^ (1/2))
 
-local structure_screen = generate_screen_square(n_screen_side)
+local mainGroupNumber = 100
+
 local structure_cube_30 = generate_reinforcement_cube_30()
 
 -- structure mans
@@ -41,30 +41,15 @@ for i = 1, structure_mans_n do
 	}
 end
 
--- structure trucks
-local structure_trucks = {}
-local structure_trucks_n = 7
-local wheel_degree_left = 0
-local wheel_degree_right = 60
-local wheel_degree_range = wheel_degree_right - wheel_degree_left
-local wheel_degree_step = wheel_degree_range / (structure_trucks_n - 1)
-for i = 1, structure_trucks_n do
-	structure_trucks[i] = create_truck(wheel_degree_step * (i-1))
-end
-
 local gene = {
 	robotTypeS = "drone",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
-		structure_screen,
 		structure_cube_30,
 	}
 }
 
-for i = 1, structure_trucks_n do
-	table.insert(gene.children, structure_trucks[i])
-end
 for i = 1, structure_mans_n do
 	table.insert(gene.children, structure_mans[i])
 end
@@ -107,7 +92,7 @@ function init()
 
 	local number = tonumber(string.match(robot.id, "%d+"))
 	local base_height = api.parameters.droneDefaultStartHeight + 65
-	if number > 100 then
+	if number > mainGroupNumber then
 		base_height = base_height + 10
 	end
 	if number % 5 == 1 then
@@ -142,6 +127,7 @@ function reset()
 					{type = "sequence", children = {
 						vns.CollectiveSensor.create_collectivesensor_node_reportAll(vns),
 						create_navigation_node(vns),
+						create_signal_node(vns),
 					}},
 				}},
 			}
@@ -178,7 +164,6 @@ function step()
 	--]]
 
 	local number = tonumber(string.match(robot.id, "%d+"))
-	--if number > 100 and vns.scalemanager.scale:totalNumber() <= 30 then
 	if vns.reinforcement == true then
 		-- reinforcement team
 		api.debug.showMorphologyLightShowLEDs(vns, "yellow")
@@ -209,8 +194,8 @@ function destroy()
 	api.destroy()
 end
 
-local takeOffStep = 2380
-local reinforceID = 100
+local takeOffStep = 1900
+local reinforceID = mainGroupNumber
 local reinforceGroupNumber = 30
 
 function create_reinforcement_node(vns)
@@ -273,19 +258,79 @@ return function()
 		return false, false
 	end
 
-	if vns.api.stepCount == 800 and vns.allocator.target.failure == "failure_1" then
-		vns.failed = true
-	end
-
-	if vns.api.stepCount == 1300 and vns.allocator.target.failure == "failure_1" then
-		vns.failed = true
-	end
-
-	if vns.api.stepCount == 1800 and vns.allocator.target.failure == "failure_2" then
-		vns.failed = true
-	end
+	if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "send_signal")) do
+		if msgM.dataT.signal == "failure_1" and vns.allocator.target.failure == "failure_1" then
+			vns.failed = true
+		elseif msgM.dataT.signal == "failure_2" and vns.allocator.target.failure == "failure_2" then
+			vns.failed = true
+		end
+	end end
 
 	return false, true
+end end
+
+function create_signal_node(vns)
+	signal_state = "init"
+	signal_stateCount = 0
+
+	local function newState(vns, _newState)
+		signal_stateCount = 0
+		signal_state = _newState
+	end
+
+	local function sendChilrenNewSignal(vns, newSignal)
+		for idS, childR in pairs(vns.childrenRT) do
+			vns.Msg.send(idS, "send_signal", {signal = newSignal})
+		end
+	end
+
+	local function switchAndSendNewSignal(vns, _newState)
+		newState(vns, _newState)
+		sendChilrenNewSignal(vns, _newState)
+	end
+return function ()
+	signal_stateCount = signal_stateCount + 1
+	-- if I receive switch state cmd from parent
+	if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "send_signal")) do
+		switchAndSendNewSignal(vns, msgM.dataT.signal)
+	end end
+
+	if vns.parentR == nil then
+		print(signal_state, signal_stateCount)
+		if signal_state == "init" and vns.api.stepCount > 300 and vns.driver.all_arrive == true then
+			newState(vns, "waiting_for_failure_1_first")
+		elseif signal_state == "waiting_for_failure_1_first" and signal_stateCount > 50 then
+			sendChilrenNewSignal(vns, "failure_1")
+			newState(vns, "failure_1_first_failed")
+
+		elseif signal_state == "failure_1_first_failed" and signal_stateCount > 300 and vns.driver.all_arrive == true then
+			newState(vns, "waiting_for_failure_1_second")
+		elseif signal_state == "waiting_for_failure_1_second" and signal_stateCount > 50 then
+			sendChilrenNewSignal(vns, "failure_1")
+			newState(vns, "failure_1_second_failed")
+
+		elseif signal_state == "failure_1_second_failed" and signal_stateCount > 300 and vns.driver.all_arrive == true then
+			newState(vns, "waiting_for_failure_2")
+		elseif signal_state == "waiting_for_failure_2" and signal_stateCount > 50 then
+			sendChilrenNewSignal(vns, "failure_2")
+			newState(vns, "failure_2_failed")
+			vns.failed = true
+
+		-- I'm new brain
+		elseif signal_state == "failure_2" and signal_stateCount > 300 and vns.driver.all_arrive == true then
+			switchAndSendNewSignal(vns, "waiting_for_reinforment")
+			robot.debug.write("newBrain:" .. robot.id)
+		elseif signal_state == "waiting_for_reinforment" and vns.scalemanager.scale:totalNumber() == mainGroupNumber then
+			switchAndSendNewSignal(vns, "reinforment_get")
+
+		elseif signal_state == "reinforment_get" and signal_stateCount > 300 and vns.driver.all_arrive == true then
+			switchAndSendNewSignal(vns, "waiting_for_wind_non_brain")
+			newState(vns, "waiting_for_wind")
+		elseif signal_state == "waiting_for_wind" and signal_stateCount > 50 then
+			robot.debug.write("wind")
+			switchAndSendNewSignal(vns, "wind_signaled")
+		end
+	end
 end end
 
 function create_navigation_node(vns)

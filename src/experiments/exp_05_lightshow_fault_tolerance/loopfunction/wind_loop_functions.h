@@ -44,6 +44,10 @@ namespace argos {
 
       UInt32 m_unStepCount;
       CRandom::CRNG* m_pcRNG;
+
+      bool m_bWindSignal;
+      UInt32 m_unWindEndStep;
+      std::string m_strNewBrain;
    };
 }
 
