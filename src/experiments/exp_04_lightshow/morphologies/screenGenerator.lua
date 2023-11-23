@@ -1,4 +1,4 @@
-local L = 2.5
+local L = 3
 
 local baseValueFunction_target = function(base, current, target)
 	return (current - target):length()

@@ -1,4 +1,4 @@
-local L = 3
+local L = 3.3
 
 local function rad(degree)
 	return degree * math.pi / 180
