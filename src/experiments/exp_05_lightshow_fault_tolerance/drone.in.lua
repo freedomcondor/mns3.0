@@ -192,7 +192,7 @@ function destroy()
 	api.destroy()
 end
 
-local takeOffStep = 2300
+local takeOffStep = 3000
 local reinforceID = mainGroupNumber
 local reinforceGroupNumber = 87
 
@@ -200,7 +200,6 @@ function create_reinforcement_node(vns)
 	local number = tonumber(string.match(robot.id, "%d+"))
 	if number > reinforceID then
 		vns.reinforcement = true
-		api.actuator.flight_preparation.state_duration = 50
 	end
 return function()
 	if number > reinforceID then

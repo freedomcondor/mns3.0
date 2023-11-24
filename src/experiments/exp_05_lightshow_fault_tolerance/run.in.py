@@ -50,6 +50,7 @@ parameters['dangerzone_drone'] = 2.2
 parameters['deadzone_drone'] = 1
 parameters['dangerzone_aerial_obstacle'] = 2.2
 parameters['deadzone_aerial_obstacle'] = 1
+parameters['drone_flight_preparation_state_duration'] = 50
 
 parameters['n_drone'] = n_drone
 parameters_txt = generateParametersText(parameters)
