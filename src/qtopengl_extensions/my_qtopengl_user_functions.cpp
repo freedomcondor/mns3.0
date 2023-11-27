@@ -371,13 +371,11 @@ namespace argos {
          Real f_max_transparency,
          CColor cColor
    ) {
-      f_radius /= 2;
-      f_halo_radius += f_radius;
       // Draw base sphere
       glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * f_max_transparency);
       DrawSphere(c_center, f_radius);
 
-      UInt16 unLayers = 50;
+      UInt16 unLayers = 0; // change it to 50 to get best rendering effect
       Real fRadiusStep = f_halo_radius / unLayers;
       for (UInt16 i = 1; i <= unLayers; i++) {
          Real fTransparencyR = (f_halo_radius - fRadiusStep * i) / f_halo_radius;

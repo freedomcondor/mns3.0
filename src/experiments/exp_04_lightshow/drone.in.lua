@@ -74,7 +74,12 @@ end
 
 function api.debug.showMorphologyLightShowLEDs(vns, color)
 	api.debug.drawCustomizeRing(color, vector3(0,0,0.2), 0.25, 0.03, 0.03, 1, true)
-	api.debug.drawHalo(color, vector3(0,0,0.2), 0.25, 0.7, 0.1, true)
+	api.debug.drawHalo(color,
+	                   vector3(0,0,0.2),
+	                   0.125,           -- sphere radius
+	                   0.7 + 0.125,     -- halo radius
+	                   0.1,             -- max transparency
+	                   true)
 end
 
 function init()

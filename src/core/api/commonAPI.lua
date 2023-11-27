@@ -186,7 +186,7 @@ function api.debug.drawHalo(color, middle, radius, halo_radius, max_transparency
 	robot.debug.draw_halo(middle, radius, halo_radius, max_transparency, color) -- 0,0,255 (blue)
 	if api.debug.recordSwitch == true then
 		api.debug.record = api.debug.record ..
-		                   "," .. "ring_halo" ..
+		                   "," .. "halo" ..
 		                   "," .. tostring(middle) ..
 		                   "," .. tostring(radius) ..
 		                   "," .. tostring(halo_radius) ..
