@@ -46,13 +46,14 @@ namespace argos {
       void DrawArrow3(const CVector3& c_from, const CVector3& c_to, Real f_arrow_thickness, Real f_arrow_head);
       void DrawRing3(const CVector3& c_center, Real f_radius);
       void DrawRing3(const CVector3& c_center, Real f_radius, Real f_thickness, Real f_height);
-      void DrawRingHalo3(
+      void DrawHalo3(
          const CVector3& c_center,
          Real f_radius,
          Real f_halo_radius,
          Real f_max_transparency,
          CColor cColor
       );
+      void DrawSphere(const CVector3& c_center, Real f_radius);
    };
 
    class QMouseWheelEventHandler : public QObject {
@@ -87,14 +88,19 @@ namespace argos {
             return m_unRing;
          }
 
+         GLuint GetSphere() const {
+            return m_unSphere;
+         }
+
       private:
          CCachedShapes() {
             /* Reserve the needed display lists */
-            m_unBaseList = glGenLists(3);
+            m_unBaseList = glGenLists(4);
             /* References to the display lists */
             m_unCylinder = m_unBaseList;
             m_unCone     = m_unBaseList + 1;
             m_unRing     = m_unBaseList + 2;
+            m_unSphere   = m_unBaseList + 3;
             /* Make cylinder list */
             glNewList(m_unCylinder, GL_COMPILE);
             MakeCylinder();
@@ -107,6 +113,10 @@ namespace argos {
             glNewList(m_unRing, GL_COMPILE);
             MakeRing();
             glEndList();
+            /* Make sphere list */
+            glNewList(m_unSphere, GL_COMPILE);
+            MakeSphere();
+            glEndList();
          }
 
          ~CCachedShapes() {
@@ -116,11 +126,13 @@ namespace argos {
          void MakeCone();
          void MakeCylinder();
          void MakeRing();
-   
+         void MakeSphere();
+
          GLuint m_unBaseList;
          GLuint m_unCylinder;
          GLuint m_unCone;
          GLuint m_unRing;
+         GLuint m_unSphere;
       };
 }
 #endif

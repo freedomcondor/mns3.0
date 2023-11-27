@@ -207,7 +207,7 @@ namespace argos {
 
    /****************************************/
    /****************************************/
-   
+
    void CMyQtOpenGLUserFunctions::Annotate(CDebugEntity& c_debug_entity,
                                            const SAnchor& s_anchor) {
       glDisable(GL_LIGHTING);
@@ -263,7 +263,7 @@ namespace argos {
          const Real& fHaloRadius = std::get<2>(t_halo);
          const Real& fMaxTransparency = std::get<3>(t_halo);
          const CColor& cColor = std::get<4>(t_halo);
-         DrawRingHalo3(cCenter, fRadius, fHaloRadius, fMaxTransparency, cColor);
+         DrawHalo3(cCenter, fRadius, fHaloRadius, fMaxTransparency, cColor);
       }
       glDepthMask(GL_TRUE);
       glPopMatrix();
@@ -317,7 +317,7 @@ namespace argos {
    /****************************************/
    /****************************************/
 
-   void CMyQtOpenGLUserFunctions::DrawArrow3(const CVector3& c_from, const CVector3& c_to) {
+  void CMyQtOpenGLUserFunctions::DrawArrow3(const CVector3& c_from, const CVector3& c_to) {
       DrawArrow3(c_from, c_to, 0.015625f * 2, 0.031250f * 2.5);
    }
 
@@ -352,21 +352,39 @@ namespace argos {
    /****************************************/
    /****************************************/
 
-   void CMyQtOpenGLUserFunctions::DrawRingHalo3(
+   void CMyQtOpenGLUserFunctions::DrawSphere(const CVector3& c_center, Real f_radius) {
+      const CCachedShapes& cCachedShapes = CCachedShapes::GetCachedShapes();
+      glPushMatrix();
+      glTranslatef(c_center.GetX(), c_center.GetY(), c_center.GetZ());
+      glScalef(f_radius, f_radius, f_radius);
+      glCallList(cCachedShapes.GetSphere());
+      glPopMatrix();
+   }
+
+   /****************************************/
+   /****************************************/
+
+   void CMyQtOpenGLUserFunctions::DrawHalo3(
          const CVector3& c_center,
          Real f_radius,
          Real f_halo_radius,
          Real f_max_transparency,
          CColor cColor
    ) {
-      UInt16 unSliceNumber = 2; // change this number for nicer rendering
+      f_radius /= 2;
+      f_halo_radius += f_radius;
+      // Draw base sphere
+      glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * f_max_transparency);
+      DrawSphere(c_center, f_radius);
 
-      Real fHaloStepDistance = f_halo_radius / unSliceNumber;
-
-      for (UInt16 i = 1; i <= unSliceNumber; i++) {
-         Real fBrightness = f_max_transparency - i * (f_max_transparency / unSliceNumber);
-         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * fBrightness);
-         DrawRing3(c_center - CVector3(0,0,i * fHaloStepDistance), 0, 2 * f_radius + 2 * i * fHaloStepDistance, i * fHaloStepDistance * 2);
+      UInt16 unLayers = 50;
+      Real fRadiusStep = f_halo_radius / unLayers;
+      for (UInt16 i = 1; i <= unLayers; i++) {
+         Real fTransparencyR = (f_halo_radius - fRadiusStep * i) / f_halo_radius;
+         Real fTransparencyR_2 = fTransparencyR * fTransparencyR;
+         Real fTransparencyEffector = fTransparencyR_2 * fTransparencyR_2;
+         glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * f_max_transparency * fTransparencyEffector);
+         DrawSphere(c_center, f_radius + fRadiusStep * i);
       }
    }
 
@@ -440,7 +458,7 @@ namespace argos {
       CVector2 cVertex;
       const CRadians cAngle(CRadians::TWO_PI / GL_NUMBER_VERTICES);
       /* draw front surface */
-      cVertex.Set(0.5f, 0.0f);     
+      cVertex.Set(0.5f, 0.0f);
       glBegin(GL_QUAD_STRIP);
       for(GLuint i = 0; i <= GL_NUMBER_VERTICES; i++) {
          glNormal3f(cVertex.GetX(), cVertex.GetY(), 0.0f);
@@ -450,7 +468,7 @@ namespace argos {
       }
       glEnd();
       /* draw back surface */
-      cVertex.Set(0.5f, 0.0f);     
+      cVertex.Set(0.5f, 0.0f);
       glBegin(GL_QUAD_STRIP);
       for(GLuint i = 0; i <= GL_NUMBER_VERTICES; i++) {
          glNormal3f(cVertex.GetX(), cVertex.GetY(), 0.0f);
@@ -463,6 +481,27 @@ namespace argos {
 
    /****************************************/
    /****************************************/
+
+   void CCachedShapes::MakeSphere() {
+      /* Side surface */
+      CRadians cAngle(CRadians::TWO_PI / GL_NUMBER_VERTICES);
+      Real fRadius = 1;
+      glBegin(GL_QUAD_STRIP);
+      for(GLuint i = 0; i < (GL_NUMBER_VERTICES * 0.5); i++) {
+         CVector2 cVertex1(fRadius * sin(cAngle.GetValue() * i),     0.0f);
+         CVector2 cVertex2(fRadius * sin(cAngle.GetValue() * (i+1)), 0.0f);
+         Real Z1 = fRadius * cos(cAngle.GetValue() * i);
+         Real Z2 = fRadius * cos(cAngle.GetValue() * (i+1));
+         for(GLuint j = 0; j < GL_NUMBER_VERTICES; j++) {
+            glNormal3f(cVertex2.GetX(), cVertex2.GetY(), 0.0f);
+            glVertex3f(cVertex1.GetX(), cVertex1.GetY(), Z1);
+            glVertex3f(cVertex2.GetX(), cVertex2.GetY(), Z2);
+            cVertex1.Rotate(cAngle);
+            cVertex2.Rotate(cAngle);
+         }
+      }
+      glEnd();
+   }
 
    REGISTER_QTOPENGL_USER_FUNCTIONS(CMyQtOpenGLUserFunctions, "my_qtopengl_user_functions");
 
