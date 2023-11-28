@@ -19,9 +19,9 @@ Experiment_types = {
     "screen_64": axs[2,2],
 }
 
-#ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
 #ExperimentsDIR = "/home/harry/code/3Ddrone-data/exp_01_formation/exp_01_formation_no_rangefinder"
-ExperimentsDIR = "/home/harry/code/3Ddrone-data/exp_01_formation/exp_01_formation_normal_12_rangefinders"
+#ExperimentsDIR = "/home/harry/code/3Ddrone-data/exp_01_formation/exp_01_formation_normal_12_rangefinders"
 #ExperimentsDIR = "/home/harry/code/3Ddrone-data/exp_01_formation/exp_01_formation_200_rangefinders"
 
 for Experiment_type in Experiment_types :
