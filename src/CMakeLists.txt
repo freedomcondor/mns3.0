@@ -92,7 +92,7 @@ set(CMAKE_MNS_DATA_PATH ${CMAKE_SOURCE_DIR}/../../3Ddrone-data)
 make_directory(logs)
 #add testing sub directory
 add_subdirectory(testing)
-add_subdirectory(testing_hw)
+add_subdirectory(hw_testing)
 #add experiments sub directory
 add_subdirectory(experiments)
 #add scripts sub directory

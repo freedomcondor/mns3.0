@@ -10,8 +10,13 @@ namespace argos {
       m_unStepCount = 0;
       m_pcRNG = CRandom::CreateRNG("argos");
 
-      system("rm -rf logs");
-      system("mkdir -p logs");
+      /* Remove old logs folder and create a new one */
+      int intSystemReturn;
+      intSystemReturn = system("rm -rf logs");
+      if (intSystemReturn != 0) std::cout << "[warning]: Removing old logs folder didn't return success." << std::endl;
+      intSystemReturn = system("mkdir -p logs");
+      if (intSystemReturn != 0) std::cout << "[warning]: Creating new logs folder didn't return success." << std::endl;
+
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
       for(CEntity* pc_entity : tRootEntityVector) {
