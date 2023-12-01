@@ -40,6 +40,7 @@ namespace argos {
             DebugEntity(pc_debug_entity),
             CTrackColor(track_color) {
                LogFile = fopen((str_log_folder + "/" + pc_entity->GetId() + ".log").c_str(), "r");
+               CPositionColor.Set("blue");
             }
          CEntity* Entity;
          CEmbodiedEntity* EmbodiedEntity;
@@ -47,6 +48,7 @@ namespace argos {
          //std::ifstream LogFile; // too slow
          std::vector<CVector3> vecTrack;
          CColor CTrackColor;
+         CColor CPositionColor;
          FILE *LogFile;
 
          struct SKeyFrame {
@@ -59,6 +61,9 @@ namespace argos {
          std::vector<SKeyFrame> vecKeyFrame;
       };
 
+      std::vector<CColor> m_vecDarkColorMap;
+      std::vector<CColor> m_vecLightColorMap;
+
       static bool m_bDrawGoalFlag;
       static bool m_bDrawDebugArrowsFlag;
       static bool m_bDrawTrackFlag;
@@ -70,6 +75,10 @@ namespace argos {
       static std::vector<STrackedEntity> m_vecTrackedEntities;
       static std::map<std::string, UInt32> m_mapEntityIDTrackedEntityIndex;
       static void EntityMultiThreadIteration(CControllableEntity* cControllableEntity);
+
+      static Real m_fLowest;
+      static Real m_fHighest;
+
    };
 }
 

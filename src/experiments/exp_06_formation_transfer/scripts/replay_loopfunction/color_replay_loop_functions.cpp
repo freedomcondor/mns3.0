@@ -18,6 +18,8 @@ namespace argos {
    UInt32 CReplayLoopFunctions::m_unStepCount;
 
    bool CReplayLoopFunctions::m_bFinishSignal = false;
+   Real CReplayLoopFunctions::m_fHighest = 0;
+   Real CReplayLoopFunctions::m_fLowest = HUGE_VAL;
 
    /****************************************/
    /****************************************/
@@ -323,6 +325,19 @@ namespace argos {
             }
          }
       }
+
+      s_tracked_entity.DebugEntity->GetHalos().emplace_back(CVector3(0,0,0.2),
+                                                            0.125,
+                                                            0.825,
+                                                            0.1,
+                                                            s_tracked_entity.CPositionColor);
+
+      s_tracked_entity.DebugEntity->GetCustomizeRings().emplace_back(CVector3(0,0,0.2),
+                                                                     0.4,
+                                                                     s_tracked_entity.CPositionColor,
+                                                                     0.01,
+                                                                     0.2,
+                                                                     1);
    }
 
    /****************************************/
@@ -330,6 +345,7 @@ namespace argos {
 
    void CReplayLoopFunctions::Init(TConfigurationNode& t_tree) {
       m_unStepCount = 0;
+      m_fHighest = 0;
       /* from replay_input_folder.txt read log file folder and other flags */
       std::string strLogFolder = "./logs";
       std::ifstream infile("replay_input_folder.txt");
@@ -370,8 +386,6 @@ namespace argos {
       }
 
       /* create a colormap */
-      std::vector<CColor> vecDarkColorMap;
-      std::vector<CColor> vecLightColorMap;
       UInt16 r = 255;
       UInt16 g = 1;
       UInt16 b = 0;
@@ -382,13 +396,13 @@ namespace argos {
          if (b == 255 && g > 0 && r == 0) g--;
          if (b == 255 && r < 255 && g == 0) r++;
          if (r == 255 && b > 0 && g == 0) b--;
-         vecDarkColorMap.push_back(CColor(r,g,b,255));
-         vecLightColorMap.push_back(CColor(r,g,b,30));
+         m_vecDarkColorMap.push_back(CColor(r,g,b,255));
+         m_vecLightColorMap.push_back(CColor(r,g,b,30));
       }
 
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
-      UInt16 unColorMapStepLength = std::floor(vecDarkColorMap.size() / tRootEntityVector.size());
+      UInt16 unColorMapStepLength = std::floor(m_vecDarkColorMap.size() / tRootEntityVector.size());
       UInt16 unDarkColorEveryXRobots = std::floor(tRootEntityVector.size() / 5);
       UInt16 unColorMapIndex = 0;
       UInt16 unEntityCount = 0;
@@ -399,9 +413,9 @@ namespace argos {
          }
          try {
             CEmbodiedEntity& cBody = pcComposable->GetComponent<CEmbodiedEntity>("body");
-            CColor cColor = vecLightColorMap[unColorMapIndex];
+            CColor cColor = m_vecLightColorMap[unColorMapIndex];
             if (unEntityCount % unDarkColorEveryXRobots == 0)
-               cColor = vecDarkColorMap[unColorMapIndex];
+               cColor = m_vecDarkColorMap[unColorMapIndex];
             try {
                CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, cColor);
@@ -425,6 +439,26 @@ namespace argos {
    /****************************************/
 
    void CReplayLoopFunctions::PreStep() {
+      if ((m_unStepCount == 80) ||
+          (m_unStepCount == 870) ||
+          (m_unStepCount == 1130)) {
+         // log locations
+         for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
+            SAnchor& s_origin_anchor = s_tracked_entity.EmbodiedEntity->GetOriginAnchor();
+            CVector3 cPosition = s_origin_anchor.Position;
+            if (cPosition.GetZ() < m_fLowest) m_fLowest = cPosition.GetZ();
+            if (cPosition.GetZ() > m_fHighest) m_fHighest = cPosition.GetZ();
+         }
+
+         for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
+            SAnchor& s_origin_anchor = s_tracked_entity.EmbodiedEntity->GetOriginAnchor();
+            CVector3 cPosition = s_origin_anchor.Position;
+            Real fRate = (cPosition.GetZ() - m_fLowest) / (m_fHighest - m_fLowest);
+            CColor cColor = m_vecDarkColorMap[UInt16(fRate * (m_vecDarkColorMap.size()-1))];
+            s_tracked_entity.CPositionColor = cColor;
+         }
+      }
+
       GetSpace().IterateOverControllableEntities(EntityMultiThreadIteration);
 
       if (m_bFinishSignal == true)
