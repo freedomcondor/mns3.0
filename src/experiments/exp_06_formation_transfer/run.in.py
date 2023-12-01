@@ -4,13 +4,14 @@ exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'
 
 import os
 
-n_drone = 125
+n_drone = Experiment_length
+Experiment_length = None
 
 # calculate side
 n_side = n_drone ** (1.0/3)
 L = 5
 
-half_side_length = (n_side-1) * L * 0.5
+half_side_length = (n_side-1) * L * 0.5 * 2
 
 arena_size = half_side_length * 30
 arena_z_center = arena_size / 2 - 2

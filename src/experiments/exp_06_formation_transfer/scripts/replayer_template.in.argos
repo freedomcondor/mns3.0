@@ -1,0 +1,138 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="MULTITHREADS" />
+    <experiment length="TOTALLENGTH" ticks_per_second="5" random_seed="RANDOMSEED" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <!-- Drone Controller -->
+    <lua_controller id="drone">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+    <!-- Pipuck Controller -->
+    <lua_controller id="pipuck">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="ARENA_SIZE" positional_index="grid" center="ARENA_CENTER">
+    <floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/dark_green_floor.png" />
+    <!--floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/wood_floor.png" /-->
+    <!--floor id="floor" source="loop_functions" pixels_per_meter="1" color="grey"/-->
+    <!-- real scenario -->
+    REAL_SCENARIO
+
+    <!-- drones -->
+    DRONES
+    <!-- pipucks -->
+    PIPUCKS
+    <!-- walls -->
+    WALL 
+    <!-- target -->
+    TARGET
+    <!-- random obstacles-->
+    OBSTACLES
+  </arena>
+
+  <!-- Physics engines, Media, Loop functions and visualization -->
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <pointmass3d id="pm3d" iterations="10" />
+    <dynamics3d id="dyn3d" iterations="25" >
+      <gravity g="9.8" />
+      <floor />
+      <srocs />
+    </dynamics3d>
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <directional_led id="directional_leds" index="grid" grid_size="20,20,20"/>
+    <tag id="tags" index="grid" grid_size="20,20,20" />
+    <radio id="nfc" index="grid" grid_size="20,20,20" />
+    <radio id="wifi" index="grid" grid_size="20,20,20" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <loop_functions library="@CMAKE_CURRENT_BINARY_DIR@/libexp_06_replay_loop_function"
+                  label="color_replay_loop_function" />
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl lua_editor="false" show_boundary="false" background_color="50,50,50,0">
+      <user_functions library="@CMAKE_BINARY_DIR@/libmy_qtopengl_extensions"
+                      label="my_qtopengl_user_functions" />
+      <camera>
+        <placements>
+          <placement index="0" position="91.4753,66.4921,91.5601" look_at="-17.8977,3.44956,43.0169" up="0,0,1" lens_focal_length="30" />
+          <placement index="8" position="1.72755,9.03198,62.1545" look_at="0.347661,8.8956,61.6359" up="0,0,1" lens_focal_length="30" />
+          <placement index="9" position="1.29961,9.84044,62.2626" look_at="0.347661,8.8956,61.6359" up="0,0,1" lens_focal_length="30" />
+
+          <placement index="1" position="92.0794,118.805,79.1585" look_at="22.2845,-20.7384,39.6028" up="0,0,1" lens_focal_length="30" />
+          <placement index="2" position="33.8247,55.5651,90.4534" look_at="55.7549,-65.1211,41.8869" up="0,0,1" lens_focal_length="30" />
+          <placement index="3" position="22.5366,28.6417,88.8194" look_at="82.8318,-56.6479,64.5294" up="0,0,1" lens_focal_length="30" />
+          <placement index="4" position="81.6257,47.3589,95.518" look_at="28.1896,-51.9886,64.5294" up="0,0,1" lens_focal_length="30" />
+          <placement index="5" position="96.5146,55.751,90.3429" look_at="-16.4655,-25.2294,41.5787" up="0,0,1" lens_focal_length="30" />
+          <placement index="6" position="102.449,61.637,88.1844" look_at="-12.1286,-13.8061,41.5787" up="0,0,1" lens_focal_length="30" />
+          <placement index="7" position="107.552,58.3009,78.9775" look_at="-11.3275,-4.08622,34.8447" up="0,0,1" lens_focal_length="30" />
+
+        </placements>
+        <timeline loop="6000">
+          <keyframe placement="0" step="1" />
+          <keyframe placement="0" step="720" />
+          <interpolate />
+          <keyframe placement="8" step="1000" />
+          <keyframe placement="8" step="1030" />
+          <interpolate />
+          <keyframe placement="9" step="1050" />
+          <interpolate />
+          <keyframe placement="0" step="1105" />
+          <keyframe placement="0" step="3000" />
+          <interpolate />
+          <keyframe placement="1" step="3050" />
+          <interpolate />
+          <keyframe placement="2" step="3150" />
+          <interpolate />
+          <keyframe placement="3" step="3500" />
+          <interpolate />
+          <keyframe placement="4" step="3600" />
+          <interpolate />
+          <keyframe placement="5" step="3700" />
+          <interpolate />
+          <keyframe placement="6" step="4500" />
+          <keyframe placement="6" step="4750" />
+          <interpolate />
+          <keyframe placement="7" step="5200" />
+        </timeline>
+      </camera>
+    </qt-opengl>
+  </visualization>
+
+</argos-configuration>
