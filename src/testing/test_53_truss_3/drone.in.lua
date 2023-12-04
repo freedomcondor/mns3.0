@@ -15,11 +15,13 @@ local bt
 
 require("complexTrussGenerator")
 require("manGenerator")
+require("truckGenerator")
 require("sphere20Generator")
 local n_drone = tonumber(robot.params.n_drone)
 --local structure = create_complex_beam(3, 5, 7)
 --local structure = create_body()
-local structure = create_sphere20()
+--local structure = create_sphere20()
+local structure = create_truck(0)
 
 function init()
 	api.linkRobotInterface(VNS)

@@ -1,4 +1,4 @@
-require("trussGenerator")
+require("complexTrussGenerator")
 require("sphere20Generator")
 local DeepCopy = require("DeepCopy")
 
