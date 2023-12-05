@@ -13,15 +13,18 @@ local BT = require("BehaviorTree")
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
-require("complexTrussGenerator")
-require("manGenerator")
-require("truckGenerator")
-require("sphere20Generator")
+--require("complexTrussGenerator")
+--require("manGenerator")
+--require("sphere20Generator")
+--require("truckGenerator")
+require("morphologyGenerateSpineSphere")
+
 local n_drone = tonumber(robot.params.n_drone)
 --local structure = create_complex_beam(3, 5, 7)
 --local structure = create_body()
 --local structure = create_sphere20()
-local structure = create_truck(0)
+--local structure = create_truck(0)
+local structure = generateSpineCenterBrainSphere(21.5, vector3(), quaternion(), vector3(5.2,0,0), vector3(0, 5.2, 0), vector3(0, 0, -5))
 
 function init()
 	api.linkRobotInterface(VNS)
