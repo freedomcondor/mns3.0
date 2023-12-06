@@ -5,6 +5,7 @@ configure_file( truckGenerator.lua         simu_code/truckGenerator.lua)
 configure_file( sphere20Generator.lua      simu_code/sphere20Generator.lua)
 configure_file( morphologyGenerateSpineSphere.lua      simu_code/morphologyGenerateSpineSphere.lua)
 configure_file( morphologyGenerateHollowSphere.lua      simu_code/morphologyGenerateHollowSphere.lua)
+configure_file( morphologyGenerateEmoji.lua      simu_code/morphologyGenerateEmoji.lua)
 
 configure_file( vns_template.in.argos      simu_code/vns_template.argos)
 configure_file( run.in.py                  simu_code/run.py)

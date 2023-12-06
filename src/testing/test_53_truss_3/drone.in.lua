@@ -18,7 +18,8 @@ local bt
 --require("sphere20Generator")
 --require("truckGenerator")
 --require("morphologyGenerateSpineSphere")
-require("morphologyGenerateHollowSphere")
+--require("morphologyGenerateHollowSphere")
+require("morphologyGenerateEmoji")
 
 local n_drone = tonumber(robot.params.n_drone)
 --local structure = create_complex_beam(3, 5, 7)
@@ -33,7 +34,12 @@ table.insert(structure.children, generateFixLengthCircle(8, 4, vector3(2,0,7), q
 --]]
 
 --local structure = generateCircleLayer(15, 5, math.pi/3 + math.pi/12, vector3(), quaternion())
-local structure = generateFixLengthHollowSphere(15, 4, 5, vector3(), quaternion())
+
+-- 306
+--local structure = generateFixLengthHollowSphere(15, 4, 5, vector3(), quaternion())
+
+-- 150
+local structure = generateSmile()
 
 
 function init()
@@ -79,9 +85,19 @@ function step()
 	vns.postStep(vns)
 	api.postStep()
 	---[[
-	api.debug.showChildren(vns, {drawOrientation = false})
+	--api.debug.showChildren(vns, {drawOrientation = false})
 	if vns.goal.positionV3:length() < vns.Parameters.driver_stop_zone * 2 then
-		api.debug.showMorphologyLines(vns, true)
+		--api.debug.showMorphologyLines(vns, true)
+		if vns.allocator.target.color ~= nil then
+			local r = 0.3
+			api.debug.drawCustomizeRing(vns.allocator.target.color,
+									   vector3(0,0,0),
+									   r,
+									   0.02,  -- thickness
+									   0.20,  -- height
+									   1.0,   -- color transparent
+									   true)
+		end
 	end
 	--]]
 	vns.logLoopFunctionInfo(vns)
