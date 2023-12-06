@@ -94,7 +94,7 @@
       <camera>
         <placements>
           <placement index="0" position="91.4753,66.4921,91.5601" look_at="-17.8977,3.44956,43.0169" up="0,0,1" lens_focal_length="30" />
-          <placement index="8" position="1.72755,9.03198,62.1545" look_at="0.347661,8.8956,61.6359" up="0,0,1" lens_focal_length="30" />
+          <placement index="8" position="1.59973,9.26223,62.2493" look_at="0.255548,9.16959,61.6359" up="0,0,1" lens_focal_length="30" />
           <placement index="9" position="1.29961,9.84044,62.2626" look_at="0.347661,8.8956,61.6359" up="0,0,1" lens_focal_length="30" />
 
           <placement index="1" position="92.0794,118.805,79.1585" look_at="22.2845,-20.7384,39.6028" up="0,0,1" lens_focal_length="30" />
@@ -105,8 +105,10 @@
           <placement index="6" position="102.449,61.637,88.1844" look_at="-12.1286,-13.8061,41.5787" up="0,0,1" lens_focal_length="30" />
           <placement index="7" position="107.552,58.3009,78.9775" look_at="-11.3275,-4.08622,34.8447" up="0,0,1" lens_focal_length="30" />
 
+          <placement index="10" position="104.03,26.0402,73.111" look_at="-13.465,0.262738,47.6369" up="0,0,1" lens_focal_length="30" />
+
         </placements>
-        <timeline loop="6000">
+        <timeline loop="8000">
           <keyframe placement="0" step="1" />
           <keyframe placement="0" step="720" />
           <interpolate />
@@ -116,22 +118,24 @@
           <keyframe placement="9" step="1050" />
           <interpolate />
           <keyframe placement="0" step="1105" />
-          <keyframe placement="0" step="3000" />
+          <keyframe placement="0" step="3100" />
           <interpolate />
-          <keyframe placement="1" step="3050" />
+          <keyframe placement="1" step="3150" />
           <interpolate />
-          <keyframe placement="2" step="3150" />
+          <keyframe placement="2" step="3250" />
           <interpolate />
           <keyframe placement="3" step="3500" />
           <interpolate />
-          <keyframe placement="4" step="3600" />
+          <keyframe placement="4" step="3550" />
           <interpolate />
-          <keyframe placement="5" step="3700" />
+          <keyframe placement="5" step="3650" />
           <interpolate />
           <keyframe placement="6" step="4500" />
           <keyframe placement="6" step="4750" />
           <interpolate />
           <keyframe placement="7" step="5200" />
+          <interpolate />
+          <keyframe placement="10" step="6000" />
         </timeline>
       </camera>
     </qt-opengl>

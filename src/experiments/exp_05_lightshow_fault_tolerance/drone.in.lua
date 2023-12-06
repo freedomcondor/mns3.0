@@ -12,6 +12,7 @@ Transform = require("Transform")
 
 require("morphologyGenerateCube")
 require("manGenerator")
+require("morphologyGenerateEmoji")
 
 -- datas ----------------
 local bt
@@ -22,6 +23,8 @@ local n_drone = tonumber(robot.params.n_drone)
 local mainGroupNumber = 306
 
 local structure_reinforcement_cube = generate_cube_morphology(87)
+local structure_angry_face = generateAngryEmoji()
+local structure_smile_face = generateSmileEmoji()
 
 -- structure mans
 local structure_mans = {}
@@ -45,6 +48,8 @@ local gene = {
 	orientationQ = quaternion(),
 	children = {
 		structure_reinforcement_cube,
+		structure_angry_face,
+		structure_smile_face,
 	}
 }
 
@@ -171,15 +176,23 @@ function step()
 		-- reinforcement team
 		api.debug.showMorphologyLightShowLEDs(vns, "yellow")
 	elseif vns.goal.positionV3:length() < LED_zone and
+		-- usual team
 	       (vector3(1,0,0):rotate(vns.goal.orientationQ) - vector3(1,0,0)):length() < 0.1 and
 	       vns.allocator.target.idN > 0 and
 	       vns.failed ~= true and
 	       vns.scalemanager.scale:totalNumber() > 5 then
-		api.debug.showMorphologyLightShowLEDs(vns, "cyan")
+		if vns.allocator.target ~= nil and vns.allocator.target.color ~= nil then
+			api.debug.showMorphologyLightShowLEDs(vns, vns.allocator.target.color)
+		else
+			api.debug.showMorphologyLightShowLEDs(vns, "cyan")
+		end
+		--[[
 		if vns.driver.all_arrive == true then
 			api.debug.showMorphologyLines(vns, "cyan")
 		end
+		--]]
 	elseif vns.failed == true then
+		-- failure team
 		api.debug.showMorphologyLightShowLEDs(vns, "red")
 	else
 		api.debug.showMorphologyLightShowLEDs(vns, "white")
@@ -197,7 +210,7 @@ function destroy()
 	api.destroy()
 end
 
-local takeOffStep = 3000
+local takeOffStep = 3100
 local reinforceID = mainGroupNumber
 local reinforceGroupNumber = 87
 
@@ -322,7 +335,7 @@ return function ()
 		elseif signal_state == "failure_2" and signal_stateCount > 300 and vns.driver.all_arrive == true then
 			switchAndSendNewSignal(vns, "waiting_for_reinforment")
 			robot.debug.write("newBrain:" .. robot.id)
-		elseif signal_state == "waiting_for_reinforment" and vns.scalemanager.scale:totalNumber() == mainGroupNumber then
+		elseif signal_state == "waiting_for_reinforment" and vns.scalemanager.scale:totalNumber() >= mainGroupNumber then
 			switchAndSendNewSignal(vns, "reinforment_get")
 
 		elseif signal_state == "reinforment_get" and signal_stateCount > 300 and vns.driver.all_arrive == true then
@@ -331,6 +344,11 @@ return function ()
 		elseif signal_state == "waiting_for_wind" and signal_stateCount > 50 then
 			robot.debug.write("wind")
 			switchAndSendNewSignal(vns, "wind_signaled")
+
+		-- After wind, turn into emoji
+		elseif signal_state == "wind_signaled" and signal_stateCount > 300 and vns.driver.all_arrive == true then
+			-- Goto emoji
+			vns.emoji = true
 		end
 	end
 end end
@@ -401,6 +419,7 @@ return function()
 		else
 			waitNextSubState = subState + 1
 		end
+		if vns.emoji == true then waitNextState = "emoji_angry" end
 		switchAndSendNewState(vns, "wait")
 	elseif state == "man_down" and vns.parentR == nil then
 		vns.setMorphology(vns, structure_mans[subState])
@@ -410,6 +429,16 @@ return function()
 		else
 			waitNextSubState = subState - 1
 		end
+		if vns.emoji == true then waitNextState = "emoji_angry" end
+		switchAndSendNewState(vns, "wait")
+
+	elseif state == "emoji_angry" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_angry_face)
+		waitNextState = "emoji_smile"
+		switchAndSendNewState(vns, "wait")
+	elseif state == "emoji_smile" and vns.parentR == nil then
+		vns.setMorphology(vns, structure_smile_face)
+		waitNextState = "end"
 		switchAndSendNewState(vns, "wait")
 	end
 end end
