@@ -93,46 +93,46 @@
                       label="my_qtopengl_user_functions" />
       <camera>
         <placements>
-          <placement index="0" position="0.575956,-1.44505,0.819277" look_at="1.60512,-0.739949,0.338321" up="0,0,1" lens_focal_length="30" />
+          <placement index="0" position="1.63972,-1.16857,0.709384" look_at="2.35404,-0.567309,0.338767" up="0,0,1" lens_focal_length="30" />
           <placement index="1" position="-45.369,-34.813,48.8517" look_at="0.1202,-1.62008,12.2888" up="0,0,1" lens_focal_length="30" />
           <placement index="2" position="59.5911,-18.0133,25.1187" look_at="-19.7204,6.42102,40" up="0,0,1" lens_focal_length="30" />
           <placement index="3" position="75.9421,-13.7568,28.8661" look_at="-17.8368,15.1347,46.4619" up="0,0,1" lens_focal_length="30" />
           <placement index="4" position="50.0339,39.0996,73.1661" look_at="-17.8977,3.44956,45.3965" up="0,0,1" lens_focal_length="30" />
           <placement index="5" position="102.412,72.796,96.4142" look_at="-17.8977,3.44956,43.0169" up="0,0,1" lens_focal_length="30" />
 
-          <placement index="6" position="0.810664,10.0517,59.0985" look_at="-0.826251,9.60777,58.3409" up="0,0,1" lens_focal_length="30" />
-          <placement index="7" position="-0.463066,11.776,59.359" look_at="-0.518121,9.72329,58.5207" up="0,0,1" lens_focal_length="30" />
-          <placement index="8" position="-1.9167,10.9908,57.3558" look_at="-0.518121,9.72329,58.5207" up="0,0,1" lens_focal_length="30" />
-          <placement index="9" position="0.0413393,7.67849,59.173" look_at="-0.518121,9.72329,58.5207" up="0,0,1" lens_focal_length="30" />
+          <placement index="6" position="0.463448,10.1023,59.1485" look_at="-1.15518,9.67799,58.3197" up="0,0,1" lens_focal_length="30" />
+          <placement index="7" position="-1.18563,11.4116,59.0892" look_at="-1.22531,9.77177,58.4197" up="0,0,1" lens_focal_length="30" />
+          <placement index="8" position="-1.50954,9.88438,60.1648" look_at="-1.22531,9.77177,58.4197" up="0,0,1" lens_focal_length="30" />
+          <placement index="9" position="-1.09906,8.22756,59.2789" look_at="-1.22531,9.77177,58.4197" up="0,0,1" lens_focal_length="30" />
         </placements>
 
         <timeline loop="3500">
           <keyframe placement="0" step="0" />
-          <keyframe placement="0" step="25" />
+          <keyframe placement="0" step="225" />
           <interpolate />
-          <keyframe placement="1" step="80" />
+          <keyframe placement="1" step="280" />
           <interpolate />
-          <keyframe placement="2" step="400" />
+          <keyframe placement="2" step="600" />
           <interpolate />
-          <keyframe placement="3" step="1343" />
-          <keyframe placement="3" step="1540" />
+          <keyframe placement="3" step="1280" />
+          <keyframe placement="3" step="1350" />
           <!-- start robot -->
           <interpolate />
-          <keyframe placement="4" step="1870" />
+          <keyframe placement="4" step="1700" />
           <interpolate />
-          <keyframe placement="5" step="2500" />
+          <keyframe placement="5" step="2350" />
           <!-- zoom in -->
-          <keyframe placement="5" step="2650" />
+          <keyframe placement="5" step="2550" />
           <interpolate />
-          <keyframe placement="6" step="2750" />
+          <keyframe placement="6" step="2650" />
           <interpolate />
-          <keyframe placement="7" step="2780" />
+          <keyframe placement="7" step="2680" />
           <interpolate />
-          <keyframe placement="8" step="2810" />
+          <keyframe placement="8" step="2710" />
           <interpolate />
-          <keyframe placement="9" step="2850" />
+          <keyframe placement="9" step="2750" />
           <interpolate />
-          <keyframe placement="6" step="2900" />
+          <keyframe placement="6" step="2800" />
         </timeline>
       </camera>
     </qt-opengl>

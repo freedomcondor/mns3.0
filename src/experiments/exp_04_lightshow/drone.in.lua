@@ -123,6 +123,14 @@ end
 
 
 function step()
+	-- delay take off
+	if api.stepCount < 200 then
+		robot.flight_system.ready = function() return false end
+	else
+		robot.flight_system.ready = function() return true end
+	end
+
+	-- step start
 	api.preStep()
 	vns.preStep(vns)
 
@@ -308,7 +316,7 @@ return function()
 	-- state
 	-- init
 	if state == "init" then
-		if api.stepCount > 200 then
+		if api.stepCount > 400 then
 			waitNextState = "countDown"
 			waitNextSubState = 3
 			switchAndSendNewState(vns, "wait")
