@@ -40,6 +40,7 @@ table.insert(structure.children, generateFixLengthCircle(8, 4, vector3(2,0,7), q
 
 -- 150
 local structure = generateSmile()
+--local structure = generateAngry()
 
 
 function init()

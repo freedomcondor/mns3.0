@@ -28,7 +28,7 @@ drone_locations = generate_random_locations(n_drone,
                                             1.5, 3,             # near limit and far limit
                                             10000)              # attempt count
 
-reinforce_offset = [60, -25]
+reinforce_offset = [60, -10]
 
 dis = 2
 reinforce_drone_locations = []

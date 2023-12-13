@@ -244,7 +244,8 @@ function create_reinforcement_navigation_node(vns)
 	local number = tonumber(string.match(robot.id, "%d+"))
 	local state = "wait"
 	return { type = "sequence", children = {
-		function() if number > reinforceID then return false, true else return false, false end end,
+		--function() if number > reinforceID then return false, true else return false, false end end,
+		function() if vns.reinforcement == true then return false, true else return false, false end end,
 		function()
 			if vns.parentR == nil then
 				vns.setMorphology(vns, structure_reinforcement_cube)
@@ -257,6 +258,7 @@ function create_reinforcement_navigation_node(vns)
 					vns.Spreader.emergency_after_core(vns, vector3(-1,0,0), vector3())
 				end
 			end
+			return false, true
 		end,
 	}}
 end
@@ -386,7 +388,6 @@ return function()
 
 	-- fail safe
 	if vns.scalemanager.scale["drone"] == 1 and
-	   n_drone ~= 8 and
 	   vns.api.actuator.flight_preparation.state == "navigation" then
 		if vns.brainkeeper ~= nil and vns.brainkeeper.brain ~= nil then
 			local target = vns.brainkeeper.brain.positionV3 + vector3(3,0,5)
