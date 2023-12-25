@@ -46,8 +46,8 @@ for subfolder in getSubfolders(DATADIR) :
     drawData(data)
 
     data = readDataFrom(subfolder + "result_minimum_distances.txt")
-    if data[319] < 0.6 :
-        print(subfolder)
+    #if data[319] < 0.6 :
+    #    print(subfolder)
     drawData(data)
 #plt.legend(legend)
 '''
@@ -57,3 +57,4 @@ drawData(readDataFrom("result_minimum_distances.txt"))
 '''
 
 plt.show()
+#plt.savefig("test.pdf")

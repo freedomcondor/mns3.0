@@ -25,7 +25,7 @@ if Experiment_type == None :
     Experiment_type = "left"
     print("Experiment_type not provided: using default", Experiment_type)
 
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_05_race_track"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_02_race_track"
 DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
 
 # check experiment type

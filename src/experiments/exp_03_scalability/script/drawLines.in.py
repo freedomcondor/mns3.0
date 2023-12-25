@@ -22,10 +22,10 @@ for opt, value in optlist:
         Experiment_type = value
         print("Experiment_type provided: ", Experiment_type)
 if Experiment_type == None :
-    Experiment_type = "polyhedron_12"
+    Experiment_type = "cube_27"
     print("Experiment_type not provided: using default", Experiment_type)
 
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_06_scalabilty"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_03_scalability"
 DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
 
 # check experiment type

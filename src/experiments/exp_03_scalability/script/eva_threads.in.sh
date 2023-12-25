@@ -24,7 +24,7 @@ fi
 
 # prepare to run threads
 #-----------------------------------------------------
-DATADIR=@CMAKE_MNS_DATA_PATH@/exp_06_scalability/$experiment_type/run_data
+DATADIR=@CMAKE_MNS_DATA_PATH@/exp_03_scalability/$experiment_type/run_data
 CODEDIR=$DATADIR/../code
 TMPDIR=@CMAKE_BINARY_DIR@/eva_threads
 #THREADS_LOG_OUTPUT=`pwd`/threads_evaluator_output.txt

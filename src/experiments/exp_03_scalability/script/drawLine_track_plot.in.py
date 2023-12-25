@@ -29,14 +29,14 @@ if Experiment_type == None :
 
 # start to draw
 #-----------------------------------------
-dataFolder = "@CMAKE_MNS_DATA_PATH@/exp_06_scalability/" + Experiment_type + "/run_data"
+dataFolder = "@CMAKE_MNS_DATA_PATH@/exp_03_scalability/" + Experiment_type + "/run_data"
 
 sample_run = "run1"
 
 option = {
 	'dataFolder'             : dataFolder,
 	'sample_run'             : sample_run,
-	'trackLog_save'          : "exp_06_scalability_" + Experiment_type + ".pdf",
+	'trackLog_save'          : "exp_03_scalability_" + Experiment_type + ".pdf",
 	'trackLog_show'          : False,
 
 	'brain_marker'      :    '@CMAKE_SOURCE_DIR@/scripts/brain-icon-small.svg',
