@@ -1,4 +1,5 @@
 ## Guidelines
+0. Clone this repo
 1. This project requires argos3 (https://github.com/ilpincy/argos3) to be installed.
 	The version to work with is:
 	```bash
@@ -8,7 +9,7 @@
 
 	Fix the left-right wheel offset in the 3D dynamics model for the Pi-Puck (#196)
 	```
-	To clone, checkout the right version, and create a branch for it:
+	Clone, checkout the right version, and create a branch for it:
 	```bash
 	git clone https://github.com/ilpincy/argos3
 	cd argos3
@@ -16,7 +17,7 @@
 	git switch -c mns3.0
 	```
 
-2. Before compiling and installing argos, it is highly recommended to delete old version of argos from your system. To do that, check /usr/local, which it is the default place when installing argos. To check:
+2. Before compiling and installing argos, it is highly recommended to delete old version of argos installation from your system. To do that, check /usr/local, which is the default place where argos installs itself. To check:
 	```bash
 	cd /usr/local
 	find . -name "*argos*"
@@ -28,7 +29,9 @@
 	```
 	will do, but again, **check carefully**.
 
-	After removing old version argos installation, and before compiling our version, you may want to apply some patch for argos3 from folder `argos3-patch`, depends on what do you need. For most of our mns experiments, 4 patches are essential, which are the first 4 described below. The last two are optional, but it is highly recommended :
+	After removing old version of argos installation, and before compiling our version, you may want to apply some patches for argos3 from folder `argos3-patch`, depends on what do you need. For mns3.0 experiments, the patches that are directly under `argos-patch` are essential. Some patches in `backup` folder might also be useful for some debug purposes.
+
+	Below are descriptions for these patches. `(To be continued)`
 
 	* `AddATagOnTheDrone.patch` is for 3D drone experiments. It adds a tag on top of the drone.
 
@@ -42,10 +45,15 @@
 
 	* `QTOpenglCameraAndMouseOperation.patch` is for tweaking argos operations. It makes argos mouse operation better for 3D experiments.
 
-	To apply these patches :
+	To apply all the essential patches, you can simply :
 	```bash
 	cd argos3
-	git checkout -b 
+	git apply ../mns3.0/argos-patch/*.patch
+	git commit -m "Apply the patches for mns3.0"
+	```
+	or apply them one by one
+	```bash
+	cd argos3
 	git apply ../mns3.0/argos-patch/xxx.patch
 	git commit -m "Apply the patch for xxx"
 	```
@@ -58,13 +66,13 @@
 	cmake -DARGOS_BUILD_NATIVE=ON \
 	      -DARGOS_DOCUMENTATION=OFF \
 	      ../src
-	make -j4
+	make -j 32
 	sudo make install
 	```
 
-4. After installing argos3, you are clear to build this repository. Clone the repository and run the following commands.
+4. After installing argos3, you are ready to build mns3.0 repository. Assuming you are at `argos/build`, and you cloned argos and mns3.0 side by side, run the following commands.
 	```bash
-	cd mns3.0
+	cd ../../mns3.0
 	mkdir build
 	cd build
 	cmake ../src 
@@ -72,7 +80,13 @@
 	argos3 -c testing/test_00_environment/vns.argos
 	```
 	NOTE: consider using `cmake -DARGOS_BREW_QT_CELLAR=$(brew --cellar qt@5) ../src` if you are using mac with qt5.
-	If everything is right, you should be able to see a group of drones and pipucks forming formations.
+	If everything is right, you should be able to see an environment test scenario, where there are several types of robots doing nothing or something nosense.
+
+	To run a something that makes sense, try :
+	```bash
+	python3 experiments/exp_01_formation/simu_code/run.py -m 32
+	```
+	, and there should be a group of drones forming formations.
 
 ## Folder Explanation
 0. **argos3 and cmake :** `src/cmake` contains necessary cmake files to find argos3. `src/argos3` is a simbolic link to the parent folder, it is needed for loop function to compile. Usually you wouldn't need to touch these.
