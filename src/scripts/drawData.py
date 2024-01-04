@@ -1,8 +1,10 @@
+# This file is for plotting experiment results data.
+
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-
-# This file is for plotting experiment results data.
+import statistics
+import math
 
 #----------------------------------------------------------------------------------------------
 # This function reads data from a file
@@ -64,7 +66,7 @@ def getSubfolders(data_dir) :
 	for subfolder in walk_dir_item[1] :
 		rundir = walk_dir_item[0] + "/" + subfolder + "/"
 		subfolders.append(rundir)
-	
+
 	return subfolders
 
 # This function iterates a path <data_dir> and return a list of all the files in this folder
@@ -81,7 +83,7 @@ def getSubfiles(data_dir) :
 	for subfile in walk_dir_item[2] :
 		rundir = walk_dir_item[0] + "/" + subfile
 		subfiles.append(rundir)
-	
+
 	return subfiles
 
 #----------------------------------------------------------------------------------------------
@@ -100,7 +102,7 @@ def sparceDataEveryXSteps(data, step_length) :
 # This function re-arrange robots data by time
 # input:
 # robotsData = [
-#     [a,b,c,d],  -- robot1's data from step1 to step 8
+#     [a,b,c,d],  -- robot1's data from step1 to step 4
 #     [e,f,g,h],  -- robot2's data
 #     [i,j,k,l],  -- robot3's data
 #     [m,n,o,p],  -- robot4's data
@@ -118,14 +120,14 @@ def sparceDataEveryXSteps(data, step_length) :
 
 # if <interval_steps> is true, [a,e,i,m] will contain all the datas from step 1 to step 49
 
-def transferTimeDataToBoxData(robotsData, step_number = 50, step_length = 50, interval_steps = False) :
+def transferTimeDataToBoxData(robotsData, step_length = 50, interval_steps = False) :
 	boxdata = []
 	positions = []
 	robot_count = 0
 	# for each robot
 	for robotData in robotsData :
-		# for each step of this robot
 		box_count = 0
+		# for each step of this robot
 		for i in range(0, len(robotData)) :
 			# if a right step
 			if i % step_length == 0 :
@@ -143,3 +145,102 @@ def transferTimeDataToBoxData(robotsData, step_number = 50, step_length = 50, in
 		robot_count = robot_count + 1
 
 	return boxdata, positions
+
+#----------------------------------------------------------------------------------------------
+# This function re-arrange a set of line datas by time
+# input:
+# robotsData = [
+#     [a,b,c,d],  -- run1's data from step1 to step 4
+#     [e,f,g,h],  -- run2's data
+#     [i,j,k,l],  -- run3's data
+#     [m,n,o,p],  -- run4's data
+#     ...
+# ]
+
+# output:
+# boxdata = [
+#      [a,e,i,m]  -- all the runs data at step 1
+#      [b,f,j,n]  -- all the runs data at step 2 (<step_length>)
+#      [c,g,k,o]  -- all the runs data at step 3
+#      [d,h,l,p]  -- all the runs data at step 4
+#      ....
+# ]
+def transferTimeDataToRunSetData(runsData, step_length = 1, interval_steps = False) :
+	stepsdata = []
+	positions = []
+	# for each run
+	for runData in runsData :
+		step_count = 0
+		# for each step of this run
+		for i in range(0, len(runData)) :
+			# if a right step by step_length
+			if i % step_length == 0 :
+				if len(stepsdata) <= step_count:
+					stepsdata.append([])
+					positions.append(i)
+				stepsdata[step_count].append(runData[i])
+				step_count = step_count + 1
+			# if count interval steps
+			if interval_steps == True:
+				stepsdata[step_count-1].append(runData[i])
+
+	return stepsdata, positions
+
+#----------------------------------------------------------------------------------------------
+# This function calculates mean, max, min, confidence interval from a stepsData
+# input: stepsData =
+#      [a,e,i,m]  -- all the runs data at step 1
+#      [b,f,j,n]  -- all the runs data at step 2 (<step_length>)
+#      [c,g,k,o]  -- all the runs data at step 3
+#      [d,h,l,p]  -- all the runs data at step 4
+# output:
+#      mean = [q,w,e,r]   mean at step 1,2,3,4
+#      upper= [q,w,e,r]   upper of confidence interval 95%
+#      lower= [q,w,e,r]   lower of confidence interval 95%
+#      min  = [q,w,e,r]   min at step 1,2,3,4
+#      max  = [q,w,e,r]   max at step 1,2,3,4
+#      or min max could be CI 99.999%
+def calcMeanFromStepsData(stepsData) :
+	mean = []
+	upper = []
+	lower = []
+	mini = []
+	maxi = []
+
+	for stepData in stepsData :
+		meanvalue = statistics.mean(stepData)
+		minvalue = min(stepData)
+		maxvalue = max(stepData)
+
+		stdev = statistics.stdev(stepData)
+		count = len(stepData)
+		interval95 = 1.96 * stdev / math.sqrt(count)
+		#interval999 = 3.291 * stdev / math.sqrt(count)
+		interval99999 = 4.417 * stdev / math.sqrt(count)
+
+		mean.append(meanvalue)
+		upper.append(meanvalue + interval95)
+		lower.append(meanvalue - interval95)
+		mini.append(minvalue)
+		maxi.append(maxvalue)
+		'''
+		upper.append(meanvalue + interval95)
+		lower.append(meanvalue - interval95)
+		mini.append(meanvalue - interval99999)
+		maxi.append(meanvalue + interval99999)
+		'''
+
+	return mean, mini, maxi, upper, lower
+
+#----------------------------------------------------------------------------------------------
+# This function draw shaded lines: darker between upper and lower, lighter between mini, maxi
+# input: X,       : x-positions,
+#        mean, maxi, mini, upper, lower
+#        subplot  : index of subplot
+def drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, subplot) :
+	legend_handle_mean, = drawDataWithXInSubplot(X, mean, type_ax, 'b')
+	legend_handle_minmax = type_ax.fill_between(
+		X, mini, maxi, color='b', alpha=.10)
+	legend_handle_lowerupper = type_ax.fill_between(
+		X, lower, upper, color='b', alpha=.30)
+	return legend_handle_mean, legend_handle_minmax, legend_handle_lowerupper

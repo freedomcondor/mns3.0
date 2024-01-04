@@ -8,8 +8,8 @@ experiment_type=$1
 declare -A index
 index=(\
 #                 exp length    argos threads    run per thread   threads
-	[polyhedron_12]='350              16                 10              2'      \
-	[polyhedron_20]='350              24                 10              2'      \
+	[polyhedron_12]='500              16                 10              2'      \
+	[polyhedron_20]='500              24                 10              2'      \
 	[cube_27]='      600              32                 10              2'      \
 	[cube_64]='      1200              32                 20              1'      \
 	[cube_125]='     2500             32                 20              1'      \
