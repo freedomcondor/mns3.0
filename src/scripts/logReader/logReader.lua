@@ -336,6 +336,9 @@ function logReader.calcSegmentDataWithFailureCheckAndGoalReferenceOption(robotsD
 	for robotName, robotData in pairs(robotsData) do
 		if robotData[endStep].failed == nil then
 			local brainName = robotData[endStep].brainID
+			if robotsData[brainName] == nil then
+				print(robotName, "'s brain is", brainName)
+			end
 			robotsData[brainName][endStep].swarmSize = robotsData[brainName][endStep].swarmSize + 1
 		end
 	end
@@ -718,5 +721,23 @@ function logReader.checkIDLastDisAppearStep(robotsData, ID, endStep, specificRob
 	return length
 end
 ------------------------------------------------------------------------
+
+function logReader.divideIntoGroups(robotsData, stableStep, IDMarkersTable)
+	local groups = {}
+	for i, IDMarker in ipairs(IDMarkersTable) do
+		table.insert(groups, {})
+	end
+
+	for robotName, robotData in pairs(robotsData) do
+		for i, IDMarker in ipairs(IDMarkersTable) do
+			local brainName = robotData[stableStep].brainID
+			if robotsData[brainName][stableStep].targetID == IDMarker then
+				groups[i][robotName] = robotData
+			end
+		end
+	end
+
+	return groups
+end
 
 return logReader

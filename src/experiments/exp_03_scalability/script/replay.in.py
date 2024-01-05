@@ -4,7 +4,7 @@ exec(compile(open(replayerFile, "rb").read(), replayerFile, 'exec'))
 
 robotNames = findRobotLogs(InputFolder, "drone") 
 n_drone = len(robotNames)
-print(n_drone)
+print("drone number: ", n_drone)
 
 # calculate split
 if n_drone == 27:
