@@ -36,6 +36,59 @@ def drawData(data, color = None) :
 	else:
 		return plt.plot(data, color=color)
 
+def drawRibbonDataInSubplot(data, subplot, option = {}) :
+	# parameters
+	color = 'b'
+	if 'color' in option :
+		color = option['color']
+
+	width = 5
+	if 'width' in option :
+		width = option['width']
+
+	dataStart = 0
+	if 'dataStart' in option :
+		dataStart = option['dataStart']
+
+	ribbonStart = 0
+	if 'ribbonStart' in option :
+		ribbonStart = option['ribbonStart']
+
+	alpha = 0.3
+	if 'alpha' in option :
+		alpha = option['alpha']
+
+	X1D = np.arange(0, width, 0.25)
+	if 'leading' in option :
+		Y1D = range(0, len(data)+1)
+	else :
+		Y1D = range(1, len(data)+1)
+
+	X, Y = np.meshgrid(X1D, Y1D)
+
+	Z = np.zeros((len(Y), len(Y[1])))
+	for i in range(0, len(Y)) :
+		for j in range(0, len(Y[i])) :
+			if Y[i][j] == 0 :
+				Z[i][j] = option['leading']
+			else :
+				Z[i][j] = data[Y[i][j] - 1]
+			Y[i][j] += dataStart
+			X[i][j] += ribbonStart
+
+	const1D = []
+	data1D = []
+	if 'leading' in option :
+		data1D.append(option['leading'])
+	for i in range(0, len(data)) :
+		data1D.append(data[i])
+
+	for i in range(0, len(Y1D)) :
+		const1D.append(ribbonStart+width)
+
+	subplot.plot3D(const1D, Y, data1D, color=color, alpha=alpha)
+	return subplot.plot_surface(X, Y, Z, color=color, alpha=alpha)
+
 # Takes and array of data, and draw in python matplot
 # subplot is the ax index of the subplot
 # For example :
@@ -208,6 +261,14 @@ def calcMeanFromStepsData(stepsData) :
 	maxi = []
 
 	for stepData in stepsData :
+		if len(stepData) == 1 :
+			mean.append(stepData[0])
+			upper.append(stepData[0])
+			lower.append(stepData[0])
+			mini.append(stepData[0])
+			maxi.append(stepData[0])
+			continue
+
 		meanvalue = statistics.mean(stepData)
 		minvalue = min(stepData)
 		maxvalue = max(stepData)
@@ -238,9 +299,43 @@ def calcMeanFromStepsData(stepsData) :
 #        mean, maxi, mini, upper, lower
 #        subplot  : index of subplot
 def drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, subplot) :
-	legend_handle_mean, = drawDataWithXInSubplot(X, mean, type_ax, 'b')
-	legend_handle_minmax = type_ax.fill_between(
+	legend_handle_mean, = drawDataWithXInSubplot(X, mean, subplot, 'b')
+	legend_handle_minmax = subplot.fill_between(
 		X, mini, maxi, color='b', alpha=.10)
-	legend_handle_lowerupper = type_ax.fill_between(
+	legend_handle_lowerupper = subplot.fill_between(
 		X, lower, upper, color='b', alpha=.30)
 	return legend_handle_mean, legend_handle_minmax, legend_handle_lowerupper
+
+
+#----------------------------------------------------------------------------------------------
+def fill_between_3d(X, upper, lower, subplot, option) :
+	alpha = 0.5
+	if 'alpha' in option :
+		alpha = option['alpha']
+
+	color = 'blue'
+	if 'color' in option :
+		color = option['color']
+
+	zLocation = 0
+	if 'zLocation' in option :
+		zLocation = option['zLocation']
+
+	zDirection = 'x'
+	if 'zDirection' in option :
+		zDirection = option['zDirection']
+
+	xStart = 0
+	if 'xStart' in option :
+		xStart = option['xStart']
+
+	vertices = []
+	vertices.append([])
+	for i in range(0, len(X)) :
+		vertices[0].append((X[i] + xStart, upper[i]))
+
+	for i in range(len(X)-1, 0, -1) :
+		vertices[0].append((X[i] + xStart, lower[i]))
+
+	poly = PolyCollection(vertices, facecolors=[color], alpha=alpha)
+	subplot.add_collection3d(poly, zs=[zLocation], zdir=zDirection)
