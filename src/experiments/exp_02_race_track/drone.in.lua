@@ -39,9 +39,9 @@ local gene = {
 }
 
 -- called when a child lost its parent
-function VNS.Allocator.resetMorphology(vns)
-	vns.Allocator.setMorphology(vns, structure20)
-end
+--function VNS.Allocator.resetMorphology(vns)
+--	vns.Allocator.setMorphology(vns, structure20)
+--end
 
 function init()
 	api.linkRobotInterface(VNS)

@@ -39,7 +39,7 @@ if not os.path.isdir(DATADIR) :
         print("    " + subfolder)
     exit()
 
-# start to draw
+# read data sets
 #--------------------------------------
 data1Set = []
 data2lSet = []
@@ -52,7 +52,8 @@ for subfolder in getSubfolders(DATADIR) :
     data2rSet.append(readDataFrom(subfolder + "result_data_2_right.txt"))
     data3Set.append(readDataFrom(subfolder + "result_data_3.txt"))
 
-
+# start to draw
+#--------------------------------------
 ax = plt.axes(projection ='3d')
 plt.gca().set_box_aspect((0.5,5,2))
 ax.set_xticks([])  # Disable xticks
@@ -101,7 +102,9 @@ ax = plt.axes(projection ='3d')
 plt.gca().set_box_aspect((1,5,2))
 
 
-
+drawRibbonDataInSubplot(data1,  ax, {'color' : 'blue',
+                                     'width' : width,
+                       })
 drawRibbonDataInSubplot(data2l, ax, {'color' : 'red',
                                      'width' : width/2-margin,
                                      'dataStart' : len(data1),
