@@ -89,6 +89,7 @@ for loc in gate_locations :
 arena_size_xml = "{}, {}, {}".format(500, 100, 100)
 arena_center_xml = "{},{},{}".format(200, 0, 25)
 
+#-- grabbing options ------------------------------------------------------
 HEADLESS_GRABBING_FLAG = "false"
 HEADLESS_FRAME_RATE = 0
 if argos_track_record_frame_rate != 0 :

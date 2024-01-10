@@ -1,7 +1,19 @@
 replayerFile = "@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer.py"
+customizeOpts = "q:"
 #execfile(createArgosFileName)
 exec(compile(open(replayerFile, "rb").read(), replayerFile, 'exec'))
 
+# check -r option for headless record for argos track plot
+argos_track_record_frame_rate = None
+for opt, value in optlist:
+    if opt == "-q":
+        argos_track_record_frame_rate = value
+        print("ARGoS Track Record Frame provided: ", argos_track_record_frame_rate)
+if argos_track_record_frame_rate == None :
+    argos_track_record_frame_rate = 0
+    print("ARGoS Track Record flag not provided, default 0, use -q to specify a number")
+
+# read from inputfolder and check drone numbers
 robotNames = findRobotLogs(InputFolder, "drone") 
 n_drone = len(robotNames)
 print("drone number: ", n_drone)
@@ -66,9 +78,16 @@ obstacle_xml += generate_3D_rectangular_gate_xml(2,                    # id
 arena_size_xml = "{}, {}, {}".format(arena_size, arena_size, arena_size)
 arena_center_xml = "0,0,{}".format(arena_z_center)
 
+#-- grabbing options ------------------------------------------------------
+HEADLESS_GRABBING_FLAG = "false"
+HEADLESS_FRAME_RATE = 0
+if argos_track_record_frame_rate != 0 :
+    HEADLESS_GRABBING_FLAG = "true"
+    HEADLESS_FRAME_RATE = argos_track_record_frame_rate
+
 #----------------------------------------------------------------------------------------------
 # generate argos file
-generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.argos", 
+generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/track_argos_template.argos",
                     "replay.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
@@ -77,9 +96,13 @@ generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.ar
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
         ["OBSTACLES",         obstacle_xml],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white", True)],
+#        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white", True)],
         ["ARENA_SIZE",        arena_size_xml], 
         ["ARENA_CENTER",      arena_center_xml], 
+
+        ["LIBRARY_DIR",                  "@CMAKE_BINARY_DIR@"],
+        ["HEADLESS_GRABBING_FLAG",       HEADLESS_GRABBING_FLAG],
+        ["HEADLESS_FRAME_RATE",          str(HEADLESS_FRAME_RATE)],
     ]
 )
 
