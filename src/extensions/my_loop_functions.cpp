@@ -56,7 +56,8 @@ namespace argos {
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug);
             }
             catch(CARGoSException& ex) {
-               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr);
+               //no debug entity, assuming it is an obstacle
+               //m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr);
             }
             m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
             unEntityCount++;

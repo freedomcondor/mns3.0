@@ -53,6 +53,7 @@ namespace argos {
             SKeyFrame(CVector3 current_positionV3) :
                PositionV3(current_positionV3) {}
             CVector3 PositionV3;
+            std::string StrParentId;
             std::vector<CVector3> vecPointing;
          };
 

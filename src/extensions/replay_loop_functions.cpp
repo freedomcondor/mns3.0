@@ -68,12 +68,14 @@ namespace argos {
       // move robot to the location
       s_tracked_entity.EmbodiedEntity->MoveTo(CPositionV3, COrientationQ, false, true);
 
-      // record position into vecTrack, and if keyFrame, record into vecKeyFrame
+      // record position into vecTrack
       if (m_bDrawTrackFlag == true) {
          s_tracked_entity.vecTrack.push_back(CPositionV3);
       }
+      // if key frame, record into vecKeyFrame
       if ((m_vecDrawTrackKeyFrame.size() > 0) && (m_unStepCount == m_vecDrawTrackKeyFrame[0]))
          s_tracked_entity.vecKeyFrame.emplace_back(CPositionV3);
+
       // draw Track
       if ((m_bDrawTrackFlag == true) &&
             (m_unStepCount % m_unDrawTrackEveryXStep == 0) &&
@@ -110,6 +112,21 @@ namespace argos {
                fHeight,
                1
             );
+
+            for (CVector3 pointing : keyFrame.vecPointing) {
+               CVector3 CRelativePointingPosition = CVector3(pointing - CPositionV3).Rotate(COrientationQ.Inverse());
+
+               Real fBodyThickness = 0.1;
+               Real fHeadThickness = 0.15;
+               Real fColorTransparent = 1;
+
+               s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(CRelativePosition,
+                                                                               CRelativePointingPosition,
+                                                                               CColor::BLACK,
+                                                                               fBodyThickness,
+                                                                               fHeadThickness,
+                                                                               fColorTransparent);
+            }
          }
       }
 
@@ -166,14 +183,18 @@ namespace argos {
          }
       }
 
-      // TODO figure a way to record parent in parallel
-      /*
+      // read parent
       if (vecWordList.size() >= 18) {
-         std::string strParent = vecWordList[17];
-         mapParent[ID] = strParent;
-      }
-      */
+         std::string strParentId = vecWordList[17];
+         // TODO figure a way to record parent in parallel
+         //mapParent[ID] = strParentId;
 
+         // if key frame, record into keyframe
+         if ((m_vecDrawTrackKeyFrame.size() > 0) && (m_unStepCount == m_vecDrawTrackKeyFrame[0]))
+            s_tracked_entity.vecKeyFrame.back().StrParentId = strParentId;
+      }
+
+      // draw debug arrows and rings
       if ((vecWordList.size() > 18) && (m_bDrawDebugArrowsFlag == true)) {
          UInt32 nCurrentIdx = 18;
          while (nCurrentIdx < vecWordList.size()) {
@@ -331,12 +352,12 @@ namespace argos {
    void CReplayLoopFunctions::Init(TConfigurationNode& t_tree) {
       m_unStepCount = 0;
       /* from replay_input_folder.txt read log file folder and other flags */
-      std::string strLogFolder = "./logs";
       std::ifstream infile("replay_input_folder.txt");
-      std::string strDrawGoalFlag = "False";
-      std::string strDrawDebugArrowsFlag = "False";
-      std::string strDrawTrackFlag = "False";
-      std::string strDrawTrackKeyFrame = "";
+      std::string strLogFolder           = "./logs";
+      std::string strDrawGoalFlag        = "False";
+      std::string strDrawDebugArrowsFlag = "False";  // debug arrows in log
+      std::string strDrawTrackFlag       = "False";
+      std::string strDrawTrackKeyFrame   = "";
       /* read key frame */
       if (!infile.fail()) {
          infile >> strLogFolder;
@@ -407,7 +428,8 @@ namespace argos {
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, cColor);
             }
             catch(CARGoSException& ex) {
-               m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, cColor);
+               //no debug entity, assuming it is an obstacle
+               //m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, cColor);
             }
 
             m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
@@ -430,8 +452,19 @@ namespace argos {
       if (m_bFinishSignal == true)
          exit(0);
 
-      if ((m_vecDrawTrackKeyFrame.size() > 0) && (m_unStepCount == m_vecDrawTrackKeyFrame[0]))
+      if ((m_vecDrawTrackKeyFrame.size() > 0) && (m_unStepCount == m_vecDrawTrackKeyFrame[0])) {
          m_vecDrawTrackKeyFrame.erase(m_vecDrawTrackKeyFrame.begin());
+
+         for (STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
+            std::string strParentId = s_tracked_entity.vecKeyFrame.back().StrParentId;
+            if (strParentId == "nil") continue;
+            STrackedEntity& sParentEntity = m_vecTrackedEntities[m_mapEntityIDTrackedEntityIndex[strParentId]];
+            CVector3 cParentPositionV3 = sParentEntity.vecKeyFrame.back().PositionV3;
+
+            s_tracked_entity.vecKeyFrame.back().vecPointing.push_back(cParentPositionV3);
+         }
+      }
+
       m_unStepCount++;
    }
 
