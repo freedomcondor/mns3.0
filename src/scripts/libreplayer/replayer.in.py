@@ -5,7 +5,7 @@ import re
 usage="[usage for replay] example: python3 replay.py -i logs -d -g\n -d to draw debug arrows\n -g to draw virtual frame and goal"
 print(usage)
 
-customizeOpts = "i:gdtk:e:"
+customizeOpts = "i:gdtk:e:" + customizeOpts
 createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 #execfile(createArgosFileName)
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))

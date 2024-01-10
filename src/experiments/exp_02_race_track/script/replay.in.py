@@ -1,6 +1,17 @@
 replayerFile = "@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer.py"
 #execfile(createArgosFileName)
+customizeOpts = "q:"
 exec(compile(open(replayerFile, "rb").read(), replayerFile, 'exec'))
+
+# check -r option for headless record for argos track plot
+argos_track_record_frame_rate = None
+for opt, value in optlist:
+    if opt == "-q":
+        argos_track_record_frame_rate = value
+        print("ARGoS Track Record Frame provided: ", argos_track_record_frame_rate)
+if argos_track_record_frame_rate == None :
+    argos_track_record_frame_rate = 0
+    print("ARGoS Track Record flag not provided, default 0, use -q to specify a number")
 
 # read from 
 typeFileAppend = "../type.txt"
@@ -78,9 +89,15 @@ for loc in gate_locations :
 arena_size_xml = "{}, {}, {}".format(500, 100, 100)
 arena_center_xml = "{},{},{}".format(200, 0, 25)
 
+HEADLESS_GRABBING_FLAG = "false"
+HEADLESS_FRAME_RATE = 0
+if argos_track_record_frame_rate != 0 :
+    HEADLESS_GRABBING_FLAG = "true"
+    HEADLESS_FRAME_RATE = argos_track_record_frame_rate
+
 #----------------------------------------------------------------------------------------------
 # generate argos file
-generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.argos", 
+generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/track_argos_template.argos",
                     "replay.argos",
     [
         ["RANDOMSEED",        str(Inputseed)],  # Inputseed is inherit from createArgosScenario.py
@@ -89,9 +106,13 @@ generate_argos_file("@CMAKE_BINARY_DIR@/scripts/libreplayer/replayer_template.ar
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
         ["OBSTACLES",         obstacle_xml],
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white", True)],
+#        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white", True)],
         ["ARENA_SIZE",        arena_size_xml], 
         ["ARENA_CENTER",      arena_center_xml], 
+
+        ["LIBRARY_DIR",                  "@CMAKE_BINARY_DIR@"],
+        ["HEADLESS_GRABBING_FLAG",       HEADLESS_GRABBING_FLAG],
+        ["HEADLESS_FRAME_RATE",          str(HEADLESS_FRAME_RATE)],
     ]
 )
 

@@ -1,0 +1,102 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="MULTITHREADS" />
+    <experiment length="TOTALLENGTH" ticks_per_second="5" random_seed="RANDOMSEED" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <!-- Drone Controller -->
+    <lua_controller id="drone">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+    <!-- Pipuck Controller -->
+    <lua_controller id="pipuck">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_BINARY_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="ARENA_SIZE" positional_index="grid" center="ARENA_CENTER">
+    <floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/grey_floor.png" />
+    <!--floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/wood_floor.png" /-->
+    <!--floor id="floor" source="loop_functions" pixels_per_meter="1" color="grey"/-->
+    <!-- real scenario -->
+    REAL_SCENARIO
+
+    <!-- drones -->
+    DRONES
+    <!-- pipucks -->
+    PIPUCKS
+    <!-- walls -->
+    WALL 
+    <!-- target -->
+    TARGET
+    <!-- random obstacles-->
+    OBSTACLES
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <pointmass3d id="pm3d" iterations="10" />
+    <dynamics3d id="dyn3d" iterations="25">
+      <gravity g="9.8" />
+      <floor />
+    </dynamics3d>
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <directional_led id="directional_leds" index="grid" grid_size="20,20,20"/>
+    <tag id="tags" index="grid" grid_size="20,20,20" />
+    <radio id="wifi" index="grid" grid_size="20,20,20" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <loop_functions library="LIBRARY_DIR/libreplay_loop_functions"
+                  label="replay_loop_functions" />
+
+  <!-- ****************** -->
+  <!-- * Visualization  * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl lua_editor="false" show_boundary="false" background_color="white">
+      <user_functions library="LIBRARY_DIR/libmy_qtopengl_extensions"
+                      label="my_qtopengl_user_functions" />
+      <frame_grabbing base_name="exp02_"
+                      format="png"
+                      quality="100"
+                      headless_grabbing="HEADLESS_GRABBING_FLAG"
+                      headless_frame_rate="HEADLESS_FRAME_RATE"/>
+      <camera>
+        <placements>
+          <placement index="0" position="-7.75307,-97.6737,114.883" look_at="64.8721,-8.4381,0" up="0,0,1" lens_focal_length="30" />
+        </placements>
+      </camera>
+    </qt-opengl>
+  </visualization>
+
+</argos-configuration>
