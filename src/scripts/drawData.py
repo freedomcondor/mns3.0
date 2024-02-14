@@ -58,6 +58,10 @@ def drawRibbonDataInSubplot(data, subplot, option = {}) :
 	if 'alpha' in option :
 		alpha = option['alpha']
 
+	dataLineOffset = width
+	if 'dataLineOffset' in option :
+		dataLineOffset = option['dataLineOffset']
+
 	X1D = np.arange(0, width, 0.25)
 	if 'leading' in option :
 		Y1D = range(0, len(data)+1)
@@ -84,7 +88,7 @@ def drawRibbonDataInSubplot(data, subplot, option = {}) :
 		data1D.append(data[i])
 
 	for i in range(0, len(Y1D)) :
-		const1D.append(ribbonStart+width)
+		const1D.append(ribbonStart+dataLineOffset)
 
 	subplot.plot3D(const1D, Y, data1D, color=color, alpha=alpha)
 	return subplot.plot_surface(X, Y, Z, color=color, alpha=alpha)
@@ -298,12 +302,38 @@ def calcMeanFromStepsData(stepsData) :
 # input: X,       : x-positions,
 #        mean, maxi, mini, upper, lower
 #        subplot  : index of subplot
-def drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, subplot) :
-	legend_handle_mean, = drawDataWithXInSubplot(X, mean, subplot, 'b')
+def drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, subplot, option={}) :
+	# check options
+	color='blue'
+	if 'color' in option:
+		color = option['color']
+	startPosition = 0
+	if 'startPosition' in option:
+		startPosition = option['startPosition']
+	leading = None
+	if 'leading' in option:
+		leading = option['leading']
+
+	# offset start position
+	X_with_offset = []
+	for i in X:
+		X_with_offset.append(i + startPosition)
+
+	# check leading
+	if leading != None :
+		X_with_offset.insert(0, startPosition-1)
+		mean.insert(0, leading)
+		maxi.insert(0, leading)
+		mini.insert(0, leading)
+		upper.insert(0, leading)
+		lower.insert(0, leading)
+
+
+	legend_handle_mean, = drawDataWithXInSubplot(X_with_offset, mean, subplot, color)
 	legend_handle_minmax = subplot.fill_between(
-		X, mini, maxi, color='b', alpha=.10)
+		X_with_offset, mini, maxi, color=color, alpha=.10)
 	legend_handle_lowerupper = subplot.fill_between(
-		X, lower, upper, color='b', alpha=.30)
+		X_with_offset, lower, upper, color=color, alpha=.30)
 	return legend_handle_mean, legend_handle_minmax, legend_handle_lowerupper
 
 
