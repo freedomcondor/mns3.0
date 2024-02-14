@@ -93,7 +93,7 @@
                       headless_frame_rate="HEADLESS_FRAME_RATE"/>
       <camera>
         <placements>
-          <placement index="0" position="-7.75307,-97.6737,114.883" look_at="64.8721,-8.4381,0" up="0,0,1" lens_focal_length="30" />
+          <placement index="0" position="23.8308,-133.618,95.2953" look_at="64.8721,-8.4381,0" up="0,0,1" lens_focal_length="30" />
         </placements>
       </camera>
     </qt-opengl>
