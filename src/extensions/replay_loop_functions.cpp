@@ -101,23 +101,23 @@ namespace argos {
           (s_tracked_entity.DebugEntity != NULL)) {
          for (STrackedEntity::SKeyFrame keyFrame : s_tracked_entity.vecKeyFrame) {
             CVector3 CRelativePosition = CVector3(keyFrame.PositionV3 - CPositionV3).Rotate(COrientationQ.Inverse());
-            Real fRadius = 0.2;
-            Real fThickness = 0.1;
-            Real fHeight = 0.2;
-            s_tracked_entity.DebugEntity->GetCustomizeRings().emplace_back(
-               CRelativePosition,
-               fRadius,
-               CColor::BLACK,
-               fThickness,
-               fHeight,
-               1
-            );
+
+            CColor cColor = CColor::BLACK;
+            if (keyFrame.vecPointing.size() == 0) cColor = CColor::RED;
+            Real fRadius = 0.4;
+            Real fHaloRadius = 0;
+            Real fMaxTransparency = 1;
+            s_tracked_entity.DebugEntity->GetHalos().emplace_back(CRelativePosition,
+                                                                  fRadius,
+                                                                  fHaloRadius,
+                                                                  fMaxTransparency,
+                                                                  cColor);
 
             for (CVector3 pointing : keyFrame.vecPointing) {
                CVector3 CRelativePointingPosition = CVector3(pointing - CPositionV3).Rotate(COrientationQ.Inverse());
 
-               Real fBodyThickness = 0.1;
-               Real fHeadThickness = 0.15;
+               Real fBodyThickness = 0.2;
+               Real fHeadThickness = 0.20;
                Real fColorTransparent = 1;
 
                s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(CRelativePosition,
