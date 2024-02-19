@@ -77,6 +77,7 @@ function logReader.readLine(str)
 		                   ),
 		targetID = tonumber(strList[16]),
 		brainID = strList[17],
+		parentID = strList[18],
 	}
 	stepData.originGoalPositionV3 = stepData.goalPositionV3
 	stepData.originGoalOrientationQ = stepData.goalOrientationQ
