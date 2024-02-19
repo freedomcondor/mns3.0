@@ -121,12 +121,13 @@ evaluate() {
 run_single_thread() {
 	start=$1
 	end=$2
-	thread_number=$3
-	cmd=$4
-	DATADIR=$5
-	TMPDIR=$6
-	check_finish_correctly_program=$7
-	evaluation_flag=$8
+	step=$3
+	thread_number=$4
+	cmd=$5
+	DATADIR=$6
+	TMPDIR=$7
+	check_finish_correctly_program=$8
+	evaluation_flag=$9
 
 	# log indent for this thread
 	log_indent=""
@@ -134,7 +135,7 @@ run_single_thread() {
 
 	echo "$log_indent thread $thread_number start" >> $THREADS_LOG_OUTPUT
 
-	for (( i_run=$start; i_run<=$end; i_run++ ));
+	for (( i_run=$start; i_run<=$end; i_run+=$step ));
 	do
 		if [ -z "$evaluation_flag" ]; then
 			run $i_run $thread_number "$cmd" $DATADIR $TMPDIR "$check_finish_correctly_program"
@@ -177,6 +178,14 @@ run_threads() {
 		mkdir -p $TMPDIR
 	fi
 
+	screen_width=`tput cols`
+	width=$(( $screen_width / 25 ))
+	LOG_LINE=""
+	for (( i=0; i<$width; i++)); do LOG_LINE="$LOG_LINE-"; done
+	LOG_INDENT=""
+	for (( i=1; i<$width; i++)); do LOG_INDENT="$LOG_INDENT "; done
+	LOG_INDENT="$LOG_INDENT|"
+
 	# line length
 	log_line=""
 	for (( indent=0; indent<$threads; indent++ )); do log_line="$log_line$LOG_LINE"; done
@@ -188,9 +197,13 @@ run_threads() {
 	# start threads
 	for (( i_thread=0; i_thread<$threads; i_thread++ )); 
 	do 
-		let thread_start=$start+$runs_per_thread*$i_thread
-		let thread_end=$thread_start+$runs_per_thread-1
-		run_single_thread $thread_start $thread_end $i_thread "$cmd" $DATADIR $TMPDIR "$check_finish_correctly_program" $evaluation_flag &
+		#let thread_start=$start+$runs_per_thread*$i_thread
+		#let thread_end=$thread_start+$runs_per_thread-1
+		#run_single_thread $thread_start $thread_end $i_thread "$cmd" $DATADIR $TMPDIR "$check_finish_correctly_program" $evaluation_flag &
+		thread_start=$(($i_thread+$start))
+		thread_end=$(($thread_start+($runs_per_thread-1)*$threads))
+		thread_step=$threads
+		run_single_thread $thread_start $thread_end $thread_step $i_thread "$cmd" $DATADIR $TMPDIR "$check_finish_correctly_program" $evaluation_flag &
 		echo "kill $!" >> $KILL_THREADS
 	done
 
