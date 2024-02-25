@@ -179,7 +179,7 @@ run_threads() {
 	fi
 
 	screen_width=`tput cols`
-	width=$(( $screen_width / 25 ))
+	width=$(( ($screen_width - 15) / $threads ))
 	LOG_LINE=""
 	for (( i=0; i<$width; i++)); do LOG_LINE="$LOG_LINE-"; done
 	LOG_INDENT=""
