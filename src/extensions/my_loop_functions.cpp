@@ -54,13 +54,13 @@ namespace argos {
             try {
                CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug);
+               m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
+               unEntityCount++;
             }
             catch(CARGoSException& ex) {
-               //no debug entity, assuming it is an obstacle
-               //m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr);
+               //no debug entity, assuming it is an obstacle and not controllable
+               m_vecTrackedNoDebugEntities.emplace_back(pc_entity, &cBody, nullptr);
             }
-            m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
-            unEntityCount++;
          }
          catch(CARGoSException& ex) {
             /* only track entities with bodies */
@@ -73,7 +73,15 @@ namespace argos {
    /****************************************/
 
    void CMyLoopFunctions::PostStep() {
+      /* iterate controllable entities through multi thread framework */
       GetSpace().IterateOverControllableEntities(EntityMultiThreadIteration);
+      /* iterate non-controllable entities */
+      for (STrackedEntity& s_tracked_entity : m_vecTrackedNoDebugEntities) {
+         /* Store position, orientation and debug message */
+         SAnchor& s_origin_anchor = s_tracked_entity.EmbodiedEntity->GetOriginAnchor();
+         s_tracked_entity.LogFile << s_origin_anchor.Position << ',' << s_origin_anchor.Orientation;
+         s_tracked_entity.LogFile << std::endl;
+      }
    }
    
    /****************************************/

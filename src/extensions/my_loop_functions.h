@@ -40,6 +40,8 @@ namespace argos {
          std::ofstream LogFile;
       };
 
+      std::vector<STrackedEntity> m_vecTrackedNoDebugEntities;
+
       static std::vector<STrackedEntity> m_vecTrackedEntities;
       static std::map<std::string, UInt32> m_mapEntityIDTrackedEntityIndex;
       static void EntityMultiThreadIteration(CControllableEntity* cControllableEntity);
