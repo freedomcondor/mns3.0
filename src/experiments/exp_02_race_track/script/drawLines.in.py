@@ -57,40 +57,55 @@ for subfolder in getSubfolders(DATADIR) :
 fig = plt.figure()
 
 ax_main = fig.add_subplot(1,1,1)
-ax_3D = fig.add_subplot(3,3,3, projection='3d')
+ax_main.set_xlabel("time(s)")
+ax_main.set_ylabel("error(m)")
+ax_3D = fig.add_subplot(3,4,4, projection='3d')
+ax_3D.set_box_aspect((1,5,2))  # set block ratio
+ax_3D.set_facecolor('none')
+#ax_3D.set_axis_off()
+#ax_3D.w_xaxis.set_pane_color('none')
+#ax_3D.w_yaxis.set_pane_color('none')
 
-#ax_main = plt.axes(projection ='3d')
-
-plt.gca().set_box_aspect((1.0,5,2))
 ax_3D.set_xticks([])  # Disable xticks
-ax_3D.view_init(30, -15)    # Z degree above ground    # X degree towards counterclockwise to the minus direction of X
+ax_3D.view_init(40, -40)    # Z degree above ground    # X degree towards counterclockwise to the minus direction of X
+# Hide all axis text ticks or tick labels
+ax_3D.set_xticks([])
+ax_3D.set_yticks([])
+ax_3D.set_zticks([])
 
 width=8
 margin=1
 gap = 0
 
+step_time_scalar = 5
+
 #----- data1 -----
 data1StepsData, X = transferTimeDataToRunSetData(data1Set)
 data1Mean, mini, maxi, upper, lower = calcMeanFromStepsData(data1StepsData)
 drawRibbonDataInSubplot(data1Mean,     ax_3D, {'color':'blue',       'width'    :width,          'dataStart':0})
+X = [i / step_time_scalar for i in X]
 drawShadedLinesInSubplot(X, data1Mean, maxi, mini, upper, lower, ax_main, {'color':'blue'})
 
 #----- data2 left -----
 data2LeftStepsData, X = transferTimeDataToRunSetData(data2lSet)
 data2LeftMean, mini, maxi, upper, lower = calcMeanFromStepsData(data2LeftStepsData)
 drawRibbonDataInSubplot(data2LeftMean, ax_3D, {'color':'red',        'width'    :width/2-margin, 'dataStart':len(data1StepsData),     'leading':data1Mean[-1]})
-drawShadedLinesInSubplot(X, data2LeftMean, maxi, mini, upper, lower, ax_main, {'color':'red', 'startPosition':len(data1StepsData), 'leading':data1Mean[-1]})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data2LeftMean, maxi, mini, upper, lower, ax_main, {'color':'red', 'startPosition':len(data1StepsData)/step_time_scalar, 'leading':data1Mean[-1]})
 
 #----- data2 right -----
 data2RightStepsData, X = transferTimeDataToRunSetData(data2rSet)
 data2RightMean, mini, maxi, upper, lower = calcMeanFromStepsData(data2RightStepsData)
 drawRibbonDataInSubplot(data2RightMean, ax_3D, {'color':'green',     'width'    :width/2-margin,  'dataStart':len(data1StepsData),     'leading':data1Mean[-1],   'ribbonStart' : width/2+margin})
-drawShadedLinesInSubplot(X, data2RightMean, maxi, mini, upper, lower, ax_main, {'color':'green', 'startPosition':len(data1StepsData), 'leading':data1Mean[-1]})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data2RightMean, maxi, mini, upper, lower, ax_main, {'color':'green', 'startPosition':len(data1StepsData)/step_time_scalar, 'leading':data1Mean[-1]})
 
 #----- data3 -----
 data3StepsData, X = transferTimeDataToRunSetData(data3Set)
 data3Mean, mini, maxi, upper, lower = calcMeanFromStepsData(data3StepsData)
 drawRibbonDataInSubplot(data3Mean,     ax_3D, {'color':'blue',      'width'    :width,           'dataStart':len(data1StepsData) + len(data2LeftStepsData),     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
-drawShadedLinesInSubplot(X, data3Mean, maxi, mini, upper, lower, ax_main, {'color':'blue', 'startPosition':len(data1StepsData) + len(data2LeftStepsData),     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data3Mean, maxi, mini, upper, lower, ax_main, {'color':'blue', 'startPosition':(len(data1StepsData) + len(data2LeftStepsData))/step_time_scalar,     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
 
-plt.show()
+#plt.show()
+plt.savefig("exp_02_plot_" + Experiment_type + ".pdf")
