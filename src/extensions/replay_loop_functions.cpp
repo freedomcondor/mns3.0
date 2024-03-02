@@ -88,7 +88,7 @@ namespace argos {
                CRelativePosition1,
                CRelativePosition2,
                s_tracked_entity.CTrackColor,
-               0.10,
+               0.20,
                0.0,
                1
             );
@@ -101,25 +101,26 @@ namespace argos {
           (s_tracked_entity.DebugEntity != NULL)) {
          for (STrackedEntity::SKeyFrame keyFrame : s_tracked_entity.vecKeyFrame) {
             CVector3 CRelativePosition = CVector3(keyFrame.PositionV3 - CPositionV3).Rotate(COrientationQ.Inverse());
-
-            CColor cColor = CColor::BLACK;
-            if (keyFrame.vecPointing.size() == 0) cColor = CColor::RED;
-            Real fRadius = 0.4;
+            // draw sphere for robots
+            Real fRadius = 0.6;
             Real fHaloRadius = 0;
             Real fMaxTransparency = 1;
+            CColor cColor = CColor::BLACK;
+            if (keyFrame.vecPointing.size() == 0) {
+               cColor = CColor::RED;
+               fRadius = 1.0;
+            }
             s_tracked_entity.DebugEntity->GetHalos().emplace_back(CRelativePosition,
                                                                   fRadius,
                                                                   fHaloRadius,
                                                                   fMaxTransparency,
                                                                   cColor);
-
+            // draw parent-child lines
             for (CVector3 pointing : keyFrame.vecPointing) {
                CVector3 CRelativePointingPosition = CVector3(pointing - CPositionV3).Rotate(COrientationQ.Inverse());
-
-               Real fBodyThickness = 0.2;
+               Real fBodyThickness = 0.4;
                Real fHeadThickness = 0.20;
                Real fColorTransparent = 1;
-
                s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(CRelativePosition,
                                                                                CRelativePointingPosition,
                                                                                CColor::BLACK,
@@ -409,8 +410,21 @@ namespace argos {
 
       /* create a vector of tracked entities */
       CEntity::TVector& tRootEntityVector = GetSpace().GetRootEntityVector();
-      UInt16 unColorMapStepLength = std::floor(vecDarkColorMap.size() / tRootEntityVector.size());
-      UInt16 unDarkColorEveryXRobots = std::floor(tRootEntityVector.size() / 5);
+      // count robot numbers : entiies with a debug entity is considered a robot
+      UInt16 unRobotNumber = 0;
+      for(CEntity* pc_entity : tRootEntityVector) {
+         CComposableEntity* pcComposable = dynamic_cast<CComposableEntity*>(pc_entity);
+         if(pcComposable == nullptr) continue;
+         try {
+            CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
+            unRobotNumber++;
+         }
+         catch(CARGoSException& ex) {}
+      }
+      // calculate color maps
+      UInt16 unDarkLineNumber = 5;
+      UInt16 unColorMapStepLength = std::floor(vecDarkColorMap.size() / unRobotNumber);
+      UInt16 unDarkColorEveryXRobots = std::floor(unRobotNumber / unDarkLineNumber);
       UInt16 unColorMapIndex = 0;
       UInt16 unEntityCount = 0;
       for(CEntity* pc_entity : tRootEntityVector) {
@@ -420,21 +434,22 @@ namespace argos {
          }
          try {
             CEmbodiedEntity& cBody = pcComposable->GetComponent<CEmbodiedEntity>("body");
-            CColor cColor = vecLightColorMap[unColorMapIndex];
-            if (unEntityCount % unDarkColorEveryXRobots == 0)
-               cColor = vecDarkColorMap[unColorMapIndex];
             try {
                CDebugEntity& cDebug = pcComposable->GetComponent<CDebugEntity>("debug");
+               // I'm a robot with debug entity
+               CColor cColor = vecLightColorMap[unColorMapIndex];
+               if (unEntityCount % unDarkColorEveryXRobots == 0)
+                  cColor = vecDarkColorMap[unColorMapIndex];
                m_vecTrackedEntities.emplace_back(pc_entity, &cBody, &cDebug, strLogFolder, cColor);
+               m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
+               unEntityCount++;
+               unColorMapIndex += unColorMapStepLength;
             }
             catch(CARGoSException& ex) {
                //no debug entity, assuming it is an obstacle
                //m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, cColor);
             }
 
-            m_mapEntityIDTrackedEntityIndex[pc_entity->GetId()] = unEntityCount;
-            unEntityCount++;
-            unColorMapIndex += unColorMapStepLength;
          }
          catch(CARGoSException& ex) {
             /* only track entities with bodies */
