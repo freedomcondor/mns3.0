@@ -54,75 +54,54 @@ for subfolder in getSubfolders(DATADIR) :
 
 # start to draw
 #--------------------------------------
-ax = plt.axes(projection ='3d')
-plt.gca().set_box_aspect((0.5,5,2))
-ax.set_xticks([])  # Disable xticks
-ax.view_init(20, -30)    # Z degree above ground    # X degree towards counterclockwise to the minus direction of X
+fig = plt.figure()
+
+ax_main = fig.add_subplot(1,1,1)
+ax_main.set_xlabel("time(s)")
+ax_main.set_ylabel("error(m)")
+ax_3D = fig.add_subplot(3,4,4, projection='3d')
+ax_3D.set_box_aspect((1,5,2))  # set block ratio
+ax_3D.set_facecolor('none')
+
+ax_3D.set_xticks([])  # Disable xticks
+ax_3D.view_init(60, -30)    # Z degree above ground    # X degree towards counterclockwise to the minus direction of X
+# Hide all axis text ticks or tick labels
+ax_3D.set_xticks([])
+ax_3D.set_yticks([])
+ax_3D.set_zticks([])
 
 width=8
 margin=1
+gap = 0
+
+step_time_scalar = 5
 
 #----- data1 -----
 data1StepsData, X = transferTimeDataToRunSetData(data1Set)
 data1Mean, mini, maxi, upper, lower = calcMeanFromStepsData(data1StepsData)
-
-drawRibbonDataInSubplot(data1Mean,      ax, {'color':'blue',       'width'    :width,          'dataStart':0                })
-fill_between_3d(X, upper, lower, ax,        {'color':'black',      'zLocation':0,              'alpha'    :0.5,                 })
-fill_between_3d(X, maxi,  mini,  ax,        {'color':'black',      'zLocation':0,              'alpha'    :0.3,                 })
+drawRibbonDataInSubplot(data1Mean,     ax_3D, {'color':'blue',       'width'    :width,          'dataStart':0})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data1Mean, maxi, mini, upper, lower, ax_main, {'color':'blue'})
 
 #----- data2 left -----
 data2LeftStepsData, X = transferTimeDataToRunSetData(data2lSet)
 data2LeftMean, mini, maxi, upper, lower = calcMeanFromStepsData(data2LeftStepsData)
-drawRibbonDataInSubplot(data2LeftMean,  ax, {'color':'red',        'width'    :width/2-margin, 'dataStart':len(data1StepsData),     'leading':data1Mean[-1]})
-fill_between_3d(X, upper, lower, ax,        {'color':'black',      'zLocation':0,              'xStart'   :len(data1StepsData),     'alpha'  :0.5,        })
-fill_between_3d(X, maxi,  mini,  ax,        {'color':'black',      'zLocation':0,              'xStart'   :len(data1StepsData),     'alpha'  :0.3,        })
+drawRibbonDataInSubplot(data2LeftMean, ax_3D, {'color':'red',        'width'    :width/2-margin, 'dataStart':len(data1StepsData),     'leading':data1Mean[-1]})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data2LeftMean, maxi, mini, upper, lower, ax_main, {'color':'red', 'startPosition':len(data1StepsData)/step_time_scalar, 'leading':data1Mean[-1]})
 
 #----- data2 right -----
 data2RightStepsData, X = transferTimeDataToRunSetData(data2rSet)
 data2RightMean, mini, maxi, upper, lower = calcMeanFromStepsData(data2RightStepsData)
-drawRibbonDataInSubplot(data2RightMean,  ax, {'color':'green',     'width'    :width/2-margin,  'dataStart':len(data1StepsData),     'leading':data1Mean[-1],   'ribbonStart' : width/2+margin})
-fill_between_3d(X, upper, lower, ax,         {'color':'black',     'zLocation':width/2+margin,  'xStart'   :len(data1StepsData),     'alpha'  :0.5,        })
-fill_between_3d(X, maxi,  mini,  ax,         {'color':'black',     'zLocation':width/2+margin,  'xStart'   :len(data1StepsData),     'alpha'  :0.3,        })
+drawRibbonDataInSubplot(data2RightMean, ax_3D, {'color':'green',     'width'    :width/2-margin,  'dataStart':len(data1StepsData),     'leading':data1Mean[-1],   'ribbonStart' : width/2+margin})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data2RightMean, maxi, mini, upper, lower, ax_main, {'color':'green', 'startPosition':len(data1StepsData)/step_time_scalar, 'leading':data1Mean[-1]})
 
 #----- data3 -----
 data3StepsData, X = transferTimeDataToRunSetData(data3Set)
 data3Mean, mini, maxi, upper, lower = calcMeanFromStepsData(data3StepsData)
-drawRibbonDataInSubplot(data3Mean,       ax, {'color':'blue',      'width'    :width,           'dataStart':len(data1StepsData) + len(data2LeftStepsData),     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
-fill_between_3d(X, upper, lower, ax,         {'color':'black',     'zLocation':0,               'xStart'   :len(data1StepsData) + len(data2LeftStepsData),     'alpha'  :0.5,        })
-fill_between_3d(X, maxi,  mini,  ax,         {'color':'black',     'zLocation':0,               'xStart'   :len(data1StepsData) + len(data2LeftStepsData),     'alpha'  :0.3,        })
+drawRibbonDataInSubplot(data3Mean,     ax_3D, {'color':'blue',      'width'    :width,           'dataStart':len(data1StepsData) + len(data2LeftStepsData),     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
+X = [i / step_time_scalar for i in X]
+drawShadedLinesInSubplot(X, data3Mean, maxi, mini, upper, lower, ax_main, {'color':'blue', 'startPosition':(len(data1StepsData) + len(data2LeftStepsData))/step_time_scalar,     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
 
-'''
-#drawData(readDataFrom("result_data_1.txt"))
-data1 = readDataFrom("result_data_1.txt")
-data2l = readDataFrom("result_data_2_left.txt")
-data2r = readDataFrom("result_data_2_right.txt")
-data3 = readDataFrom("result_data_3.txt")
-
-ax = plt.axes(projection ='3d')
-plt.gca().set_box_aspect((1,5,2))
-
-
-drawRibbonDataInSubplot(data1,  ax, {'color' : 'blue',
-                                     'width' : width,
-                       })
-drawRibbonDataInSubplot(data2l, ax, {'color' : 'red',
-                                     'width' : width/2-margin,
-                                     'dataStart' : len(data1),
-                                     'leading'   : data1[-1]
-                       })
-drawRibbonDataInSubplot(data2r, ax, {'color' : 'green',
-                                     'width' : width/2-margin,
-                                     'dataStart' : len(data1),
-                                     'ribbonStart' : width/2+margin,
-                                     'leading'   : data1[-1]
-                       })
-drawRibbonDataInSubplot(data3,  ax, {'color' : 'blue',
-                                     'width' : width,
-                                     'dataStart' : len(data1)+len(data2l),
-                                     'leading'   : data2r[-1]
-                       })
-
-#drawData(readDataFrom("result_minimum_distances.txt"))
-'''
-
-plt.show()
+plt.savefig("exp03_plot_" + Experiment_type + ".pdf")
