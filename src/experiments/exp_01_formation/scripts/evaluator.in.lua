@@ -25,11 +25,14 @@ elseif type == "cube_125" then
 	structure = generate_cube_morphology(125)
 elseif type == "screen_64" then
 	structure = generate_screen_square(8)
+elseif type == "donut_48" then
+	nodes = 48 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
 elseif type == "donut_64" then
 	nodes = 64 / 4
 	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
-elseif type == "donut_48" then
-	nodes = 48 / 4
+elseif type == "donut_80" then
+	nodes = 80 / 4
 	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
 end
 
