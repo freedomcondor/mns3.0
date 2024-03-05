@@ -29,7 +29,7 @@ if Experiment_type == None :
 
 # start to draw
 #-----------------------------------------
-dataFolder = "@CMAKE_MNS_DATA_PATH@/exp_01_formation/exp_01_formation_normal_12_rangefinders/" + Experiment_type + "/run_data"
+dataFolder = "@CMAKE_MNS_DATA_PATH@/exp_01_formation/" + Experiment_type + "/run_data"
 
 sample_run = "run1"
 
