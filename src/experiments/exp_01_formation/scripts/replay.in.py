@@ -31,13 +31,13 @@ with open(typeFile) as f:
     Experiment_type = f.readline().strip('\n')
 print(Experiment_type)
 
-if Experiment_type == "left" :
-    os.system("echo left > type.txt")
-else :
-    os.system("echo right > type.txt")
-
 arena_size_xml = "{}, {}, {}".format(500, 500, 100)
 arena_center_xml = "{},{},{}".format(0, 0, 25)
+
+if Experiment_type == "cube_1000" :
+    arena_size_xml = "{}, {}, {}".format(1000, 1000, 1000)
+    arena_center_xml = "{},{},{}".format(0, 0, 450)
+
 
 #-- grabbing options ------------------------------------------------------
 HEADLESS_GRABBING_FLAG = "false"

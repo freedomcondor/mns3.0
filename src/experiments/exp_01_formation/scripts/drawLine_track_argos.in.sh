@@ -12,6 +12,7 @@ index=(\
 	[donut_64]='     970   position="-41.8704,-53.1639,68.5449"look_at="-4.18923,6.36437,10.9116"'  \
 	[donut_80]='     1200  position="-42.8467,-53.3419,63.9209"look_at="-3.96572,6.7569,7.6938"'  \
 	[screen_64]='    810   position="-74.2383,-34.4149,33.5239"look_at="3.34592,11.1728,19.8295"'   \
+	[cube_1000]='    3300  position="-85.7698,52.1927,109.786"look_at="5.08687,-14.5241,52.8338"'   \
 )
 
 tuple_line=${index[${experiment_type}]}
@@ -28,11 +29,18 @@ tuple=($tuple_line)
 experiment_length=${tuple[0]}
 camera=${tuple[1]}
 key_frame=$(($experiment_length-1))
+input_folder="@CMAKE_MNS_DATA_PATH@/exp_01_formation/$experiment_type/run_data/run1/logs"
+
+if [[ $experiment_type == "cube_1000" ]]; then
+	input_folder="@CMAKE_MNS_DATA_PATH@/exp_00_important_512_1000_drone_demos/cube_1000/logs"
+fi
 
 python3 @CMAKE_CURRENT_BINARY_DIR@/replay.py\
-	-i @CMAKE_MNS_DATA_PATH@/exp_01_formation/$experiment_type/run_data/run1/logs \
+	-i $input_folder \
 	-t \
 	-k "$key_frame" \
 	-e $experiment_length \
 	-q $experiment_length \
-	-c $camera
+	-c $camera \
+	-m 32
+
