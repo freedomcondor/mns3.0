@@ -6,8 +6,10 @@ elif [[ $experiment_type == "cube_64" ]]; then
 	echo "Experiment type specified: cube_64"
 elif [[ $experiment_type == "cube_125" ]]; then
 	echo "Experiment type specified: cube_125"
+elif [[ $experiment_type == "cube_216" ]]; then
+	echo "Experiment type specified: cube_216"
 else
-	echo "invalid parameters, please specify cube_27, cube_64 or cube_125"
+	echo "invalid parameters, please specify cube_27, cube_64, cube_125 or cube_216"
 	exit
 fi
 
@@ -37,5 +39,15 @@ if [[ $experiment_type == "cube_125" ]]; then
 		-k "790, 1230, 2300" \
 		-e 2400 \
 		-q 2400 \
+		-m 32
+fi
+
+if [[ $experiment_type == "cube_216" ]]; then
+	python3 @CMAKE_CURRENT_BINARY_DIR@/replay.py\
+		-i @CMAKE_MNS_DATA_PATH@/exp_03_scalability/cube_216_demo/logs \
+		-t \
+		-k "1100, 1680, 3150" \
+		-e 3155 \
+		-q 3155 \
 		-m 32
 fi

@@ -94,6 +94,8 @@
       <camera>
         <placements>
           <placement index="0" position="-24.8777,-73.3649,135.337" look_at="11.0174,7.92513,-0.82112" up="0,0,1" lens_focal_length="30" />
+          <placement index="1" position="-31.7004,-88.8159,161.217" look_at="11.0174,7.92513,-0.82112" up="0,0,1" lens_focal_length="30" />
+          <placement index="2" position="-36.906,-86.09,161.217" look_at="5.81175,10.6511,-0.82112" up="0,0,1" lens_focal_length="30" />
         </placements>
       </camera>
     </qt-opengl>
