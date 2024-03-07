@@ -41,6 +41,7 @@ if not os.path.isdir(DATADIR) :
 #--------------------------------------
 fig = plt.figure()
 ax_main = fig.add_subplot(1,1,1)
+ax_main.set_ylim([-1,23])
 
 # read data sets
 #--------------------------------------

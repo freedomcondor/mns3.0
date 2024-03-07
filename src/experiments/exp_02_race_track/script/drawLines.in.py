@@ -59,6 +59,7 @@ fig = plt.figure()
 ax_main = fig.add_subplot(1,1,1)
 ax_main.set_xlabel("time(s)")
 ax_main.set_ylabel("error(m)")
+ax_main.set_ylim([-0.7, 13])
 ax_3D = fig.add_subplot(3,4,4, projection='3d')
 ax_3D.set_box_aspect((1,5,2))  # set block ratio
 ax_3D.set_facecolor('none')
