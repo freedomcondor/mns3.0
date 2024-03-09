@@ -375,7 +375,8 @@ namespace argos {
       glColor4ub(cColor.GetRed(), cColor.GetGreen(), cColor.GetBlue(), cColor.GetAlpha() * f_max_transparency);
       DrawSphere(c_center, f_radius);
 
-      UInt16 unLayers = 0; // change it to 50 to get best rendering effect
+      //UInt16 unLayers = 0; // change it to 0 to get fastest simulation performance
+      UInt16 unLayers = 50; // change it to 50 to get best rendering effect
       Real fRadiusStep = f_halo_radius / unLayers;
       for (UInt16 i = 1; i <= unLayers; i++) {
          Real fTransparencyR = (f_halo_radius - fRadiusStep * i) / f_halo_radius;

@@ -328,16 +328,9 @@ namespace argos {
 
       s_tracked_entity.DebugEntity->GetHalos().emplace_back(CVector3(0,0,0.2),
                                                             0.125,
-                                                            0.825,
-                                                            0.1,
+                                                            0.7 + 0.125,
+                                                            0.05,
                                                             s_tracked_entity.CPositionColor);
-
-      s_tracked_entity.DebugEntity->GetCustomizeRings().emplace_back(CVector3(0,0,0.2),
-                                                                     0.4,
-                                                                     s_tracked_entity.CPositionColor,
-                                                                     0.01,
-                                                                     0.2,
-                                                                     1);
    }
 
    /****************************************/
@@ -440,7 +433,7 @@ namespace argos {
 
    void CReplayLoopFunctions::PreStep() {
       if ((m_unStepCount == 80) ||
-          (m_unStepCount == 870) ||
+          (m_unStepCount == 850) ||
           (m_unStepCount == 1130)) {
          // log locations
          for(STrackedEntity& s_tracked_entity : m_vecTrackedEntities) {
