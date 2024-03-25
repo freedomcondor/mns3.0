@@ -22,6 +22,17 @@ namespace argos {
    /****************************************/
    /****************************************/
 
+   Real stodWithFailureCheck(std::string _string) {
+      Real value;
+      try {
+         value = std::stod(_string);
+      } catch(std::exception &e) {
+         std::cerr << "[warning] stod failed : " << _string << std::endl;
+         value = 0;
+      }
+      return value;
+   }
+
    void CReplayLoopFunctions::EntityMultiThreadIteration(CControllableEntity* cControllableEntity) {
       // Get tracked entity from cControllableEntity id
       STrackedEntity& s_tracked_entity = m_vecTrackedEntities[
@@ -53,16 +64,16 @@ namespace argos {
       CQuaternion COrientationQ(0,0,0,0);
       // get Position
       if (vecWordList.size() >= 3) {
-         CPositionV3.SetX(std::stod(vecWordList[0]));
-         CPositionV3.SetY(std::stod(vecWordList[1]));
-         CPositionV3.SetZ(std::stod(vecWordList[2]));
+         CPositionV3.SetX(stodWithFailureCheck(vecWordList[0]));
+         CPositionV3.SetY(stodWithFailureCheck(vecWordList[1]));
+         CPositionV3.SetZ(stodWithFailureCheck(vecWordList[2]));
       }
       // get Orientation
       if (vecWordList.size() >= 6) {
          CRadians CX, CY, CZ;
-         CZ.FromValueInDegrees(std::stod(vecWordList[3]));
-         CY.FromValueInDegrees(std::stod(vecWordList[4]));
-         CX.FromValueInDegrees(std::stod(vecWordList[5]));
+         CZ.FromValueInDegrees(stodWithFailureCheck(vecWordList[3]));
+         CY.FromValueInDegrees(stodWithFailureCheck(vecWordList[4]));
+         CX.FromValueInDegrees(stodWithFailureCheck(vecWordList[5]));
          COrientationQ.FromEulerAngles(CZ, CY, CX);
       }
       // move robot to the location
@@ -138,21 +149,21 @@ namespace argos {
          CQuaternion CGoalOrientationQ(0,0,0,0);
          // get Virtual Orientation
          CRadians CX, CY, CZ;
-         CZ.FromValueInDegrees(std::stod(vecWordList[6]));
-         CY.FromValueInDegrees(std::stod(vecWordList[7]));
-         CX.FromValueInDegrees(std::stod(vecWordList[8]));
+         CZ.FromValueInDegrees(stodWithFailureCheck(vecWordList[6]));
+         CY.FromValueInDegrees(stodWithFailureCheck(vecWordList[7]));
+         CX.FromValueInDegrees(stodWithFailureCheck(vecWordList[8]));
          CVirtualOrientationQ.FromEulerAngles(CZ, CY, CX);
 
          // get Goal Position
-         CGoalPositionV3.SetX(std::stod(vecWordList[9]));
-         CGoalPositionV3.SetY(std::stod(vecWordList[10]));
-         CGoalPositionV3.SetZ(std::stod(vecWordList[11]));
+         CGoalPositionV3.SetX(stodWithFailureCheck(vecWordList[9]));
+         CGoalPositionV3.SetY(stodWithFailureCheck(vecWordList[10]));
+         CGoalPositionV3.SetZ(stodWithFailureCheck(vecWordList[11]));
 
          // get Goal Orientation
          //CRadians CX, CY, CZ;
-         CZ.FromValueInDegrees(std::stod(vecWordList[12]));
-         CY.FromValueInDegrees(std::stod(vecWordList[13]));
-         CX.FromValueInDegrees(std::stod(vecWordList[14]));
+         CZ.FromValueInDegrees(stodWithFailureCheck(vecWordList[12]));
+         CY.FromValueInDegrees(stodWithFailureCheck(vecWordList[13]));
+         CX.FromValueInDegrees(stodWithFailureCheck(vecWordList[14]));
          CGoalOrientationQ.FromEulerAngles(CZ, CY, CX);
 
          std::string strTarget = vecWordList[15];
@@ -202,17 +213,17 @@ namespace argos {
             std::string strDrawType = vecWordList[nCurrentIdx];
             if (strDrawType == "ring") {
                CVector3 cVecMiddle = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 1]),
-                  std::stod(vecWordList[nCurrentIdx + 2]),
-                  std::stod(vecWordList[nCurrentIdx + 3])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 2]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 3])
                );
-               Real fRadius = std::stod(vecWordList[nCurrentIdx + 4]);
+               Real fRadius = stodWithFailureCheck(vecWordList[nCurrentIdx + 4]);
                nCurrentIdx += 5;
                CColor cColor;
                if (std::isdigit(vecWordList[nCurrentIdx][0])) {
-                  cColor.Set(std::stod(vecWordList[nCurrentIdx]),
-                              std::stod(vecWordList[nCurrentIdx + 1]),
-                              std::stod(vecWordList[nCurrentIdx + 2])
+                  cColor.Set(stodWithFailureCheck(vecWordList[nCurrentIdx]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 2])
                   );
                   nCurrentIdx += 3;
                }
@@ -224,17 +235,17 @@ namespace argos {
             }
             if (strDrawType == "customize_ring") {
                CVector3 cVecMiddle = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 1]),
-                  std::stod(vecWordList[nCurrentIdx + 2]),
-                  std::stod(vecWordList[nCurrentIdx + 3])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 2]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 3])
                );
-               Real fRadius = std::stod(vecWordList[nCurrentIdx + 4]);
+               Real fRadius = stodWithFailureCheck(vecWordList[nCurrentIdx + 4]);
                nCurrentIdx += 5;
                CColor cColor;
                if (std::isdigit(vecWordList[nCurrentIdx][0])) {
-                  cColor.Set(std::stod(vecWordList[nCurrentIdx]),
-                              std::stod(vecWordList[nCurrentIdx + 1]),
-                              std::stod(vecWordList[nCurrentIdx + 2])
+                  cColor.Set(stodWithFailureCheck(vecWordList[nCurrentIdx]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 2])
                   );
                   nCurrentIdx += 3;
                }
@@ -242,9 +253,9 @@ namespace argos {
                   cColor.Set(vecWordList[nCurrentIdx]);
                   nCurrentIdx ++;
                }
-               Real fThickness = std::stod(vecWordList[nCurrentIdx]);
-               Real fHeight = std::stod(vecWordList[nCurrentIdx + 1]);
-               Real fColorTransparent = std::stod(vecWordList[nCurrentIdx + 2]);
+               Real fThickness = stodWithFailureCheck(vecWordList[nCurrentIdx]);
+               Real fHeight = stodWithFailureCheck(vecWordList[nCurrentIdx + 1]);
+               Real fColorTransparent = stodWithFailureCheck(vecWordList[nCurrentIdx + 2]);
                s_tracked_entity.DebugEntity->GetCustomizeRings().emplace_back(cVecMiddle,
                                                                               fRadius,
                                                                               cColor,
@@ -254,21 +265,21 @@ namespace argos {
             }
             else if (strDrawType == "arrow") {
                CVector3 cVecBegin = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 1]),
-                  std::stod(vecWordList[nCurrentIdx + 2]),
-                  std::stod(vecWordList[nCurrentIdx + 3])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 2]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 3])
                );
                CVector3 cVecEnd = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 4]),
-                  std::stod(vecWordList[nCurrentIdx + 5]),
-                  std::stod(vecWordList[nCurrentIdx + 6])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 4]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 5]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 6])
                );
                nCurrentIdx += 7;
                CColor cColor;
                if (std::isdigit(vecWordList[nCurrentIdx][0])) {
-                  cColor.Set(std::stod(vecWordList[nCurrentIdx]),
-                              std::stod(vecWordList[nCurrentIdx + 1]),
-                              std::stod(vecWordList[nCurrentIdx + 2])
+                  cColor.Set(stodWithFailureCheck(vecWordList[nCurrentIdx]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 2])
                   );
                   nCurrentIdx += 3;
                }
@@ -280,21 +291,21 @@ namespace argos {
             }
             else if (strDrawType == "customize_arrow") {
                CVector3 cVecBegin = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 1]),
-                  std::stod(vecWordList[nCurrentIdx + 2]),
-                  std::stod(vecWordList[nCurrentIdx + 3])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 2]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 3])
                );
                CVector3 cVecEnd = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 4]),
-                  std::stod(vecWordList[nCurrentIdx + 5]),
-                  std::stod(vecWordList[nCurrentIdx + 6])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 4]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 5]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 6])
                );
                nCurrentIdx += 7;
                CColor cColor;
                if (std::isdigit(vecWordList[nCurrentIdx][0])) {
-                  cColor.Set(std::stod(vecWordList[nCurrentIdx]),
-                              std::stod(vecWordList[nCurrentIdx + 1]),
-                              std::stod(vecWordList[nCurrentIdx + 2])
+                  cColor.Set(stodWithFailureCheck(vecWordList[nCurrentIdx]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 2])
                   );
                   nCurrentIdx += 3;
                }
@@ -302,9 +313,9 @@ namespace argos {
                   cColor.Set(vecWordList[nCurrentIdx]);
                   nCurrentIdx ++;
                }
-               Real fBodyThickness = std::stod(vecWordList[nCurrentIdx]);
-               Real fHeadThickness = std::stod(vecWordList[nCurrentIdx + 1]);
-               Real fColorTransparent = std::stod(vecWordList[nCurrentIdx + 2]);
+               Real fBodyThickness = stodWithFailureCheck(vecWordList[nCurrentIdx]);
+               Real fHeadThickness = stodWithFailureCheck(vecWordList[nCurrentIdx + 1]);
+               Real fColorTransparent = stodWithFailureCheck(vecWordList[nCurrentIdx + 2]);
                s_tracked_entity.DebugEntity->GetCustomizeArrows().emplace_back(cVecBegin,
                                                                                  cVecEnd,
                                                                                  cColor,
@@ -314,19 +325,19 @@ namespace argos {
             }
             else if (strDrawType == "halo") {
                CVector3 cVecMiddle = CVector3(
-                  std::stod(vecWordList[nCurrentIdx + 1]),
-                  std::stod(vecWordList[nCurrentIdx + 2]),
-                  std::stod(vecWordList[nCurrentIdx + 3])
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 2]),
+                  stodWithFailureCheck(vecWordList[nCurrentIdx + 3])
                );
-               Real fRadius = std::stod(vecWordList[nCurrentIdx + 4]);
-               Real fHaloRadius = std::stod(vecWordList[nCurrentIdx + 5]);
-               Real fMaxTransparency = std::stod(vecWordList[nCurrentIdx + 6]);
+               Real fRadius = stodWithFailureCheck(vecWordList[nCurrentIdx + 4]);
+               Real fHaloRadius = stodWithFailureCheck(vecWordList[nCurrentIdx + 5]);
+               Real fMaxTransparency = stodWithFailureCheck(vecWordList[nCurrentIdx + 6]);
                nCurrentIdx += 7;
                CColor cColor;
                if (std::isdigit(vecWordList[nCurrentIdx][0])) {
-                  cColor.Set(std::stod(vecWordList[nCurrentIdx]),
-                              std::stod(vecWordList[nCurrentIdx + 1]),
-                              std::stod(vecWordList[nCurrentIdx + 2])
+                  cColor.Set(stodWithFailureCheck(vecWordList[nCurrentIdx]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 1]),
+                             stodWithFailureCheck(vecWordList[nCurrentIdx + 2])
                   );
                   nCurrentIdx += 3;
                }
