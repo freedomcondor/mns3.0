@@ -69,6 +69,7 @@ namespace argos {
       static bool m_bFinishSignal;
 
       static std::vector<STrackedEntity> m_vecTrackedEntities;
+      std::vector<STrackedEntity> m_vecTrackedNoDebugEntities;
       static std::map<std::string, UInt32> m_mapEntityIDTrackedEntityIndex;
       static void EntityMultiThreadIteration(CControllableEntity* cControllableEntity);
    };

@@ -458,7 +458,7 @@ namespace argos {
             }
             catch(CARGoSException& ex) {
                //no debug entity, assuming it is an obstacle
-               //m_vecTrackedEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, cColor);
+               m_vecTrackedNoDebugEntities.emplace_back(pc_entity, &cBody, nullptr, strLogFolder, CColor::BLACK);
             }
 
          }
@@ -473,7 +473,51 @@ namespace argos {
    /****************************************/
 
    void CReplayLoopFunctions::PreStep() {
+      // Update robots
       GetSpace().IterateOverControllableEntities(EntityMultiThreadIteration);
+
+      // Update obstacle
+      for (STrackedEntity& s_tracked_entity : m_vecTrackedNoDebugEntities) {
+         // Get a line from log
+         int bufferLength = 4096;
+         char buff[bufferLength];
+         if (!fgets(buff, bufferLength, s_tracked_entity.LogFile))
+         {
+            m_bFinishSignal = true;
+            break;
+         }
+         std::string strLine = buff;
+         // strip \n from end
+         strLine.erase(std::remove(strLine.begin(), strLine.end(), '\n'), strLine.end());
+
+         // split by ,
+         std::vector<std::string> vecWordList;
+         std::stringstream strstreamLineStream(strLine);
+         while (strstreamLineStream.good()) {
+            std::string substr;
+            std::getline(strstreamLineStream, substr, ',' );
+            vecWordList.push_back(substr);
+         }
+
+         CVector3 CPositionV3(0,0,0);
+         CQuaternion COrientationQ(0,0,0,0);
+         // get Position
+         if (vecWordList.size() >= 3) {
+            CPositionV3.SetX(stodWithFailureCheck(vecWordList[0]));
+            CPositionV3.SetY(stodWithFailureCheck(vecWordList[1]));
+            CPositionV3.SetZ(stodWithFailureCheck(vecWordList[2]));
+         }
+         // get Orientation
+         if (vecWordList.size() >= 6) {
+            CRadians CX, CY, CZ;
+            CZ.FromValueInDegrees(stodWithFailureCheck(vecWordList[3]));
+            CY.FromValueInDegrees(stodWithFailureCheck(vecWordList[4]));
+            CX.FromValueInDegrees(stodWithFailureCheck(vecWordList[5]));
+            COrientationQ.FromEulerAngles(CZ, CY, CX);
+         }
+         // move robot to the location
+         s_tracked_entity.EmbodiedEntity->MoveTo(CPositionV3, COrientationQ, false, true);
+      }
 
       if (m_bFinishSignal == true)
          exit(0);
