@@ -22,6 +22,7 @@ function TrussReferencer.step(vns)
 	-- receive truss information
 	local max_weight = 0
 	local min_weight = math.huge
+	local neighhourNumber = 0
 	if vns.allocator.target ~= nil and vns.allocator.target.idN >= 1 then
 		local goalAcc = Transform.createAccumulator()
 		--Transform.addAccumulator(goalAcc, vns.goal) -- goal from parent, from allocator
@@ -34,9 +35,11 @@ function TrussReferencer.step(vns)
 			for _, msgM in ipairs(vns.Msg.getAM(idS, "truss")) do if msgM.dataT.vnsID == vns.idS then
 				if msgM.dataT.weight > max_weight then max_weight = msgM.dataT.weight end
 				if msgM.dataT.weight < min_weight then min_weight = msgM.dataT.weight end
+				neighhourNumber = neighhourNumber + 1
 			end end
 		end
 
+		local seenNumber = vns.connector.seenRobots
 		for idS, robotR in pairs(vns.connector.seenRobots) do
 			for _, msgM in ipairs(vns.Msg.getAM(idS, "truss")) do if msgM.dataT.vnsID == vns.idS then
 				local yourTargetID = msgM.dataT.targetID
@@ -46,7 +49,8 @@ function TrussReferencer.step(vns)
 				local targetTransform = Transform.AxCisB(yourGlobalTransform, myGlobalTransform)
 				local yourGoal = Transform.AxBisC(robotR, msgM.dataT.goal)
 				local myGoal = Transform.AxBisC(yourGoal, targetTransform)
-				local weight = 2 ^ (msgM.dataT.weight - max_weight)
+				local weight = neighhourNumber ^ (msgM.dataT.weight - max_weight)
+				--local weight = 2 ^ (msgM.dataT.weight - max_weight)
 
 				--if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
 					Transform.addAccumulator(goalAcc, myGoal, weight)
