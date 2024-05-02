@@ -11,17 +11,18 @@ fig, axs = plt.subplots(3,3, figsize=(15,9))
 Experiment_types = {
     "polyhedron_12": axs[0,0],
     "polyhedron_20": axs[0,1],
+    "screen_64": axs[0,2],
     "cube_27"  : axs[1,0],
     "cube_64"  : axs[1,1],
-    #"cube_125" : axs[1,2],
+    "cube_125" : axs[1,2],
     "donut_48" : axs[2,0],
     "donut_64" : axs[2,1],
-    "screen_64": axs[2,2],
+    "donut_80" : axs[2,2],
 }
 
 # appearings of subplots
-axs[0,2].axis('off')
-axs[1,2].axis('off')
+#axs[0,2].axis('off')
+#axs[1,2].axis('off')
 fig.subplots_adjust(
     top=0.95,
     bottom=0.05,
@@ -62,8 +63,8 @@ for Experiment_type in Experiment_types :
         #if data[150] > 0.25 :
         #    print(subfolder)
         #drawDataInSubplot(data, type_ax, "black")
-        #data = readDataFrom(subfolder + "result_minimum_distances.txt")
-        #drawDataInSubplot(data, type_ax)
+        data = readDataFrom(subfolder + "result_minimum_distances.txt")
+        drawDataInSubplot(data, type_ax)
         #type_ax.set_ylim([0,20])
 
         #for subFile in getSubfiles(subfolder + "result_each_robot_error") :
