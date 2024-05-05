@@ -66,12 +66,14 @@ function TrussReferencer.step(vns)
 			end
 		end end
 
-		if vns.parentR ~= nil then
+		if max_weight ~= 0 and
+		   vns.parentR ~= nil then
 			Transform.averageAccumulator(goalAcc, vns.goal)
 		end
 	end
 
-	if vns.allocator.target ~= nil and
+	if (max_weight ~= 0 or vns.parentR == nil) and
+	   vns.allocator.target ~= nil and
 	   vns.allocator.target.idN >= 1 then
 		--if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
 			local weight = max_weight - 1
