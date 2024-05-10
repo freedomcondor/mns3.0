@@ -1,0 +1,3 @@
+add_subdirectory(test_01_differential_drive)
+add_subdirectory(test_02_camera)
+add_subdirectory(test_03_list)

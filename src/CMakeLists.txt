@@ -93,6 +93,7 @@ make_directory(logs)
 #add testing sub directory
 add_subdirectory(testing)
 add_subdirectory(hw_testing)
+add_subdirectory(builderbot_testing)
 #add experiments sub directory
 add_subdirectory(experiments)
 #add scripts sub directory
