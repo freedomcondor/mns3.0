@@ -4,6 +4,11 @@ robot.logger:register_module('nodes_aim_block')
 -- return node generator
 return function(data, aim_point)
    -- aim block, put the block into the center of the image
+   -- takes data.blocks and data.target as input (data.blocks[data.target.id])
+   -- aim_point = {
+   --   case = "left" or "right"                                : put the tag to the left or right of the camera
+   --   forward_backup = "forward" or "backup" or other(nil)    : move forward or backward or stays to the block
+   -- }:
    return function()
       -- find the left/right/up/down corners of a tag of the target block
       if data.target == nil or data.target.id == nil or data.blocks[data.target.id] == nil then
