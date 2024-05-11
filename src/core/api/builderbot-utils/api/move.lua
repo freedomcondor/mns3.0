@@ -3,8 +3,8 @@ robot.logger:register_module('api_move')
 
 return {
    with_velocity = function(left, right)
-      --robot.differential_drive.set_target_velocity(left, -right)
-      robot.vns_api.actuator.setNewWheelSpeed(left, right)
+      robot.differential_drive.set_target_velocity(left, -right)
+      --robot.vns_api.actuator.setNewWheelSpeed(left, right)
    end,
 
    -- move with bearing:  
@@ -15,8 +15,7 @@ return {
       local diff = interwheel_dist * math.pi * (angle / 360)
       local left = velocity - diff
       local right = velocity + diff
-      --robot.differential_drive.set_target_velocity(left, -right)
-      robot.vns_api.actuator.setNewWheelSpeed(left, right)
+      robot.api.move.with_velocity(left, right)
    end,
 
    -- move following vector3
