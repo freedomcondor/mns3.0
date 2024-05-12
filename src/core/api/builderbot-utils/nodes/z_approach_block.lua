@@ -8,6 +8,17 @@ return function(data, distance)
    return {
       type = "sequence*",
       children = {
+         -- check the target block is there
+         function()
+            if data.target.id == nil or
+               data.blocks[data.target.id] == nil then
+               robot.logger:log_warn("target block is nil, abort Z approach")
+               robot.api.move.with_velocity(0,0)
+               return false, false
+            else
+               return false, true
+            end
+         end,
          -- calculate location
          function()
             local target_block = data.blocks[data.target.id]

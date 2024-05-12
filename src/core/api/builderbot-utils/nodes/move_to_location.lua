@@ -65,6 +65,9 @@ local function create_get_time_function(data, location)
       end
       return math.abs(th2) / robot.api.parameters.default_turn_speed
    end
+   local do_not_check_obstacle = function()
+      return false, true
+   end
    local check_obstacle = function()
       local flag = false
       for i, v in ipairs(data.obstacles) do
@@ -111,11 +114,14 @@ return function(data, location)
             return false, true
          end,
          -- turn th
-         robot.nodes.create_timer_node(get_th, check_obstacle),
+         --robot.nodes.create_timer_node(get_th, check_obstacle),
+         robot.nodes.create_timer_node(get_th, do_not_check_obstacle),
          -- move dis
-         robot.nodes.create_timer_node(get_dis, check_obstacle),
+         --robot.nodes.create_timer_node(get_dis, check_obstacle),
+         robot.nodes.create_timer_node(get_dis, do_not_check_obstacle),
          -- turn th2
-         robot.nodes.create_timer_node(get_th2, check_obstacle),
+         --robot.nodes.create_timer_node(get_th2, check_obstacle),
+         robot.nodes.create_timer_node(get_th2, do_not_check_obstacle),
          -- stop moving
          function() 
             robot.api.move.with_velocity(0,0)

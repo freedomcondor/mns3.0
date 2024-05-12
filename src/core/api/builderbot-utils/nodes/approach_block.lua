@@ -9,6 +9,17 @@ return function(data, search_node, distance)
          -- search block
          search_node,
          -- check range and blind approach and search again
+                  -- check the target block is there
+         function()
+            if data.target.id == nil or
+               data.blocks[data.target.id] == nil then
+               robot.logger:log_warn("target block is nil, abort Z approach")
+               robot.api.move.with_velocity(0,0)
+               return false, false
+            else
+               return false, true
+            end
+         end,
          {
             type = "selector*",
             children = {
@@ -22,7 +33,8 @@ return function(data, search_node, distance)
                   local blind_tolerance = robot.api.parameters.z_approach_range_angle
                   if angle < blind_tolerance and 
                      angle > -blind_tolerance and
-                     robot_to_block:length() < robot.api.parameters.z_approach_range_distance then 
+                     --robot_to_block:length() < robot.api.parameters.z_approach_range_distance then
+                     robot_to_block:length() < distance + robot.api.parameters.z_approach_block_distance_increment * 2 then
                      return false, true
                   else
                      return false, false

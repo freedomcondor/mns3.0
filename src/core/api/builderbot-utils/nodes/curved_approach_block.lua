@@ -6,14 +6,15 @@ return function(data, target_distance)
    local case = {
       left_right_case = 0,
       forward_backup_case = 1,
+      done = false,
    }
    local aim = {}
    return {
       type = "sequence",
       children = {
          -- obstacle_avoidance
-         robot.nodes.create_obstacle_avoidance_node(data),
-         -- check the target block is still there 
+         --robot.nodes.create_obstacle_avoidance_node(data),
+         -- check the target block is still there
          function()
             if data.target.id == nil or
                data.blocks[data.target.id] == nil then

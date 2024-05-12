@@ -8,7 +8,8 @@ return function(data, forward_distance)
       children = {
          -- recharge
          function()
-            robot.electromagnet_system.set_discharge_mode('disable')
+            --robot.electromagnet_system.set_discharge_mode('disable')
+            return false, true
          end,
          -- reach the block
          robot.nodes.create_reach_block_node(data, forward_distance),
@@ -17,6 +18,7 @@ return function(data, forward_distance)
             type = 'selector',
             children = {
                -- hand full ?
+               --[[
                function()
                   if robot.rangefinders['underneath'].proximity < robot.api.parameters.proximity_touch_tolerance then
                      return false, true -- not running, true
@@ -24,10 +26,15 @@ return function(data, forward_distance)
                      return false, false -- not running, false
                   end
                end,
+               --]]
                -- low lift
                function()
                   robot.lift_system.set_position(0)
-                  return true
+                  if robot.lift_system.position < 0 + robot.api.parameters.lift_system_position_tolerance then
+                     return false, true
+                  else
+                     return true
+                  end
                end
             }
          },
@@ -36,24 +43,31 @@ return function(data, forward_distance)
             type = 'sequence*',
             children = {
                -- attrack magnet
+               --[[
                function()
-                  robot.electromagnet_system.set_discharge_mode('constructive')
+                  --robot.electromagnet_system.set_discharge_mode('constructive')
+                  return false, true
                end,
+               --]]
                -- wait for 2 sec
-               robot.nodes.create_timer_node(2),
+               robot.nodes.create_timer_node(0.5),
                -- raise
                function()
                   robot.lift_system.set_position(robot.lift_system.position + 0.05)
                   return false, true -- not running, true
                end,
                -- recharge magnet
+               --[[
                function()
-                  robot.electromagnet_system.set_discharge_mode('disable')
+                  --robot.electromagnet_system.set_discharge_mode('disable')
+                  return false, true
                end
+               --]]
             }
          },
          -- check success
          -- wait
+         --[[
          robot.nodes.create_timer_node(2),
          function()
             if robot.rangefinders['underneath'].proximity < robot.api.parameters.proximity_touch_tolerance then
@@ -71,6 +85,7 @@ return function(data, forward_distance)
                return false, true
             end
          end
+         --]]
       }
    }
 end
