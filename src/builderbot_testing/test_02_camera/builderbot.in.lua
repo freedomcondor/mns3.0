@@ -47,8 +47,8 @@ function step()
 	print("            Z = ", vector3(0,0,1):rotate(robot_to_ref_based_on_input.orientationQ))
 
 	-- standard
-	local robot_to_ref = {
-		positionV3 = vector3(0.20, 0, 0.008),
+	local robot_to_ref = {  -- effector end to ref
+		positionV3 = vector3(0.20, 0, 0.008) - vector3(0.09, 0, 0.055),
 		orientationQ = quaternion(math.pi, vector3(1,0,0))
 	}
 
