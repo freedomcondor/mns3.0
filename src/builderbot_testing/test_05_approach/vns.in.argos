@@ -65,7 +65,7 @@
     </block>
 
     <block id="block2">
-      <body position="0.48,0.00,0" orientation="0,0,0" />
+      <body position="0.38,0.00,0" orientation="0,0,0" />
       <controller config="block_controller"/>
     </block>
   </arena>

@@ -16,7 +16,7 @@ robot.logger:set_verbosity(2)
 local BT = require("BehaviorTree")
 local bt
 
-local data = {blocks = {}}
+data = {blocks = {}, state = "pickup"}
 
 function init()
 	reset()
@@ -25,15 +25,26 @@ end
 
 function reset()
 	bt = BT.create
-	{
-		type = "sequence*",
-		children = {
-			robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,0)} end, 0.19),
-			robot.nodes.create_pick_up_block_node(data, 0.19),
-			robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,1)} end, 0.19),
-			robot.nodes.create_place_block_node(data, 0.19),
-		}
-	}
+	{type = "selector", children = {
+		{type = "sequence", children = {
+			function()
+				print(data.state)
+				if data.state == "pickup" then return false, true
+				                          else return false, false
+				end
+			end,
+			{type = "sequence*", children = {
+				robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,0)} end, 0.20),
+				robot.nodes.create_pick_up_block_node(data, 0.170), --0.165 for hardware
+				function() data.state = "place" end,
+			}},
+		}},
+		{type = "sequence*", children = {
+			robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(1,0,0)} end, 0.20),
+			robot.nodes.create_place_block_node(data, 0.170),
+			function() data.state = "pickup" end,
+		}},
+	}}
 end
 
 function step()

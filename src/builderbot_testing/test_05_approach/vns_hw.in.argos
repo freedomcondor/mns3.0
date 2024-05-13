@@ -24,9 +24,9 @@
         <builderbot_camera_system
           implementation="default" 
           calibration="/home/root/calibration/builderbot_camera_system.xml"
-          save_as="saveImage/img"
           save_raw="false"
           saturationLimit="120"/>
+         <!-- save_as="saveImage/img" -->
         <builderbot_lift_system
           implementation="default" 
           device="las-sens"
@@ -34,6 +34,7 @@
           top_limit_switch="proximity0"
           bottom_limit_switch="proximity1"
           state = "index0" />
+        <builderbot_system implementation="default" />
       </sensors>
 	  <params script="builderbot.lua"
             block_label="255,255"/>
