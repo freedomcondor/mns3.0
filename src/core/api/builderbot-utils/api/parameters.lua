@@ -2,12 +2,12 @@
 robot.logger:register_module('api_parameters')
 
 return {
-    default_speed = tonumber(robot.params.default_speed or 0.020),
-    default_turn_speed = tonumber(robot.params.default_turn_speed or 7),
-    approach_block_speed = tonumber(robot.params.approach_block_speed or 0.01),
-    approach_block_turn_speed = tonumber(robot.params.approach_block_turn_speed or 5),
+    default_speed = tonumber(robot.params.default_speed or 0.050),
+    default_turn_speed = tonumber(robot.params.default_turn_speed or 10),
+    approach_block_speed = tonumber(robot.params.approach_block_speed or 0.025),
+    approach_block_turn_speed = tonumber(robot.params.approach_block_turn_speed or 4),
     search_random_range = tonumber(robot.params.search_random_range or 25),
-    aim_block_angle_tolerance = tonumber(robot.params.aim_block_angle_tolerance or 0.5),
+    aim_block_angle_tolerance = tonumber(robot.params.aim_block_angle_tolerance or 1.5),
     block_position_tolerance = tonumber(robot.params.block_position_tolerance or 0.001),
     proximity_touch_tolerance = tonumber(robot.params.proximity_touch_tolerance or 0.003),
     proximity_detect_tolerance = tonumber(robot.params.proximity_detect_tolerance or 0.03),
