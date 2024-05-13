@@ -7,36 +7,48 @@ return function(data, forward_distance)
       type = "sequence*",
       children = {
          -- recharge
+         --[[
          function()
             robot.electromagnet_system.set_discharge_mode("disable")
             return false, true
          end,
+         --]]
          -- reach the block
          robot.nodes.create_reach_block_node(data, forward_distance),
          -- change color
+         --[[
          function()
             if data.target.type ~= nil then
                robot.radios.nfc.send({tostring(data.target.type)})
             end
             return false, true
          end,
+         --]]
          -- release block
+         --[[
          function()
             robot.electromagnet_system.set_discharge_mode("destructive")
             return false, true
          end,
+         --]]
+         function()
+            robot.lift_system.set_position(robot.lift_system.position -
+                                           robot.api.constants.block_side_length / 2 + 0.005)
+         end,
          -- wait for 2 sec
-         robot.nodes.create_timer_node(2),
+         robot.nodes.create_timer_node(1.0),
          function()
             robot.lift_system.set_position(robot.lift_system.position + 0.05)
             return false, true
          end,
          -- wait for 2 sec
-         robot.nodes.create_timer_node(2),
+         robot.nodes.create_timer_node(0.5),
          -- recharge magnet
+         --[[
          function()
             robot.electromagnet_system.set_discharge_mode("disable")
          end,
+         --]]
       },
    }
 end

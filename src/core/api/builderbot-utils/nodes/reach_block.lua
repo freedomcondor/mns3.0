@@ -62,6 +62,7 @@ return function(data, distance)
                      -- condition vector3(0,0,1)
                      function ()
                         if data.target.offset == vector3(0,0,1) then
+                           print("I'm here")
                            return false, true
                         else
                            return false, false
@@ -93,7 +94,7 @@ return function(data, distance)
 
                      function()
                         robot.lift_system.set_position(robot.lift_system.position -
-								                       robot.api.constants.block_side_length / 2)
+                                                       robot.api.constants.block_side_length / 2)
                         return false, true
                      end,
                      -- wait for 2 sec
