@@ -108,7 +108,7 @@ end
 
 local function update_block(old_block, new_block)
    old_block.position = new_block.position
-   old_block.orientation = new_block.orientation
+   old_block.orientation = new_block.orientation or old_block.orientation -- new block orientation may be nil for detection errors
    old_block.X = new_block.X
    old_block.Y = new_block.Y
    old_block.Z = new_block.Z
@@ -168,7 +168,9 @@ local function hungarian_match(_old_blocks, _new_blocks)
    end
    local index = 1
    for j, new_block in ipairs(_new_blocks) do
-      if penalty_matrix[hun.match_of_Y[j]][j] == penalty_base then
+      if penalty_matrix[hun.match_of_Y[j]][j] == penalty_base
+         and new_block.orientation ~= nil -- block.orientation may be nil for detection errors
+      then
          -- new blocks
          while _old_blocks[index] ~= nil do index = index + 1 end
          _old_blocks[index] = new_block
