@@ -1,9 +1,9 @@
 -- register module with logger
 robot.logger:register_module('nodes_reach_block')
 
--- assuming I'm distance(parameter) away of the block, 
+-- assuming I'm distance(parameter) away of the block,
 -- move forward blindly for a certain distance
--- based on target.offset, adjust the distance and 
+-- based on target.offset, adjust the distance and
 --                         raise or lower the manipulator
 --     offset could be vector3(0,0,0), means the reference block itself
 --                     vector3(1,0,0), means just infront of the reference block
@@ -12,6 +12,7 @@ robot.logger:register_module('nodes_reach_block')
 --                     vector3(1,0,-2)
 -- return node generator
 return function(data, distance)
+   local lift_target = 0
    return {
       type = "sequence*",
       children = {
@@ -33,23 +34,29 @@ return function(data, distance)
                      end,
                      -- raise lift
                      function()
-                        robot.lift_system.set_position(data.blocks[data.target.id].position_robot.z) 
+                        lift_target = data.blocks[data.target.id].position_robot.z
+                        robot.lift_system.set_position(lift_target)
                         return false, true
                      end,
                      -- check whether lift to position
                      function()
-                        if robot.lift_system.state == "inactive" then return false, true
-                        else return true end
+                        local lift_position_error = robot.lift_system.position - lift_target
+                        if -robot.api.parameters.lift_system_position_tolerance < lift_position_error and
+                            robot.api.parameters.lift_system_position_tolerance > lift_position_error then
+                              return false, true
+                           else
+                              return true
+                        end
                      end,
                      -- forward to block
                      robot.nodes.create_timer_node(
-                        (distance 
-                           - robot.api.constants.end_effector_position_offset.x 
+                        (distance
+                           - robot.api.constants.end_effector_position_offset.x
                            - robot.api.constants.end_effector_position_pickup_bias
                         ) /
                            robot.api.parameters.default_speed,
                         function()
-                           robot.api.move.with_velocity(robot.api.parameters.default_speed, 
+                           robot.api.move.with_velocity(robot.api.parameters.default_speed,
                                                       robot.api.parameters.default_speed)
                         end
                      )
@@ -70,28 +77,36 @@ return function(data, distance)
                      end,
                      -- raise lift
                      function()
-                        robot.lift_system.set_position(data.blocks[data.target.id].position_robot.z + 
-                                                       robot.api.constants.block_side_length) 
+                        lift_target = data.blocks[data.target.id].position_robot.z +
+                                      robot.api.constants.block_side_length +
+                                      robot.api.constants.end_effector_position_place_bias
+                        robot.lift_system.set_position(lift_target)
                         return false, true
                      end,
                      -- check whether lift to position
                      function()
-                        if robot.lift_system.state == "inactive" then return false, true
-                        else return true end
+                        local lift_position_error = robot.lift_system.position - lift_target
+                        if -robot.api.parameters.lift_system_position_tolerance < lift_position_error and
+                            robot.api.parameters.lift_system_position_tolerance > lift_position_error then
+                              return false, true
+                           else
+                              return true
+                        end
                      end,
                      -- forward to block
                      robot.nodes.create_timer_node(
-                        (distance - 
-                        robot.api.constants.end_effector_position_offset.x - 
+                        (distance -
+                        robot.api.constants.end_effector_position_offset.x -
                         robot.api.parameters.end_effector_overhang_length
                         ) / robot.api.parameters.default_speed,
                         function()
-                           robot.api.move.with_velocity(robot.api.parameters.default_speed, 
+                           robot.api.move.with_velocity(robot.api.parameters.default_speed,
                                                       robot.api.parameters.default_speed)
                         end
                      ),
                      function() robot.api.move.with_velocity(0,0) return false, true end,
 
+                     --[[ this should be done by pickup block or place block
                      function()
                         robot.lift_system.set_position(robot.lift_system.position -
                                                        robot.api.constants.block_side_length / 2)
@@ -104,6 +119,7 @@ return function(data, distance)
                         if robot.lift_system.state == "inactive" then return false, true
                         else return true end
                      end
+                     --]]
                   },
                },
                -- reach the front of the reference block
@@ -120,27 +136,32 @@ return function(data, distance)
                      end,
                      -- raise lift
                      function()
-                        robot.lift_system.set_position(data.blocks[data.target.id].position_robot.z - 
-                                                       robot.api.constants.block_side_length / 2 +
-                                                       robot.api.constants.end_effector_position_place_bias) 
+                        lift_target = data.blocks[data.target.id].position_robot.z +
+                                      robot.api.constants.end_effector_position_place_bias
+                        robot.lift_system.set_position(lift_target)
                         return false, true
                      end,
                      -- wait for 2 sec
                      robot.nodes.create_timer_node(0.5),
                      -- check whether lift to position
                      function()
-                        if robot.lift_system.state == "inactive" then return false, true
-                        else return true end
+                        local lift_position_error = robot.lift_system.position - lift_target
+                        if -robot.api.parameters.lift_system_position_tolerance < lift_position_error and
+                            robot.api.parameters.lift_system_position_tolerance > lift_position_error then
+                              return false, true
+                           else
+                              return true
+                        end
                      end,
                      -- forward in front of block
                      robot.nodes.create_timer_node(
-                        (distance - 
-                        robot.api.constants.end_effector_position_offset.x - 
-                        robot.api.constants.block_side_length - 
+                        (distance -
+                        robot.api.constants.end_effector_position_offset.x -
+                        robot.api.constants.block_side_length -
                         robot.api.parameters.end_effector_overhang_length
                         ) / robot.api.parameters.default_speed,
                         function()
-                           robot.api.move.with_velocity(robot.api.parameters.default_speed, 
+                           robot.api.move.with_velocity(robot.api.parameters.default_speed,
                                                       robot.api.parameters.default_speed)
                         end
                      ),
@@ -161,25 +182,31 @@ return function(data, distance)
                      end,
                      -- lower lift
                      function()
-                        robot.lift_system.set_position(data.blocks[data.target.id].position_robot.z - 
-                                                      robot.api.constants.block_side_length - 
-                                                      robot.api.parameters.end_effector_overhang_length) 
+                        lift_target = data.blocks[data.target.id].position_robot.z -
+                                      robot.api.constants.block_side_length -
+                                      robot.api.parameters.end_effector_position_place_bias
+                        robot.lift_system.set_position(lift_target)
                         return false, true
                      end,
                      -- check whether lift to position
                      function()
-                        if robot.lift_system.state == "inactive" then return false, true
-                        else return true end
+                        local lift_position_error = robot.lift_system.position - lift_target
+                        if -robot.api.parameters.lift_system_position_tolerance < lift_position_error and
+                            robot.api.parameters.lift_system_position_tolerance > lift_position_error then
+                              return false, true
+                           else
+                              return true
+                        end
                      end,
                      -- forward in front of block
                      robot.nodes.create_timer_node(
-                        (distance - 
-                        robot.api.constants.end_effector_position_offset.x - 
-                        robot.api.constants.block_side_length - 
+                        (distance -
+                        robot.api.constants.end_effector_position_offset.x -
+                        robot.api.constants.block_side_length -
                         robot.api.parameters.end_effector_overhang_length
                         ) / robot.api.parameters.default_speed,
                         function()
-                           robot.api.move.with_velocity(robot.api.parameters.default_speed, 
+                           robot.api.move.with_velocity(robot.api.parameters.default_speed,
                                                       robot.api.parameters.default_speed)
                         end
                      )
@@ -199,24 +226,30 @@ return function(data, distance)
                      end,
                      -- lower lift
                      function()
-                        robot.lift_system.set_position(data.blocks[data.target.id].position_robot.z - 
-                                                      robot.api.constants.block_side_length * 2) 
+                        lift_target = data.blocks[data.target.id].position_robot.z -
+                                      robot.api.constants.block_side_length * 2
+                        robot.lift_system.set_position(lift_target)
                         return false, true
                      end,
                      -- check whether lift to position
                      function()
-                        if robot.lift_system.state == "inactive" then return false, true
-                        else return true end
+                        local lift_position_error = robot.lift_system.position - lift_target
+                        if -robot.api.parameters.lift_system_position_tolerance < lift_position_error and
+                            robot.api.parameters.lift_system_position_tolerance > lift_position_error then
+                              return false, true
+                           else
+                              return true
+                        end
                      end,
                      -- forward in front of block
                      robot.nodes.create_timer_node(
-                        (distance - 
-                        robot.api.constants.end_effector_position_offset.x - 
-                        robot.api.constants.block_side_length - 
+                        (distance -
+                        robot.api.constants.end_effector_position_offset.x -
+                        robot.api.constants.block_side_length -
                         robot.api.parameters.end_effector_overhang_length
                         ) / robot.api.parameters.default_speed,
                         function()
-                           robot.api.move.with_velocity(robot.api.parameters.default_speed, 
+                           robot.api.move.with_velocity(robot.api.parameters.default_speed,
                                                       robot.api.parameters.default_speed)
                         end
                      )
