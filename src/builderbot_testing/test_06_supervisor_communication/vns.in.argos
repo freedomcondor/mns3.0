@@ -1,0 +1,226 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="0" ticks_per_second="5" random_seed="12345" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <!-- Drone Controller -->
+    <lua_controller id="drone">
+      <actuators>
+        <debug implementation="default" />
+        <drone_flight_system implementation="default" />
+        <drone_leds implementation="default" />
+        <radios implementation="default" />
+      </actuators>
+      <sensors>
+        <drone_system implementation="default" />
+        <drone_cameras_system implementation="default" show_frustum="false" show_tag_rays="false" />
+        <drone_flight_system implementation="default" />
+        <drone_rangefinders implementation="default" show_rays="true" />
+        <radios implementation="default" />
+      </sensors>
+      <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua" 
+              simulation="true"
+              mode_2D="true"
+              mode_builderbot="true"
+
+              drone_real_noise="true"
+              drone_tilt_sensor="false"
+              pipuck_label="1, 20"
+              builderbot_label="21, 30"
+              obstacle_label="50, 50"
+              block_label="0, 0"
+
+              drone_tag_detection_rate="1"
+      />
+    </lua_controller>
+
+    <!-- Pi-Puck Controller -->
+    <lua_controller id="pipuck">
+      <actuators>
+        <debug implementation="default" />
+        <pipuck_differential_drive implementation="default" />
+        <radios implementation="default" />
+        <pipuck_leds implementation="default" />
+      </actuators>
+      <sensors>
+        <pipuck_differential_drive implementation="default" />
+        <pipuck_system implementation="default" />
+        <pipuck_rangefinders implementation="default" show_rays="true" />
+        <radios implementation="default" show_rays="false" />
+      </sensors>
+      <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/pipuck.lua"
+              simulation="true"
+              mode_2D="true"
+              mode_builderbot="true"
+      />
+    </lua_controller>
+
+    <!-- Builderbot Controller -->
+    <lua_controller id="builderbot">
+      <actuators>
+        <debug implementation="default" />
+        <builderbot_electromagnet_system implementation="default" />
+        <builderbot_differential_drive implementation="default" />
+        <builderbot_lift_system implementation="default" />
+        <radios implementation="default" />
+      </actuators>
+      <sensors>
+        <builderbot_camera_system implementation="default"
+          show_frustum="false" show_tag_rays="true" show_led_rays="false" />
+        <builderbot_rangefinders implementation="default" show_rays="false" />
+        <builderbot_differential_drive implementation="default"/>
+        <builderbot_electromagnet_system implementation="default" />
+        <builderbot_lift_system implementation="default" />
+        <builderbot_system implementation="default" />
+        <radios implementation="default" />
+      </sensors>
+      <params script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/builderbot.lua"
+              simulation="true"
+              mode_2D="true"
+              mode_builderbot="true"
+
+              block_label="0, 0"
+      />
+    </lua_controller>
+
+    <!-- Block Controller -->
+    <lua_controller id="block_controller">
+      <actuators />
+      <sensors />
+      <params script="@CMAKE_SOURCE_DIR@/scripts/libreplayer/dummy.lua" />
+    </lua_controller>
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="40, 40, 6.0" positional_index="grid" center="0, 0, 1">
+    <floor id="floor" source="loop_functions" pixels_per_meter="1" />
+
+    <!-- add drones -->
+    <drone id="drone1" wifi_medium="wifi" tag_medium="tags">
+      <body position="0,0,0" orientation="0,0,0"/>
+      <controller config="drone"/>
+    </drone>
+
+    <!--drone id="drone2" wifi_medium="wifi" tag_medium="tags">
+      <body position="1,0,0" orientation="0,0,0"/>
+      <controller config="drone"/>
+    </drone>
+
+    <pipuck_ext id="pipuck1" wifi_medium="wifi" tag_medium="tags">
+      <body position="0.5,0.5,0" orientation="0,0,0"/>
+      <controller config="pipuck"/>
+    </pipuck_ext-->
+
+    <!-- add builderbots -->
+    <builderbot id="builderbot1">
+      <body position="0.5,0,0" orientation="0,0,0"/>
+      <controller config="builderbot"/>
+    </builderbot>
+
+    <block id="block">
+      <body position="1.0,0,0" orientation="0,0,0" />
+      <controller config="block_controller"/>
+    </block>
+
+    <pipuck_ext id="pipuck1" wifi_medium="wifi" tag_medium="tags">
+      <body position="0.5,0.3,0" orientation="0,0,0"/>
+      <controller config="pipuck"/>
+    </pipuck_ext>
+
+    <pipuck_ext id="pipuck2" wifi_medium="wifi" tag_medium="tags">
+      <body position="0.5,-0.3,0" orientation="0,0,0"/>
+      <controller config="pipuck"/>
+    </pipuck_ext>
+
+    <pipuck_ext id="pipuck3" wifi_medium="wifi" tag_medium="tags">
+      <body position="0.5,0.6,0" orientation="0,0,0"/>
+      <controller config="pipuck"/>
+    </pipuck_ext>
+
+	  <!--prototype id="obstacle1" movable="false" friction="10">
+		  <body position="0,0,0" orientation="0,0,0" />
+		    <links ref="base">
+			    <link id="base" geometry="box" size="0.12, 0.12, 0.1" mass="0.01"
+			          position="0,0,0" orientation="0,0,0" />
+		    </links>
+		  <devices>
+			  <tags medium="tags">
+				  <tag anchor="base" observable_angle="75" side_length="0.1078" payload="50"
+				       position="0,0,0.101" orientation="0,0,0" />
+			  </tags>
+		  </devices>
+	  </prototype-->
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <pointmass3d id="pm3d" iterations="10" />
+    <dynamics3d id="dyn3d" iterations="25" >
+      <gravity g="9.8" />
+      <floor />
+      <srocs />
+    </dynamics3d>
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <directional_led id="directional_leds" index="grid" grid_size="20,20,20"/>
+    <tag id="tags" index="grid" grid_size="20,20,20" />
+    <radio id="nfc" index="grid" grid_size="20,20,20" />
+    <radio id="wifi" index="grid" grid_size="20,20,20" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <loop_functions library="@CMAKE_BINARY_DIR@/libmy_extensions"
+                  label="my_loop_functions" />
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl lua_editor="true" show_boundary="false">
+      <user_functions library="@CMAKE_BINARY_DIR@/libmy_qtopengl_extensions"
+                      label="my_qtopengl_user_functions" />
+      <camera>
+        <placements>
+          <placement index="0" position="  0,0.1, 20"  look_at="0,0,0.25" lens_focal_length="50" up="0,0,1"/>
+          <placement index="1" position="  0,-15, 7.5" look_at="0,0,0.25" lens_focal_length="60" />
+          <placement index="2" position=" 15,-15, 10"  look_at="0,0,0.25" lens_focal_length="90" />
+          <placement index="3" position=" 15,  0, 7.5" look_at="0,0,0.25" lens_focal_length="60" />
+          <placement index="4" position=" 15, 15, 10"  look_at="0,0,0.25" lens_focal_length="90" />
+          <placement index="5" position="  0, 15, 7.5" look_at="0,0,0.25" lens_focal_length="60" />
+          <placement index="6" position="-15, 15, 10"  look_at="0,0,0.25" lens_focal_length="90" />
+          <placement index="7" position="-15,  0, 7.5" look_at="0,0,0.25" lens_focal_length="60" />
+          <placement index="8" position="-15,-15, 10"  look_at="0,0,0.25" lens_focal_length="90" />
+        </placements>
+        <!--timeline loop="400">
+          <keyframe placement="0" step="0" />
+          <interpolate />
+          <keyframe placement="1" step="100" />
+          <keyframe placement="2" step="200" />
+          <keyframe placement="3" step="300" />
+          <interpolate />
+        </timeline-->
+      </camera>
+    </qt-opengl>
+  </visualization>
+
+</argos-configuration>

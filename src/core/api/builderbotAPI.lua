@@ -48,7 +48,8 @@ function api.preStep()
 	-- preprocessing
 	robot.api.process_blocks(api.builderbot_utils_data.blocks)
 	robot.api.process_leds(api.builderbot_utils_data.blocks)
-	robot.api.process_obstacles(api.builderbot_utils_data.obstacles, api.builderbot_utils_data.blocks)
+	--rangefinders are disabled
+	--robot.api.process_obstacles(api.builderbot_utils_data.obstacles, api.builderbot_utils_data.blocks)
 end
 
 api.commonPostStep = api.postStep
