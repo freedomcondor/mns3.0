@@ -3,8 +3,11 @@ robot.logger:register_module('api_move')
 
 return {
    with_velocity = function(left, right)
-      robot.differential_drive.set_target_velocity(left, -right)
-      --robot.vns_api.actuator.setNewWheelSpeed(left, right)
+      if robot.vns_api ~= nil then
+         robot.vns_api.actuator.setNewWheelSpeed(left, right)
+      else
+         robot.differential_drive.set_target_velocity(left, -right)
+      end
    end,
 
    -- move with bearing:  
