@@ -57,6 +57,23 @@ function TrussReferencer.step(vns)
 		end
 	end
 
+	-- Stabilizer hack ------------------------------------------------------
+	-- stop moving is I'm referenced  TODO: combine with goal_overwrite
+	if vns.stabilizer.referencing_me == true then
+		vns.goal.positionV3 = vector3()
+		vns.goal.orientationQ = quaternion()
+		if vns.stabilizer.referencing_me_goal_overwrite ~= nil then
+			if vns.stabilizer.referencing_me_goal_overwrite.positionV3 ~= nil then
+				vns.goal.positionV3 = vns.stabilizer.referencing_me_goal_overwrite.positionV3
+			end
+			if vns.stabilizer.referencing_me_goal_overwrite.orientationQ ~= nil then
+				vns.goal.orientationQ = vns.stabilizer.referencing_me_goal_overwrite.orientationQ
+			end
+			vns.stabilizer.referencing_me_goal_overwrite = nil
+		end
+	end
+	-- end Stabilizer hack ------------------------------------------------------
+
 	if vns.allocator.target ~= nil and
 	   vns.allocator.target.idN >= 1 then
 		if vns.goal.positionV3:length() < vns.Parameters.driver_arrive_zone then
