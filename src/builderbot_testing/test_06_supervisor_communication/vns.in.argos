@@ -35,8 +35,8 @@
 
               drone_real_noise="true"
               drone_tilt_sensor="false"
-              pipuck_label="1, 20"
-              builderbot_label="21, 30"
+              pipuck_label="1, 10"
+              builderbot_label="11, 20"
               obstacle_label="50, 50"
               block_label="0, 0"
 
@@ -124,7 +124,7 @@
     </pipuck_ext-->
 
     <!-- add builderbots -->
-    <builderbot id="builderbot1">
+    <builderbot id="builderbot11">
       <body position="0.5,0,0" orientation="0,0,0"/>
       <controller config="builderbot"/>
     </builderbot>

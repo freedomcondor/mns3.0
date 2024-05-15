@@ -9,6 +9,7 @@ params = '''
     stabilizer_preference_brain="drone1"
 
     builderbot_label="11,11"
+    block_label="255,255"
 
     connector_waiting_count="5"
     connector_waiting_parent_count="8"

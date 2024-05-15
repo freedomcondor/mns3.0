@@ -48,7 +48,6 @@ function reset()
 	{type = "sequence", children = {
 		vns.create_preconnector_node(vns),
 		vns.create_vns_core_node(vns),
-		--[[
 		{type = "selector*", children = {
 			{type = "sequence", children = {
 				function() 
@@ -61,11 +60,11 @@ function reset()
 				vns.Driver.create_driver_node(vns),
 			}},
 			{type = "sequence*", children = {
-				robot.nodes.create_pick_up_behavior_node(data, rules),
-				--robot.nodes.create_place_behavior_node(data, rules),
+				robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,0)} end, 0.20),
+				robot.nodes.create_pick_up_block_node(data, 0.17), --0.170 for hardware
+				function() data.state = "place" end,
 			}},
 		}}
-		--]]
 	}}
 end
 
