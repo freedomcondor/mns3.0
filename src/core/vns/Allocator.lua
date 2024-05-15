@@ -1077,7 +1077,7 @@ function Allocator.GraphMatch(sourceList, targetList, originCost, type)
 
 	local LuaStackScaleLimit = 11 -- assuming max slots is 255, then C and W each can't be higher than 121
 	local F
-	if n > LuaStackScaleLimit then
+	if n > LuaStackScaleLimit or ARGoSMinCostFlowNetwork == nil then
 		F = MinCostFlowNetwork(C, W)
 	else
 		local F_argos

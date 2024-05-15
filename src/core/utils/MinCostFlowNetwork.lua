@@ -98,7 +98,7 @@ function MinCostFlowNetwork(c, w)
 		local LuaStackScaleLimit = 15 -- 15, assuming stack has 255 slots, matrix can be at most 16x16
 		local D, L
 
-		if n > LuaStackScaleLimit then
+		if n > LuaStackScaleLimit or ARGoSDijkstra == nil then
 			D, L = Dijkstra(g)
 		else
 			for i = 1, n do
