@@ -84,7 +84,7 @@ function Stabilizer.step(vns)
 	-- If I'm a drone brain and I haven't fully taken off, don't do anything
 	--if vns.robotTypeS == "drone" and vns.api.actuator.flight_preparation.state ~= "navigation" then return end
 	-- If I'm a pipuck brain, I don't need stabilizer
-	if vns.robotTypeS == "pipuck" then return end
+	if vns.robotTypeS ~= "drone" then return end
 
 	-- I'm the brain run stabilizer, and set vns.goal
 	-- for each obstacle with a stabilizer, average its offset as a new goal
