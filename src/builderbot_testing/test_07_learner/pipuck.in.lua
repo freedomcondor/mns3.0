@@ -44,7 +44,7 @@ function reset()
 	if robot.id == "pipuck2" then
 		vns.learner.knowledges["move_forward"] = {hash = 1, rank = 1, node = [[
 			function()
-				vns.Spreader.emergency_after_core(vns, vector3(0.05,0,0), vector3())
+				vns.Spreader.emergency_after_core(vns, vector3(0.02,0,0), vector3())
 				return false, true
 			end
 		]]}
@@ -52,7 +52,8 @@ function reset()
 end
 
 function step()
-	logger(robot.id, api.stepCount, "----------------------------")
+	logger(robot.id, api.stepCount, robot.system.time, "----------------------------")
+	logger(robot.radios.wifi.recv)
 	api.preStep()
 	vns.preStep(vns)
 
@@ -67,14 +68,16 @@ function step()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
 	--api.debug.showSeenRobots(vns, {drawOrientation = true})
-	logger("seenRobots")
+	logger("seenRobots--------")
 	logger(vns.connector.seenRobots)
-	logger("connector")
+	logger("connector---------")
 	logger(vns.connector)
-	logger("parent")
+	logger("parent------------")
 	logger(vns.parentR)
-	logger("children")
+	logger("children----------")
 	logger(vns.childrenRT)
+	logger("goal--------------")
+	logger(vns.goal)
 end
 
 function destroy()

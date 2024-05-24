@@ -12,10 +12,10 @@ params = '''
     builderbot_label="11,11"
     block_label="255,255"
 
-    connector_waiting_count="15"
-    connector_waiting_parent_count="25"
-    connector_unseen_count="20"
-    connector_heartbeat_count="10"
+    connector_waiting_count="5"
+    connector_waiting_parent_count="10"
+    connector_unseen_count="10"
+    connector_heartbeat_count="8"
 '''
 
 drone_params = '''

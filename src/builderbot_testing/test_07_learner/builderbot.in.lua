@@ -49,7 +49,16 @@ function reset()
 		vns.create_vns_core_node(vns),
 		-- learner
 		vns.Learner.create_learner_node(vns),
-		vns.Learner.create_knowledge_node(vns, "move_forward"),
+		{type = "selector", children = {
+			function()
+				if data.state == "place" then
+					return false, true
+				else
+					return false, false
+				end
+			end,
+			vns.Learner.create_knowledge_node(vns, "move_forward"),
+		}},
 		-- if I see a block, pickup, otherwise follow mns driver
 		{type = "selector*", children = {
 			{type = "sequence", children = {
@@ -64,7 +73,7 @@ function reset()
 			}},
 			{type = "sequence*", children = {
 				robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,0)} end, 0.20),
-				robot.nodes.create_pick_up_block_node(data, 0.20), --0.170 for hardware
+				robot.nodes.create_pick_up_block_node(data, 0.20), --0.170 for old motor hardware
 				function() data.state = "place" end,
 			}},
 		}}
@@ -72,7 +81,8 @@ function reset()
 end
 
 function step()
-	logger(robot.id, api.stepCount, "----------------------------")
+	logger(robot.id, api.stepCount, robot.system.time, "----------------------------")
+	logger(robot.radios.wifi.recv)
 	api.preStep()
 	vns.preStep(vns)
 
@@ -83,14 +93,16 @@ function step()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
 
-	logger("seenRobots")
+	logger("seenRobots--------")
 	logger(vns.connector.seenRobots)
-	logger("connector")
+	logger("connector---------")
 	logger(vns.connector)
-	logger("parent")
+	logger("parent------------")
 	logger(vns.parentR)
-	logger("children")
+	logger("children----------")
 	logger(vns.childrenRT)
+	logger("goal--------------")
+	logger(vns.goal)
 end
 
 function destroy()
