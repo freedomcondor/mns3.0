@@ -35,13 +35,13 @@ function reset()
 			end,
 			{type = "sequence*", children = {
 				robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,0)} end, 0.20),
-				robot.nodes.create_pick_up_block_node(data, 0.170), --0.165 for hardware
+				robot.nodes.create_pick_up_block_node(data, 0.20), --0.165 for old motor hardware, new motor can use 20
 				function() data.state = "place" end,
 			}},
 		}},
 		{type = "sequence*", children = {
 			robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(1,0,0)} end, 0.20),
-			robot.nodes.create_place_block_node(data, 0.170),
+			robot.nodes.create_place_block_node(data, 0.20),
 			function() data.state = "pickup" end,
 		}},
 	}}
