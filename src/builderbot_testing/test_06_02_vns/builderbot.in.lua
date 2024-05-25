@@ -61,8 +61,8 @@ function reset()
 			}},
 			{type = "sequence*", children = {
 				robot.nodes.create_approach_block_node(data, function() data.target = {id = 1, offset = vector3(0,0,0)} end, 0.20),
-				robot.nodes.create_pick_up_block_node(data, 0.17), --0.170 for hardware
-				function() data.state = "place" end,
+				robot.nodes.create_pick_up_block_node(data, 0.20), --0.170 for hardware
+				function() data.state = "place" return false, true end,
 			}},
 		}}
 	}}

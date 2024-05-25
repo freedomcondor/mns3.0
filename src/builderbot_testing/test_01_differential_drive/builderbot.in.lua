@@ -6,6 +6,8 @@ end
 local state = "front"
 local stepCount = 0
 
+local ticks_per_second = 3
+
 function step()
 	stepCount = stepCount + 1
 
@@ -15,7 +17,7 @@ function step()
 		speed = 0.01
 		left = speed
 		right = speed
-		if stepCount == 5 * 10 then
+		if stepCount == ticks_per_second * 10 then
 			stepCount = 0
 			state = "turn"
 		end
@@ -26,7 +28,7 @@ function step()
 
 		local D = 0.125
 		local R = D * 0.5
-		if stepCount > 5 * 0.5*R*math.pi/speed then
+		if stepCount > ticks_per_second * 0.5*R*math.pi/speed then
 			stepCount = 0
 			state = "front"
 		end

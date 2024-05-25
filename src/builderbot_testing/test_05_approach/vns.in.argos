@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="0" ticks_per_second="5" random_seed="12345" />
+    <experiment length="0" ticks_per_second="3" random_seed="12345" />
   </framework>
   
   <!-- *************** -->
@@ -55,17 +55,17 @@
 
     <!-- add builderbots -->
     <builderbot id="builderbot1">
-      <body position="0,0,0" orientation="0,0,0"/>
+      <body position="0,0.05,0" orientation="0,0,0"/>
       <controller config="builderbot"/>
     </builderbot>
 
     <block id="block">
-      <body position="0.18,0.00,0" orientation="0,0,0" />
+      <body position="0.25,0.00,0" orientation="0,0,0" />
       <controller config="block_controller"/>
     </block>
 
     <block id="block2">
-      <body position="0.38,0.00,0" orientation="0,0,0" />
+      <body position="0.50,-0.05,0" orientation="0,0,0" />
       <controller config="block_controller"/>
     </block>
   </arena>
