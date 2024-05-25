@@ -5,7 +5,9 @@ robot.logger:register_module('nodes_curved_approach_block')
 return function(data, target_distance)
    local case = {
       left_right_case = 0,
+      -- 1 left, 0 middle, -1 right  robot is to the left/right to the block, need to move to the opposite direction
       forward_backup_case = 1,
+      -- are we in moving forward or backward state, 1, forward, -1 backward
       done = false,
    }
    local aim = {}
@@ -43,7 +45,7 @@ return function(data, target_distance)
             if target_block.position_robot.x > target_distance + 0.05 then
                if case.left_right_case == 0 and
                   angle > tolerance / 2 then
-                  case.left_right_case = -1 -- right
+                  case.left_right_case = -1 -- right robot is to the right of the block
                elseif case.left_right_case == 0 and
                         angle < -tolerance / 2 then
                   case.left_right_case = 1 -- left
@@ -123,7 +125,11 @@ return function(data, target_distance)
             elseif case.forward_backup_case == -1 then
                -- backup case
                --if target_block.position_robot.x < target_distance + 0.03 + tolerence then
-               if target_block.position_robot.x < target_distance + 0.04 then
+               if case.left_right_case == 0 then
+                     case.forward_backup_case = 1
+                     aim.forwad_backup = "forward"
+                     return true
+               elseif target_block.position_robot.x < target_distance + 0.04 then
                   -- too close, keep move backward
                   robot.api.move.with_velocity(-default_speed,
                                                 -default_speed)
