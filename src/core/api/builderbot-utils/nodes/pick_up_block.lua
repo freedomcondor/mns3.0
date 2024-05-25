@@ -56,6 +56,7 @@ return function(data, forward_distance)
                   robot.lift_system.set_position(robot.lift_system.position + 0.05)
                   return false, true -- not running, true
                end,
+               robot.nodes.create_timer_node(0.5),
                -- recharge magnet
                --[[
                function()
