@@ -13,4 +13,12 @@ return
 		positionV3 = vector3(-dis/2, 0, 0),
 		orientationQ = quaternion(),
 	},
+	{	robotTypeS = "pipuck",
+		positionV3 = vector3(0, -dis/2, 0),
+		orientationQ = quaternion(),
+	},
+	{	robotTypeS = "pipuck",
+		positionV3 = vector3(0, dis/2, 0),
+		orientationQ = quaternion(),
+	},
 }}

@@ -65,9 +65,9 @@ return {
 	        |-----------------------------------
 	                      distance
 	--]]
-	driver_default_speed = tonumber(robot.params.driver_default_speed or 0.10),
-	driver_slowdown_zone = tonumber(robot.params.driver_slowdown_zone or 0.10),
-	driver_stop_zone = tonumber(robot.params.driver_stop_zone or 0.01),
+	driver_default_speed = tonumber(robot.params.driver_default_speed or 0.07),
+	driver_slowdown_zone = tonumber(robot.params.driver_slowdown_zone or 0.30),
+	driver_stop_zone = tonumber(robot.params.driver_stop_zone or 0.05),
 	driver_default_rotate_scalar = tonumber(robot.params.driver_default_rotate_scalar or 0.5),
 	driver_spring_default_speed_scalar = tonumber(robot.params.driver_spring_default_speed_scalar or 2),
 	driver_arrive_zone = tonumber(robot.params.driver_arrive_zone or 0.30),

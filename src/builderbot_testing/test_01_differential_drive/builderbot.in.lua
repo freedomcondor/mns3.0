@@ -14,7 +14,7 @@ function step()
 	local left, right
 
 	if state == "front" then
-		speed = 0.01
+		speed = 0.02
 		left = speed
 		right = speed
 		if stepCount == ticks_per_second * 10 then
@@ -22,7 +22,7 @@ function step()
 			state = "turn"
 		end
 	elseif state == "turn" then
-		speed = 0.01
+		speed = 0.02
 		left = speed
 		right = -speed
 
