@@ -12,6 +12,7 @@ end
 
 function PipuckConnector.step(vns)
 	local seenObstacles = {}
+	local seenBlocks = {}
 
 	-- For any sight report, update quadcopter and other pipucks to seenRobots
 	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
@@ -50,8 +51,7 @@ function PipuckConnector.step(vns)
 			if msgM.dataT.myObstacles ~= nil then
 				for i, obstacle in ipairs(msgM.dataT.myObstacles) do
 					local positionV3 = quad.positionV3 + 
-									   vector3(obstacle.positionV3):rotate(quad.orientationQ) +
-									   vector3(0,0,0.08)
+									   vector3(obstacle.positionV3):rotate(quad.orientationQ)
 					local orientationQ = quad.orientationQ * obstacle.orientationQ 
 
 					-- check positionV3 in existing obstacles
@@ -71,6 +71,20 @@ function PipuckConnector.step(vns)
 							orientationQ = orientationQ,
 						}
 					end
+				end
+			end
+
+			-- add blocks
+			if msgM.dataT.myBlocks ~= nil then
+				for i, block in ipairs(msgM.dataT.myBlocks) do
+					local positionV3 = quad.positionV3 +
+					                   vector3(block.positionV3):rotate(quad.orientationQ)
+					local orientationQ = quad.orientationQ * block.orientationQ
+					seenBlocks[#seenBlocks + 1] = {
+						robotTypeS = "block",
+						positionV3 = positionV3,
+						orientationQ = orientationQ,
+					}
 				end
 			end
 		end
@@ -100,6 +114,18 @@ function PipuckConnector.step(vns)
 	end
 
 	SensorUpdater.updateObstacles(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
+
+	-- convert blocks from real frame into virtual frame
+	local seenBlocksInVirtualFrame = {}
+	for i, v in ipairs(seenBlocks) do
+		seenBlocksInVirtualFrame[i] = {
+			robotTypeS = v.robotTypeS,
+			positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
+			orientationQ = vns.api.virtualFrame.Q_RtoV(v.orientationQ),
+		}
+	end
+
+	vns.avoider.blocks = seenBlocksInVirtualFrame
 
 	--[[ draw obstacles
 	for i, ob in ipairs(vns.avoider.obstacles) do

@@ -197,6 +197,18 @@ function DroneConnector.step(vns)
 	end
 	vns.avoider.aerial_obstacles = aerialObstaclesInVirtualFrame
 
+	-- convert blocks from real frame into virtual frame
+	local seenBlocksInVirtualFrame = {}
+	for i, v in ipairs(seenBlocks) do
+		seenBlocksInVirtualFrame[i] = {
+			robotTypeS = v.robotTypeS,
+			positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
+			orientationQ = vns.api.virtualFrame.Q_RtoV(v.orientationQ),
+		}
+	end
+
+	vns.avoider.blocks = seenBlocksInVirtualFrame
+
 	--[[ draw obstacles
 	if vns.parentR == nil then
 	for i, ob in ipairs(vns.avoider.obstacles) do

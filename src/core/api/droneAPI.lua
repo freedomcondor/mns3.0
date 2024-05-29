@@ -568,7 +568,7 @@ function api.droneAddBlocks(tags, blocksInRealFrame) -- tags is an array of R
 			blocksInRealFrame[#blocksInRealFrame + 1] = {
 				type = tag.id,
 				robotTypeS = "block",
-				positionV3 = tag.positionV3 + vector3(0,0,-0.1):rotate(tag.orientationQ),
+				positionV3 = tag.positionV3 + (-tagOffset["block"]):rotate(tag.orientationQ),
 				orientationQ = tag.orientationQ,
 			}
 		end
