@@ -24,9 +24,13 @@
         <radios implementation="default" />
         <drone_cameras_system implementation="default">
           <!--
+                  # for smaller tag
                   tag_family="tag25h9"
+                  tag_side_length="0.0385"
+
+                  # for larger tag
                   tag_family="tag36h11"
-                  tag_side_length="0.1075"
+                  tag_side_length="0.1087"
           -->
           <!--
                   save_as="/media/usb/"
@@ -41,7 +45,7 @@
                   processing_offset="162,34"
 
                   tag_family="tag25h9"
-                  tag_side_length="0.14"
+                  tag_side_length="0.0385"
 
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
@@ -57,7 +61,7 @@
                   processing_offset="162,34"
 
                   tag_family="tag25h9"
-                  tag_side_length="0.14"
+                  tag_side_length="0.0385"
 
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
@@ -73,7 +77,7 @@
                   processing_offset="162,34"
 
                   tag_family="tag25h9"
-                  tag_side_length="0.14"
+                  tag_side_length="0.0385"
 
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
@@ -89,7 +93,7 @@
                   processing_offset="162,34"
 
                   tag_family="tag25h9"
-                  tag_side_length="0.14"
+                  tag_side_length="0.0385"
 
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
