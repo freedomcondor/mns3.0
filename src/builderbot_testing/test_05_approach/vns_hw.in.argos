@@ -25,7 +25,12 @@
           implementation="default" 
           calibration="/home/root/calibration/builderbot_camera_system.xml"
           save_raw="false"
-          saturationLimit="120"/>
+          saturationLimit="120"
+          save_as="saveImage/img"
+        />
+         <!--
+           save_as="saveImage/img"
+         -->
          <!-- save_as="saveImage/img" -->
         <builderbot_lift_system
           implementation="default" 
@@ -37,7 +42,7 @@
         <builderbot_system implementation="default" />
       </sensors>
 	  <params script="builderbot.lua"
-            block_label="255,255"/>
+            block_label="34,34"/>
     </lua_controller>
   </controllers>
 
