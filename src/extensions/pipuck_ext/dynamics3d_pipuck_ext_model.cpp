@@ -20,18 +20,22 @@ namespace argos {
       m_cDifferentialDriveEntity(c_pipuck.GetDifferentialDriveEntity()) {
       /* get the required collision shapes */
       std::shared_ptr<btCollisionShape> ptrBodyShape =
-         CDynamics3DShapeManager::RequestCylinder(BODY_HALF_EXTENTS);
+         CDynamics3DShapeManager::RequestBox(BODY_HALF_EXTENTS);
       std::shared_ptr<btCollisionShape> ptrWheelShape =
          CDynamics3DShapeManager::RequestCylinder(WHEEL_HALF_EXTENTS);
       std::shared_ptr<btCollisionShape> ptrMountShape =
-         CDynamics3DShapeManager::RequestCylinder(MOUNT_HALF_EXTENTS);
+         CDynamics3DShapeManager::RequestBox(MOUNT_HALF_EXTENTS);
+      std::shared_ptr<btCollisionShape> ptrMount2Shape =
+         CDynamics3DShapeManager::RequestBox(MOUNT_HALF_EXTENTS);
       /* calculate the inertia of the collision objects */
       btVector3 cBodyInertia;
       btVector3 cWheelInertia;
       btVector3 cMountInertia;
+      btVector3 cMount2Inertia;
       ptrBodyShape->calculateLocalInertia(BODY_MASS, cBodyInertia);
       ptrWheelShape->calculateLocalInertia(WHEEL_MASS, cWheelInertia);
       ptrMountShape->calculateLocalInertia(MOUNT_MASS, cMountInertia);
+      ptrMount2Shape->calculateLocalInertia(MOUNT_MASS, cMount2Inertia);
       /* calculate a btTransform that moves us from the global coordinate system to the
          local coordinate system */
       const SAnchor& sOriginAnchor = c_pipuck.GetEmbodiedEntity().GetOriginAnchor();
@@ -70,6 +74,12 @@ namespace argos {
          cMountInertia,
          MOUNT_MASS,
          MOUNT_FRICTION);
+      CAbstractBody::SData sMount2Data(
+         cStartTransform * MOUNT2_OFFSET,
+         MOUNT_GEOMETRIC_OFFSET,
+         cMount2Inertia,
+         MOUNT_MASS,
+         MOUNT_FRICTION);
       SAnchor* psBodyAnchor = &c_pipuck.GetEmbodiedEntity().GetAnchor("body");
       SAnchor* psLeftWheelAnchor = &c_pipuck.GetEmbodiedEntity().GetAnchor("left_wheel");
       SAnchor* psRightWheelAnchor = &c_pipuck.GetEmbodiedEntity().GetAnchor("right_wheel");
@@ -78,8 +88,9 @@ namespace argos {
       m_ptrLeftWheel = std::make_shared<CLink>(*this, 0, psLeftWheelAnchor, ptrWheelShape, sLeftWheelData);
       m_ptrRightWheel = std::make_shared<CLink>(*this, 1, psRightWheelAnchor, ptrWheelShape, sRightWheelData);
       m_ptrMount = std::make_shared<CLink>(*this, 2, nullptr, ptrMountShape, sMountData);
+      m_ptrMount2 = std::make_shared<CLink>(*this, 3, nullptr, ptrMount2Shape, sMount2Data);
       /* copy the bodies to the base class */
-      m_vecBodies = {m_ptrBody, m_ptrLeftWheel, m_ptrRightWheel, m_ptrMount};
+      m_vecBodies = {m_ptrBody, m_ptrLeftWheel, m_ptrRightWheel, m_ptrMount, m_ptrMount2};
       /* synchronize with the entity with the space */
       Reset();
    }
@@ -98,6 +109,14 @@ namespace argos {
                               BODY_TO_MOUNT_JOINT_ROTATION,
                               BODY_TO_MOUNT_JOINT_OFFSET,
                               MOUNT_TO_BODY_JOINT_OFFSET,
+                              true);
+      m_cMultiBody.setupFixed(m_ptrMount2->GetIndex(),
+                              m_ptrMount2->GetData().Mass,
+                              m_ptrMount2->GetData().Inertia,
+                              m_ptrBody->GetIndex(),
+                              BODY_TO_MOUNT2_JOINT_ROTATION,
+                              BODY_TO_MOUNT2_JOINT_OFFSET,
+                              MOUNT2_TO_BODY_JOINT_OFFSET,
                               true);
       /* set up wheels */
       m_cMultiBody.setupRevolute(m_ptrLeftWheel->GetIndex(),
@@ -193,8 +212,7 @@ namespace argos {
 
    const btScalar CDynamics3DPiPuckExtModel::BODY_MASS(0.33);
    const btScalar CDynamics3DPiPuckExtModel::BODY_DISTANCE_FROM_FLOOR(0.00125);
-   //const btVector3 CDynamics3DPiPuckExtModel::BODY_HALF_EXTENTS(0.0362, 0.03165, 0.0362);
-   const btVector3 CDynamics3DPiPuckExtModel::BODY_HALF_EXTENTS(0.1, 0.03165, 0.1);
+   const btVector3 CDynamics3DPiPuckExtModel::BODY_HALF_EXTENTS(0.05, 0.03165, 0.05);
    const btTransform CDynamics3DPiPuckExtModel::BODY_OFFSET(
       btQuaternion(0.0, 0.0, 0.0, 1.0), btVector3(0.0, BODY_DISTANCE_FROM_FLOOR, 0.0)
    );
@@ -227,18 +245,25 @@ namespace argos {
    const btVector3 CDynamics3DPiPuckExtModel::WHEEL_LEFT_TO_BODY_JOINT_OFFSET(0.0, WHEEL_HALF_EXTENTS.getY(), -0.0);
    const btQuaternion CDynamics3DPiPuckExtModel::BODY_TO_WHEEL_LEFT_JOINT_ROTATION(btVector3(1,0,0), SIMD_HALF_PI);
    
-   const btVector3    CDynamics3DPiPuckExtModel::MOUNT_HALF_EXTENTS(0.1, 0.00835, 0.1);
+   const btVector3    CDynamics3DPiPuckExtModel::MOUNT_HALF_EXTENTS(0.01, 0.02835, 0.1);
    const btScalar     CDynamics3DPiPuckExtModel::MOUNT_MASS(0.100);
    const btTransform  CDynamics3DPiPuckExtModel::MOUNT_OFFSET(
-      btQuaternion(0.0, 0.0, 0.0, 1.0),
-      btVector3(0.0, BODY_DISTANCE_FROM_FLOOR + 2.0 * BODY_HALF_EXTENTS.getY(), 0.0));
+      btQuaternion(btVector3(0,1,0), SIMD_HALF_PI/2),
+      btVector3(0.0, BODY_DISTANCE_FROM_FLOOR + 0.0 * BODY_HALF_EXTENTS.getY(), 0.0));
    const btTransform  CDynamics3DPiPuckExtModel::MOUNT_GEOMETRIC_OFFSET(
       btQuaternion(0.0, 0.0, 0.0, 1.0),
       btVector3(0.0, -MOUNT_HALF_EXTENTS.getY(), 0.0));
    const btScalar     CDynamics3DPiPuckExtModel::MOUNT_FRICTION(1.0);
-   const btQuaternion CDynamics3DPiPuckExtModel::BODY_TO_MOUNT_JOINT_ROTATION(0.0, 0.0, 0.0, 1.0);
-   const btVector3    CDynamics3DPiPuckExtModel::BODY_TO_MOUNT_JOINT_OFFSET(0.0, BODY_HALF_EXTENTS.getY(), 0.0);
-   const btVector3    CDynamics3DPiPuckExtModel::MOUNT_TO_BODY_JOINT_OFFSET(0.0, MOUNT_HALF_EXTENTS.getY(), 0.0);
+   const btQuaternion CDynamics3DPiPuckExtModel::BODY_TO_MOUNT_JOINT_ROTATION(btVector3(0,1,0), SIMD_HALF_PI/2);
+   const btVector3    CDynamics3DPiPuckExtModel::BODY_TO_MOUNT_JOINT_OFFSET(0.0, 0.0, 0.0);
+   const btVector3    CDynamics3DPiPuckExtModel::MOUNT_TO_BODY_JOINT_OFFSET(0.0, 0.0, 0.0);
+
+   const btTransform  CDynamics3DPiPuckExtModel::MOUNT2_OFFSET(
+      btQuaternion(btVector3(0,1,0), -SIMD_HALF_PI/2),
+      btVector3(0.0, BODY_DISTANCE_FROM_FLOOR + 0.0 * BODY_HALF_EXTENTS.getY(), 0.0));
+   const btQuaternion CDynamics3DPiPuckExtModel::BODY_TO_MOUNT2_JOINT_ROTATION(btVector3(0,1,0), -SIMD_HALF_PI/2);
+   const btVector3    CDynamics3DPiPuckExtModel::BODY_TO_MOUNT2_JOINT_OFFSET(0.0, 0.0, 0.0);
+   const btVector3    CDynamics3DPiPuckExtModel::MOUNT2_TO_BODY_JOINT_OFFSET(0.0, 0.0, 0.0);
 
    /* TODO calibrate these values */
    const btScalar CDynamics3DPiPuckExtModel::BODY_FRICTION(0.125);

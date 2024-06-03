@@ -517,7 +517,7 @@ api.tagLabelIndex.builderbot.from = tonumber(from)
 api.tagLabelIndex.builderbot.to   = tonumber(to)
 
 tagOffset = {
-	pipuck = vector3(0, 0, 0.0685),
+	pipuck = vector3(0, 0, 0.14),
 	drone = vector3(0, 0, 0.25),   -- 0.285 for candidate
 	builderbot = vector3(0, 0, 0.3875),
 	block = vector3(0, 0, 0.028),

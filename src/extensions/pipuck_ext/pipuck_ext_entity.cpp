@@ -21,8 +21,8 @@ namespace argos {
 
    const CVector3 CPiPuckExtEntity::WIFI_OFFSET_POSITION = {0.0, 0.0, 0.05};
    const Real CPiPuckExtEntity::WIFI_TRANSMISSION_RANGE = 10.0;
-   const CVector3 CPiPuckExtEntity::TAG_OFFSET_POSITION = {0.0, 0.0, 0.0685};
-   const Real CPiPuckExtEntity::TAG_SIDE_LENGTH = 0.107;
+   const CVector3 CPiPuckExtEntity::TAG_OFFSET_POSITION = {0.0, 0.0, 0.14};
+   const Real CPiPuckExtEntity::TAG_SIDE_LENGTH = 0.050;
 
    /****************************************/
    /****************************************/

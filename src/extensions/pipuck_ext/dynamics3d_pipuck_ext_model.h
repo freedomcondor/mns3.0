@@ -41,6 +41,7 @@ namespace argos {
       std::shared_ptr<CLink> m_ptrLeftWheel;
       std::shared_ptr<CLink> m_ptrRightWheel;
       std::shared_ptr<CLink> m_ptrMount;
+      std::shared_ptr<CLink> m_ptrMount2;
       /* entities */
       CPiPuckDifferentialDriveEntity& m_cDifferentialDriveEntity;
       /* body data */
@@ -71,11 +72,15 @@ namespace argos {
       static const btVector3 MOUNT_HALF_EXTENTS;
       static const btScalar MOUNT_MASS;
       static const btTransform MOUNT_OFFSET;
+      static const btTransform MOUNT2_OFFSET;
       static const btTransform MOUNT_GEOMETRIC_OFFSET;
       static const btScalar MOUNT_FRICTION;
       static const btQuaternion BODY_TO_MOUNT_JOINT_ROTATION;
       static const btVector3 BODY_TO_MOUNT_JOINT_OFFSET;
       static const btVector3 MOUNT_TO_BODY_JOINT_OFFSET;
+      static const btQuaternion BODY_TO_MOUNT2_JOINT_ROTATION;
+      static const btVector3 BODY_TO_MOUNT2_JOINT_OFFSET;
+      static const btVector3 MOUNT2_TO_BODY_JOINT_OFFSET;
    };
 }
 
