@@ -61,13 +61,14 @@ function Connector.deleteParent(vns)
 	vns.parentR = nil
 end
 
-function Connector.recruit(vns, robotR)
+function Connector.recruit(vns, robotR, assign_only_or_requirement)
 	vns.Msg.send(robotR.idS, "recruit", {	
 		positionV3 = vns.api.virtualFrame.V3_VtoR(robotR.positionV3),
 		orientationQ = vns.api.virtualFrame.Q_VtoR(robotR.orientationQ),
 		fromTypeS = vns.robotTypeS,
 		idS = vns.idS,
 		idN = vns.idN,
+		assign_only_or_requirement = assign_only_or_requirement,
 	}) 
 
 	vns.connector.waitingRobots[robotR.idS] = {
@@ -315,6 +316,55 @@ function Connector.recruitAll(vns)
 	end
 end
 
+function Connector.recruitOnlyNecessary(vns, gene_type)
+	-- get the target scale in my target morphology
+	local targetScale
+	if gene_type == "single_morphology_gene" then
+		targetScale = vns.allocator.gene.scale
+	elseif type(gene_type) == "table" then
+		for i = #gene_type, 1, -1 do
+			local morph = gene_type[i]
+			if morph.idN <= vns.allocator.target.idN then
+				targetScale = morph.scale
+				break
+			end
+		end
+	end
+
+	local currentScale = vns.scalemanager.scale
+	local diffScale = targetScale - currentScale
+
+	-- recruit new
+	for idS, robotR in pairs(vns.connector.seenRobots) do
+		-- check robot type max children number
+		local assign_only_or_requirement = true
+
+		if diffScale[robotR.robotTypeS] ~= nil and diffScale[robotR.robotTypeS] > 0 then
+			assign_only_or_requirement = diffScale
+		end
+
+		if vns.childrenRT[idS] == nil and
+		   vns.connector.waitingRobots[idS] == nil and
+		   (vns.parentR == nil or vns.parentR.idS ~= idS) then
+			local safezone = vns.Parameters.safezone_default
+			if vns.robotTypeS == "drone" and robotR.robotTypeS == "drone" then
+				safezone = vns.Parameters.safezone_drone_drone
+			elseif vns.robotTypeS == "drone" and robotR.robotTypeS == "pipuck" then
+				safezone = vns.Parameters.safezone_drone_pipuck
+			elseif vns.robotTypeS == "pipuck" and robotR.robotTypeS == "drone" then
+				safezone = vns.Parameters.safezone_drone_pipuck
+			elseif vns.robotTypeS == "pipuck" and robotR.robotTypeS == "pipuck" then
+				safezone = vns.Parameters.safezone_pipuck_pipuck
+			end
+			local position2D = vector3(robotR.positionV3)
+			if vns.api.parameters.mode_2D == true then position2D.z = 0 end
+			if position2D:length() < safezone then
+				Connector.recruit(vns, robotR, assign_only_or_requirement)
+			end
+		end
+	end
+end
+
 function Connector.recruitNear(vns)
 	-- only recruit robot that doesn't have a nearer robot in between
 	-- create a available robot list
@@ -322,7 +372,7 @@ function Connector.recruitNear(vns)
 	for idS, robotR in pairs(vns.connector.seenRobots) do
 		-- if a foreign robot (not parent, not children, note:waiting robots counts in)
 		if vns.childrenRT[idS] == nil and 
-		   --vns.connector.waitingRobots[idS] == nil and 
+		   --vns.connector.waitingRobots[idS] == nil and
 		   (vns.parentR == nil or vns.parentR.idS ~= idS) then
 			-- choose safezone according to robot type
 			local safezone
@@ -374,6 +424,17 @@ function Connector.ackSpecific(vns, specific_name, option)
 	-- check acks, ack the nearest valid recruit
 	--for _, msgM in pairs(vns.Msg.getAM("ALLMSG", "recruit")) do
 	for _, msgM in pairs(vns.Msg.getAM(specific_name, "recruit")) do
+		-- check requirement
+		local requirement_flag = true
+		if type(msgM.dataT.assign_only_or_requirement) == "table" then
+			local diffScale = vns.scalemanager.scale - msgM.dataT.assign_only_or_requirement
+			for i, v in pairs(diffScale) do
+				if v > 0 then   -- I have more than asked
+					requirement_flag = false
+					break
+				end
+			end
+		end
 		-- check
 		-- if id == my vns id then pass unconditionally
 		-- else, if it is from changing id, then ack
@@ -381,8 +442,9 @@ function Connector.ackSpecific(vns, specific_name, option)
 		if (msgM.dataT.idS ~= vns.idS and
 		    msgM.dataT.idN > vns.idN and
 		    vns.connector.locker_count == 0 and
-		    vns.connector.lastid[msgM.dataT.idS] == nil
-		    and (option == nil or option.no_parent_ack ~= true or vns.parentR == nil)
+		    vns.connector.lastid[msgM.dataT.idS] == nil and
+		    (option == nil or option.no_parent_ack ~= true or vns.parentR == nil) and
+		    msgM.dataT.assign_only_or_requirement ~= true and requirement_flag == true
 			-- no_parent_ack means a robot only ack when it doesn't have a parent
 		   )
 		   or
@@ -500,7 +562,12 @@ function Connector.create_connector_node(vns, option)
 
 		-- recruit
 		if option.no_recruit ~= true then
-			Connector.recruitAll(vns)
+			if option.recruit_only_necessary == nil then
+				Connector.recruitAll(vns)
+			else
+				-- recruit_only_necessary = "single_morphology_gene" or a table of {structure1, structure2}
+				Connector.recruitOnlyNecessary(vns, option.recruit_only_necessary)
+			end
 		end
 		--Connector.recruitNear(vns)
 		return false, true

@@ -397,6 +397,7 @@ function VNS.create_vns_core_node(vns, option)
 		--vns.create_preconnector_node(vns),
 		vns.Connector.create_connector_node(vns,
 			{	no_recruit = option.connector_no_recruit,
+				recruit_only_necessary = option.connector_recruit_only_necessary,
 				no_parent_ack = option.connector_no_parent_ack,
 				specific_name = option.specific_name,
 				specific_time = option.specific_time,
