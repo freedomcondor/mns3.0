@@ -81,6 +81,7 @@ function PipuckConnector.step(vns)
 					                   vector3(block.positionV3):rotate(quad.orientationQ)
 					local orientationQ = quad.orientationQ * block.orientationQ
 					seenBlocks[#seenBlocks + 1] = {
+						type = block.type,
 						robotTypeS = "block",
 						positionV3 = positionV3,
 						orientationQ = orientationQ,
@@ -120,6 +121,7 @@ function PipuckConnector.step(vns)
 	for i, v in ipairs(seenBlocks) do
 		seenBlocksInVirtualFrame[i] = {
 			robotTypeS = v.robotTypeS,
+			type = v.type,
 			positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
 			orientationQ = vns.api.virtualFrame.Q_RtoV(v.orientationQ),
 		}

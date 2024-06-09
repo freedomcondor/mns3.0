@@ -1,0 +1,23 @@
+diff --git a/src/plugins/robots/block/simulator/block_entity.cpp b/src/plugins/robots/block/simulator/block_entity.cpp
+index e046bb44..b86bacb6 100644
+--- a/src/plugins/robots/block/simulator/block_entity.cpp
++++ b/src/plugins/robots/block/simulator/block_entity.cpp
+@@ -80,7 +80,9 @@ namespace argos {
+          /* Initialize the parent */
+          CComposableEntity::Init(t_tree);
+          /* check if we are debugging */
++         std::string strPayload = "0";
+          GetNodeAttributeOrDefault(t_tree, "debug", m_bDebug, m_bDebug);
++         GetNodeAttributeOrDefault(t_tree, "payload", strPayload, strPayload);
+          /* create and initialize the embodied entity */
+          m_pcEmbodiedEntity = new CEmbodiedEntity(this, "body_0");
+          AddComponent(*m_pcEmbodiedEntity);
+@@ -101,7 +103,7 @@ namespace argos {
+                                           sOriginAnchor,
+                                           CRadians::PI_OVER_THREE,
+                                           TAG_SIDE_LENGTH,
+-                                          std::string("0"));
++                                          std::string(strPayload));
+          }
+          CTagMedium& cTagMedium = 
+             CSimulator::GetInstance().GetMedium<CTagMedium>("tags");
