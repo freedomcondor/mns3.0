@@ -49,10 +49,10 @@ block_locations = generate_random_locations(n_block,
 
 pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 drone_xml = generate_drones(drone_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
-builderbot_xml = generate_builderbot_xml(11, 3, 0, 0)
+builderbot_xml = generate_builderbot_xml(11, 1, 0, 0)
 
-block_xml = generate_blocks(block_locations, 2, 34)  # from label 1 generate drone xml tags, type
-block_xml = generate_block_xml(1, 2, 0, 0, 33) + block_xml
+block_xml = generate_blocks(block_locations, 2, 33)  # from label 2 generate drone xml tags, type
+block_xml = generate_block_xml(1, 0, 0, 0, 34) + block_xml
 
 parameters = {
     "mode_2D"           :  "true",
@@ -60,6 +60,10 @@ parameters = {
     "pipuck_label"      :  "1, 10",
     "builderbot_label"  :  "11, 15",
     "block_label"       :  "30, 34",
+    "driver_stop_zone"  :  0.01,
+    "avoid_block_vortex"  :  "nil",
+    "dangerzone_pipuck" :  0.25,
+    "dangerzone_block"  :  0.25,
 }
 
 parameters_txt = generateParametersText(parameters)

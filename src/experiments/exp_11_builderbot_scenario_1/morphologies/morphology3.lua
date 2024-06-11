@@ -5,6 +5,10 @@ return
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
+	{	robotTypeS = "builderbot",
+		positionV3 = vector3(dis/2, 0, 0),
+		orientationQ = quaternion(),
+	},
 	{	robotTypeS = "pipuck",
 		positionV3 = vector3(-dis/2, 0, 0),
 		orientationQ = quaternion(),
@@ -17,10 +21,12 @@ return
 			positionV3 = vector3(-dis/2, 0, 0),
 			orientationQ = quaternion(),
 			children = {
+			--[[
 			{	robotTypeS = "builderbot",
 				positionV3 = vector3(-dis/2, 0, 0),
 				orientationQ = quaternion(),
 			}
+			--]]
 		}},
 	}},
 	{	robotTypeS = "pipuck",

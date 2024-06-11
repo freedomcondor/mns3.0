@@ -17,10 +17,12 @@ return
 			positionV3 = vector3(-dis/2, 0, 0),
 			orientationQ = quaternion(),
 			children = {
+			--[[
 			{	robotTypeS = "pipuck",
 				positionV3 = vector3(-dis/2, 0, 0),
 				orientationQ = quaternion(),
 			}
+			--]]
 		}},
 	}},
 	{	robotTypeS = "pipuck",
