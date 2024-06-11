@@ -23,7 +23,8 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 
 	-- avoid seen robots
 	-- the brain is not influenced by other robots
-	if vns.parentR ~= nil and vns.stabilizer.referencing_me ~= true then
+	if (vns.parentR ~= nil or vns.Parameters.avoider_brain_exception == false) and
+	   vns.stabilizer.referencing_me ~= true then
 		for idS, robotR in pairs(vns.connector.seenRobots) do
 			-- avoid drone
 			if vns.robotTypeS == "drone" and
@@ -125,8 +126,8 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 			end
 		end
 	else
-		-- avoid ground obstacles
-		for i, obstacle in ipairs(vns.avoider.obstacles) do if obstacle.added ~= true then
+		-- avoid ground blocks
+		for i, block in ipairs(vns.avoider.blocks) do if block.added ~= true then
 			-- check vortex
 			local block_vortex = vns.Parameters.avoid_block_vortex
 			if block_vortex == "goal" then
@@ -137,7 +138,7 @@ function Avoider.step(vns, drone_pipuck_avoidance)
 				block_vortex = nil
 			end
 			avoid_speed.positionV3 =
-				Avoider.add(vector3(), obstacle.positionV3,
+				Avoider.add(vector3(), block.positionV3,
 				            avoid_speed.positionV3,
 				            vns.Parameters.dangerzone_block,
 				            block_vortex,

@@ -54,6 +54,7 @@ return {
 	avoid_drone_vortex = robot.params.avoid_drone_vortex or "goal",
 	avoid_pipuck_vortex = robot.params.avoid_pipuck_vortex or "goal",
 	avoid_block_vortex = robot.params.avoid_block_vortex or "goal",
+	avoider_brain_exception = (robot.params.avoider_brain_exception == "false") or true,
 
 	-- driver --------------------------------------------------------
 	--[[
