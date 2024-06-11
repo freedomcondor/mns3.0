@@ -19,6 +19,7 @@ function Driver.create(vns)
 	vns.driver = {
 		all_arrive = false,
 		drone_arrive = false,
+		pipuck_arrive = false,
 	}
 end
 
@@ -36,6 +37,7 @@ function Driver.addChild(vns, robotR)
 	robotR.driver = {
 		all_arrive = false,
 		drone_arrive = false,
+		pipuck_arrive = false,
 	}
 end
 
@@ -255,11 +257,14 @@ function Driver.step(vns, waiting)
 			if msgM.dataT.all_arrive == false then robotR.driver.all_arrive = false end
 			if msgM.dataT.drone_arrive == true then robotR.driver.drone_arrive = true end
 			if msgM.dataT.drone_arrive == false then robotR.driver.drone_arrive = false end
+			if msgM.dataT.pipuck_arrive == true then robotR.driver.pipuck_arrive = true end
+			if msgM.dataT.pipuck_arrive == false then robotR.driver.pipuck_arrive = false end
 		end
 	end
 
 	local all_arrive_flag = true
 	local drone_arrive_flag = true
+	local pipuck_arrive_flag = true
 	-- check myself
 	local goalV2 = vector3(vns.goal.positionV3)
 	if vns.api.parameters.mode_2D == true then goalV2.z = 0 end
@@ -267,6 +272,7 @@ function Driver.step(vns, waiting)
 		-- not arrive
 		all_arrive_flag = false
 		if vns.robotTypeS == "drone" then drone_arrive_flag = false end
+		if vns.robotTypeS == "pipuck" then pipuck_arrive_flag = false end
 	else
 		for idS, robotR in pairs(vns.childrenRT) do
 			if robotR.driver.all_arrive ~= true then
@@ -275,6 +281,9 @@ function Driver.step(vns, waiting)
 			if robotR.driver.drone_arrive ~= true then
 				drone_arrive_flag = false
 			end
+			if robotR.driver.pipuck_arrive ~= true then
+				pipuck_arrive_flag = false
+			end
 		end
 	end
 
@@ -282,6 +291,11 @@ function Driver.step(vns, waiting)
 		vns.driver.drone_arrive = true
 	else
 		vns.driver.drone_arrive = false
+	end
+	if pipuck_arrive_flag == true then
+		vns.driver.pipuck_arrive = true
+	else
+		vns.driver.pipuck_arrive = false
 	end
 	if all_arrive_flag == true then
 		vns.driver.all_arrive = true
@@ -310,7 +324,8 @@ function Driver.step(vns, waiting)
 	end
 	if vns.parentR ~= nil then
 		vns.Msg.send(vns.parentR.idS, "arrive_signal", {all_arrive = all_arrive_flag,
-	                                                    drone_arrive = drone_arrive_flag,})
+	                                                    drone_arrive = drone_arrive_flag,
+	                                                    pipuck_arrive = pipuck_arrive_flag})
 	end
 end
 
