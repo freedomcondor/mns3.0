@@ -118,6 +118,43 @@ def generate_pipuck_controller(params) :
 
     return text
 
+def generate_builderbot_controller(params) :
+    text = '''
+    <!-- Builderbot Controller -->
+    <lua_controller id="builderbot">
+      <actuators>
+        <debug implementation="default" />
+        <builderbot_electromagnet_system implementation="default" />
+        <builderbot_differential_drive implementation="default" />
+        <builderbot_lift_system implementation="default" />
+        <radios implementation="default" />
+      </actuators>
+      <sensors>
+        <builderbot_camera_system implementation="default"
+          show_frustum="false" show_tag_rays="true" show_led_rays="false" />
+        <builderbot_rangefinders implementation="default" show_rays="false" />
+        <builderbot_differential_drive implementation="default"/>
+        <builderbot_electromagnet_system implementation="default" />
+        <builderbot_lift_system implementation="default" />
+        <builderbot_system implementation="default" />
+        <radios implementation="default" />
+      </sensors>
+      <params simulation="true" {} />
+    </lua_controller>
+    '''.format(params)
+    return text
+
+def generate_block_controller(params) :
+    text = '''
+    <!-- Block Controller -->
+    <lua_controller id="block">
+      <actuators />
+      <sensors />
+      <params simulation="true" {} />
+    </lua_controller>
+    '''.format(params)
+    return text
+
 def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False, background_color=None, replay=False) :
     if lua_editor :
         lua_editor = "true"
@@ -153,6 +190,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False
   <media>
     <directional_led id="directional_leds" index="grid" grid_size="20,20,20"/>
     <tag id="tags" index="grid" grid_size="20,20,20" />
+    <radio id="nfc" index="grid" grid_size="20,20,20" />
     <radio id="wifi" index="grid" grid_size="20,20,20" />
   </media>
 
@@ -386,7 +424,7 @@ def generate_obstacle_cylinder_xml(i, x, y, th, type) :
 
 def generate_block_xml(i, x, y, th, type) :
     tag = '''
-    <block id="obstacle{}" init_led_color="{}">
+    <block id="obstacle{}" payload="{}">
         <body position="{},{},0" orientation="{},0,0" />
         <controller config="block"/>
     </block>
@@ -410,11 +448,20 @@ def generate_pipuck_xml(i, x, y, th, wifi_range=None) :
     if wifi_range != None:
       wifi_range_xml = '''wifi_transmission_range="{}"'''.format(wifi_range)
     tag = '''
-    <pipuck_ext id="pipuck{}" wifi_medium="wifi" tag_medium="tags" debug="true">
+    <pipuck_ext id="pipuck{}" wifi_medium="wifi" tag_medium="tags" debug="true" {}>
         <body position="{},{},0" orientation="{},0,0"/>
         <controller config="pipuck"/>
     </pipuck_ext>
     '''.format(i, wifi_range_xml, x, y, th)
+    return tag
+
+def generate_builderbot_xml(i, x, y, th) :
+    tag = '''
+    <builderbot id="builderbot{}">
+      <body position="{},{},0" orientation="{},0,0"/>
+      <controller config="builderbot"/>
+    </builderbot>
+    '''.format(i, x, y, th)
     return tag
 
 ########## target ##############################################################
@@ -1019,6 +1066,14 @@ def generate_obstacles(locations, start_id, type) :
     i = start_id
     for loc in locations :
         tagstr = tagstr + generate_obstacle_xml(i, loc[0], loc[1], 0, type)
+        i = i + 1
+    return tagstr
+
+def generate_blocks(locations, start_id, type) :
+    tagstr = ""
+    i = start_id
+    for loc in locations :
+        tagstr = tagstr + generate_block_xml(i, loc[0], loc[1], 0, type)
         i = i + 1
     return tagstr
 
