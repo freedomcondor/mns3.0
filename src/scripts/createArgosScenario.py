@@ -425,7 +425,7 @@ def generate_obstacle_cylinder_xml(i, x, y, th, type) :
 
 def generate_block_xml(i, x, y, th, type) :
     tag = '''
-    <block id="obstacle{}" payload="{}">
+    <block id="block{}" payload="{}">
         <body position="{},{},0" orientation="{},0,0" />
         <controller config="block"/>
     </block>
