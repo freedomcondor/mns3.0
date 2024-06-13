@@ -113,6 +113,7 @@ local function update_block(old_block, new_block)
    old_block.Y = new_block.Y
    old_block.Z = new_block.Z
    old_block.tags = new_block.tags
+   old_block.type = new_block.type
 end
 
 local function hungarian_match(_old_blocks, _new_blocks)
@@ -222,6 +223,7 @@ return function(_blocks, _tags)
             position = middle_point_v3, 
             positionSum = middle_point_v3,
             orientation = tag.orientation,
+            type = tag.id,
             tags = {
                tag
             },

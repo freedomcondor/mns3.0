@@ -202,6 +202,7 @@ function DroneConnector.step(vns)
 	for i, v in ipairs(seenBlocks) do
 		seenBlocksInVirtualFrame[i] = {
 			robotTypeS = v.robotTypeS,
+			type = v.type,
 			positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
 			orientationQ = vns.api.virtualFrame.Q_RtoV(v.orientationQ),
 		}
