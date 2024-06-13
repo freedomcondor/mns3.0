@@ -21,6 +21,12 @@ robot.vns_api = api
 local VNS = require("VNS")
 local BT = require("DynamicBehaviorTree")
 
+
+center_block_type = tonumber(robot.params.center_block_type)
+usual_block_type = tonumber(robot.params.usual_block_type)
+pickup_block_type = tonumber(robot.params.pickup_block_type)
+
+
 ----- data
 local bt
 local structure1 = require("morphology1")
@@ -38,6 +44,7 @@ local gene = {
 }
 
 data = api.builderbot_utils_data -- for data editor check
+state = "pickup"
 
 function init()
 	api.linkRobotInterface(VNS)
@@ -59,8 +66,12 @@ function reset()
 	{type = "sequence", children = {
 		vns.create_preconnector_node(vns),
 		vns.create_vns_core_node(vns, {connector_recruit_only_necessary = gene.children}),
-		vns.Driver.create_driver_node(vns),
+		vns.Learner.create_learner_node(vns),
+		create_navigation_node(vns),
+		create_approach_and_driver_node(vns),
 	}}
+
+	setup_not_to_push_node(vns)
 end
 
 function step()
@@ -71,22 +82,107 @@ function step()
 
 	bt()
 
+	vns.Learner.spreadKnowledge(vns, "wait_to_push_node", vns.learner.knowledges["wait_to_push_node"])
+
 	vns.postStep(vns)
 	api.postStep()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
-
-	--[[
-	for id, robot in pairs(vns.connector.seenRobots) do
-		vns.api.debug.drawArrow("blue", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(robot.positionV3), true)
-	end
-
-	for id, block in pairs(vns.avoider.blocks) do
-		vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
-	end
-	--]]
 end
 
 function destroy()
 	api.destroy()
+end
+
+function setup_not_to_push_node(vns)
+	vns.learner.knowledges["wait_to_push_node"] = {hash = 2, rank = 2, node = [[
+	function()
+		return false, true -- don't push
+	end
+	]]}
+end
+
+function setup_start_to_push_node(vns)
+	vns.learner.knowledges["wait_to_push_node"] = {hash = 3, rank = 3, node = [[
+	function()
+		return false, false -- start push
+	end
+	]]}
+end
+
+function create_navigation_node(vns)
+return function()
+	if vns.parentR ~= nil then
+		local target_type = nil
+		if state == "pickup" then
+			target_type = center_block_type
+		elseif state == "place" then
+			target_type = pickup_block_type
+		end
+		-- find pickup block
+		local target_block = nil
+		for i, block in ipairs(vns.avoider.blocks) do
+			if block.type == target_type then
+				target_block = block
+				break
+			end
+		end
+		if target_block ~= nil then
+			vns.setGoal(vns, target_block.positionV3, quaternion())
+		end
+	end
+	return false, true
+end end
+
+function create_approach_and_driver_node(vns)
+return
+	{type = "selector*", children = {
+		{type = "sequence", children = {
+			function() 
+				-- find target type
+				local target_type = nil
+				local target_offset = nil
+				if state == "pickup" then
+					target_type = center_block_type
+					target_offset = vector3(0,0,0)
+				elseif state == "place" then
+					target_type = pickup_block_type
+					target_offset = vector3(0,0,1)
+				end
+
+				local find_flag = false
+				for id, block in pairs(api.builderbot_utils_data.blocks) do
+					if block.type == target_type then
+						find_flag = true
+						data.target = {id = id, offset = target_offset}
+						break
+					end
+				end
+				if find_flag == true then
+					return false, false
+				end
+				return false, true 
+			end,
+			vns.Driver.create_driver_node(vns),
+		}},
+		{type = "sequence", children = {
+			function() return false, state == "pickup" end,
+			{type = "sequence*", children = {
+				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.20),
+				robot.nodes.create_pick_up_block_node(data, 0.20), --0.170 for old motor hardware
+				function() state = "place" end,
+			}},
+		}},
+		{type = "sequence", children = {
+			function() return false, state == "place" end,
+			{type = "sequence*", children = {
+				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.20),
+				robot.nodes.create_place_block_node(data, 0.20), --0.170 for old motor hardware
+				function()
+					state = "finish"
+					setup_start_to_push_node(vns)
+				end,
+			}},
+		}},
+	}}
 end

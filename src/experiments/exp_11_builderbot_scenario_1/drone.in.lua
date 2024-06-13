@@ -15,6 +15,11 @@ logger.enable("DroneConnector")
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
+center_block_type = tonumber(robot.params.center_block_type)
+usual_block_type = tonumber(robot.params.usual_block_type)
+pickup_block_type = tonumber(robot.params.pickup_block_type)
+
+
 local structure1 = require("morphology1")
 local structure2 = require("morphology2")
 local structure3 = require("morphology3")
@@ -63,6 +68,17 @@ function step()
 	api.postStep()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
+
+	-- show type blocks
+	local type1 = center_block_type
+	local type2 = pickup_block_type
+	for i, block in ipairs(vns.avoider.blocks) do
+		if block.type == type1 then
+			vns.api.debug.drawRing("red", vns.api.virtualFrame.V3_VtoR(block.positionV3), 0.1, true)
+		elseif block.type == type2 then
+			vns.api.debug.drawRing("green", vns.api.virtualFrame.V3_VtoR(block.positionV3), 0.1, true)
+		end
+	end
 end
 
 function destroy()

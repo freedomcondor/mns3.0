@@ -181,6 +181,7 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False
     <dynamics3d id="dyn3d" iterations="25">
       <gravity g="9.8" />
       <floor />
+      <srocs />
     </dynamics3d>
   </physics_engines>
 
