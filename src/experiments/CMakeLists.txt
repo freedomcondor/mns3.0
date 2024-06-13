@@ -6,3 +6,4 @@ add_subdirectory(exp_05_lightshow_fault_tolerance)
 add_subdirectory(exp_06_formation_transfer)
 
 add_subdirectory(exp_11_builderbot_scenario_1)
+add_subdirectory(exp_12_builderbot_scenario_2)
