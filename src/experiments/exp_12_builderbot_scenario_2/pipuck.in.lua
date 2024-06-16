@@ -72,7 +72,7 @@ function reset()
 end
 
 function step()
-	logger(robot.id, api.stepCount, robot.system.time, "----------------------------")
+	logger(robot.id, api.stepCount, robot.system.time, state, substate, "----------------------------")
 	api.preStep()
 	vns.preStep(vns)
 
@@ -141,7 +141,7 @@ return function()
 			vns.Parameters.dangerzone_block = 0
 			vns.setGoal(vns, target.positionV3, quaternion())
 			vns.api.debug.drawArrow("0,255,255,0", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(target.positionV3), true)
-			if target.positionV3:length() < 0.10 then
+			if target.positionV3:length() < 0.15 then
 				state = "wait_to_forward_2"
 			end
 		end
