@@ -56,19 +56,21 @@ block_xml = generate_block_xml(1, 1, 0, 0, 34) + block_xml
 #block_xml = generate_block_xml(2, 1, 1, 0, 32) + block_xml
 
 parameters = {
-    "mode_2D"           :  "true",
-    "mode_builderbot"   :  "true",
-    "pipuck_label"      :  "1, 10",
-    "builderbot_label"  :  "11, 15",
-    "block_label"       :  "30, 34",
-    "driver_stop_zone"  :  0.01,
-    "avoid_block_vortex"  :  "nil",
-    "dangerzone_pipuck" :  0.25,
-    "dangerzone_block"  :  0.25,
+    "mode_2D"            :  "true",
+    "mode_builderbot"    :  "true",
+    "pipuck_label"       :  "1, 10",
+    "builderbot_label"   :  "11, 15",
+    "block_label"        :  "30, 34",
+    "driver_stop_zone"   :  0.01,
+    "avoid_block_vortex" :  "nil",
+    "dangerzone_pipuck"  :  0.25,
+    "dangerzone_block"   :  0.25,
 
     "center_block_type" :  34,
     "usual_block_type"  :  33,
     "pickup_block_type" :  32,
+
+    "special_pipuck"    :  "pipuck10",
 }
 
 parameters_txt = generateParametersText(parameters)

@@ -29,6 +29,7 @@ center_block_type = tonumber(robot.params.center_block_type)
 usual_block_type = tonumber(robot.params.usual_block_type)
 pickup_block_type = tonumber(robot.params.pickup_block_type)
 
+special_pipuck = robot.params.special_pipuck
 
 local structure1 = require("morphology1")
 local structure2 = require("morphology2")
@@ -73,20 +74,20 @@ function reset()
 
 	state = "consensus"
 
-	if robot.id == "pipuck10" then
+	if robot.id == special_pipuck then
 		setup_push_node(vns)
 		setup_wait_to_push_node(vns)
 	end
 end
 
 function step()
-	logger(robot.id, api.stepCount, robot.system.time, "----------------------------")
+	logger(robot.id, api.stepCount, robot.system.time, state, substate, "----------------------------")
 	api.preStep()
 	vns.preStep(vns)
 
 	bt()
 
-	if robot.id == "pipuck10" then
+	if robot.id == special_pipuck then
 		vns.Learner.spreadKnowledge(vns, "push_node", vns.learner.knowledges["push_node"])
 		vns.Learner.spreadKnowledge(vns, "wait_to_push_node", vns.learner.knowledges["wait_to_push_node"])
 	end
@@ -138,6 +139,8 @@ return function()
 		vns.api.debug.drawRing("black", vector3(0,0,0.15 + 0.06 * i), 0.04, true)
 	end
 
+	logger("type_number = ", type_number)
+
 	-- send to neighbour pipucks
 	for id, robot in pairs(vns.connector.seenRobots) do
 		if robot.positionV3:length() < range then
@@ -176,7 +179,7 @@ return function()
 	end end
 
 	local range = 0.7
-	if state == "consensus" and vns.parentR == nil and robot.id ~= "pipuck10" then
+	if state == "consensus" and vns.parentR == nil and robot.id ~= special_pipuck then
 		vns.Parameters.avoider_brain_exception = false
 		vns.Parameters.dangerzone_block = 0.2
 		local desired_distance = 0.5
