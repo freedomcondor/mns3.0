@@ -64,16 +64,23 @@ obstacle_xml += generate_obstacle_xml(2, 1.5, -0.7, 0, 30)
 obstacle_xml += generate_obstacle_xml(3, 3, -0.7, 0, 30)
 
 parameters = {
+    "drone_real_noise"  :  "true",
+    "drone_tag_detection_rate"  : 0.95,
+    "drone_report_sight_rate"   : 0.8,
+
     "mode_2D"           :  "true",
     "mode_builderbot"   :  "true",
+
     "pipuck_label"      :  "1, 10",
     "builderbot_label"  :  "11, 15",
     "block_label"       :  "30, 34",
+
     "driver_stop_zone"  :  0.01,
+    "driver_arrive_zone" : 0.1,
+
     "avoid_block_vortex"  :  "nil",
     "dangerzone_pipuck" :  0.20,
     "dangerzone_block"  :  0.20,
-    "driver_arrive_zone" : 0.1,
 
     "line_block_type"      :  34,
     "obstacle_block_type"  :  33,

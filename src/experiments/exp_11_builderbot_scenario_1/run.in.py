@@ -56,11 +56,17 @@ block_xml = generate_block_xml(1, 1, 0, 0, 34) + block_xml
 #block_xml = generate_block_xml(2, 1, 1, 0, 32) + block_xml
 
 parameters = {
+    "drone_real_noise"  :  "true",
+    "drone_tag_detection_rate"  : 0.95,
+    "drone_report_sight_rate"   : 0.8,
+
     "mode_2D"            :  "true",
     "mode_builderbot"    :  "true",
+
     "pipuck_label"       :  "1, 10",
     "builderbot_label"   :  "11, 15",
     "block_label"        :  "30, 34",
+
     "driver_stop_zone"   :  0.01,
     "avoid_block_vortex" :  "nil",
     "dangerzone_pipuck"  :  0.25,
