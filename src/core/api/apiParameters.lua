@@ -8,6 +8,7 @@ local Parameters = {
 	report_sight_rounds = tonumber(robot.params.report_sight_rounds or 1),
 	-- tag detection rate
 	droneTagDetectionRate = tonumber(robot.params.drone_tag_detection_rate or 0.9),
+	droneReportSightRate = tonumber(robot.params.drone_report_sight_rate or 0.9),
 	-- altitude control -------
 	droneAltitudeBias = tonumber(robot.params.drone_altitude_bias or 0.2),
 	droneAltitudeNoise = tonumber(robot.params.drone_altitude_noise or 0.1),

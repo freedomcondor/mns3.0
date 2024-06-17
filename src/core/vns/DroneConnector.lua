@@ -44,8 +44,19 @@ function DroneConnector.step(vns)
 	)
 
 	-- broadcast my sight so other drones would see me
-	local myRobotRT = DeepCopy(vns.connector.seenRobots)
-	vns.Msg.send("ALLMSG", "reportSight", {mySight = myRobotRT, myObstacles = seenObstacles, myBlocks = seenBlocks})
+	local report_flag = true
+	if robot.params.simulation == true and vns.api.parameters.droneRealNoise == true then
+		local random = robot.random.uniform()
+		if random > vns.api.parameters.droneReportSightRate then
+			print("do not send report sight")
+			report_flag = false
+		end
+	end
+
+	if report_flag == true then
+		local myRobotRT = DeepCopy(vns.connector.seenRobots)
+		vns.Msg.send("ALLMSG", "reportSight", {mySight = myRobotRT, myObstacles = seenObstacles, myBlocks = seenBlocks})
+	end
 
 	-- Add seenThrough tag for direct seen robots
 	for idS, robotR in pairs(vns.connector.seenRobots) do
