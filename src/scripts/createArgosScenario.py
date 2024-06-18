@@ -221,6 +221,26 @@ def generate_physics_media_loop_visualization(cmake_binary_dir, lua_editor=False
 
 #######################################################################
 # real lab scenario
+def generate_builderbot_real_scenario_object() :
+    if Visualization == False :
+        return ""
+    text = '''
+    <box id="south_arena" size="0.02,1.50,0.10" movable="false" mass="10">
+      <body position="-0.975,0,0"  orientation="0,0,0" />
+    </box>
+    <box id="north_arena" size="0.02,1.50,0.10" movable="false" mass="10">
+      <body position="0.975,0,0"  orientation="0,0,0" />
+    </box>
+    <box id="west_arena" size="1.95,0.02,0.10" movable="false" mass="10">
+      <body position="0, 0.75,0"  orientation="0,0,0" />
+    </box>
+    <box id="east_arena" size="1.95,0.02,0.10" movable="false" mass="10">
+      <body position="0, -0.75,0"  orientation="0,0,0" />
+    </box>
+    '''
+    return text
+
+
 def generate_real_scenario_object() :
     if Visualization == False :
         return ""

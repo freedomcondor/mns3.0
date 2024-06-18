@@ -5,7 +5,7 @@
   <!-- * General configuration * -->
   <!-- ************************* -->
   <framework>
-    <experiment length="0" ticks_per_second="3" />
+    <experiment length="0" ticks_per_second="5" />
   </framework>
   
   <!-- *************** -->
@@ -24,6 +24,10 @@
         <radios implementation="default" />
         <drone_cameras_system implementation="default">
           <!--
+                  capture_resolution="1024,768"
+                  processing_resolution="700,700"
+                  processing_offset="162,34"
+
                   # for smaller tag
                   tag_family="tag25h9"
                   tag_side_length="0.0385"
@@ -38,11 +42,11 @@
           <camera id="arm0"
                   device="/dev/camera0" 
 
-                  calibration="/home/root/calibration/drone_camera_calibration_arm0.xml"
+                  calibration="/home/root/calibration/drone_camera_calibration_arm0_single_camera.xml"
 
                   capture_resolution="1024,768"
-                  processing_resolution="700,700"
-                  processing_offset="162,34"
+                  processing_resolution="1024,768"
+                  processing_offset="0,0"
 
                   tag_family="tag25h9"
                   tag_side_length="0.0385"
@@ -50,8 +54,10 @@
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
                   camera_exposure_absolute_time="39"
+
+                  save_as="/media/usb/"
           />
-          <camera id="arm1"
+          <!--camera id="arm1"
                   device="/dev/camera1" 
 
                   calibration="/home/root/calibration/drone_camera_calibration_arm1.xml"
@@ -66,6 +72,8 @@
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
                   camera_exposure_absolute_time="39"
+
+                  save_as="/media/usb/"
           />
           <camera id="arm2"
                   device="/dev/camera3" 
@@ -82,6 +90,8 @@
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
                   camera_exposure_absolute_time="39"
+
+                  save_as="/media/usb/"
           />
           <camera id="arm3"
                   device="/dev/camera2" 
@@ -98,7 +108,9 @@
                   camera_brightness="15"
                   camera_exposure_auto_mode="false"
                   camera_exposure_absolute_time="39"
-          />
+
+                  save_as="/media/usb/"
+          /-->
         </drone_cameras_system>
       </sensors>
       <params 
