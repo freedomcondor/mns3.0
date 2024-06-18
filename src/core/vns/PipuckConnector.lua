@@ -8,15 +8,18 @@ local SensorUpdater = require("SensorUpdater")
 
 function PipuckConnector.preStep(vns)
 	vns.connector.seenRobots = {}
+	vns.connector.pipuckReportSightCountDown = vns.Parameters.connector_pipuck_report_sight_count_down
 end
 
 function PipuckConnector.step(vns)
 	local seenObstacles = {}
 	local seenBlocks = {}
 
+	local valid_report_flag = false
 	-- For any sight report, update quadcopter and other pipucks to seenRobots
 	for _, msgM in ipairs(vns.Msg.getAM("ALLMSG", "reportSight")) do
 		if msgM.dataT.mySight[vns.Msg.myIDS()] ~= nil then
+			valid_report_flag = true
 			-- I'm seen in this report sight, add this drone into seenRobots
 			local common = msgM.dataT.mySight[vns.Msg.myIDS()]
 			local quad = {
@@ -116,18 +119,29 @@ function PipuckConnector.step(vns)
 
 	SensorUpdater.updateObstacles(vns, seenObstaclesInVirtualFrame, vns.avoider.obstacles)
 
-	-- convert blocks from real frame into virtual frame
-	local seenBlocksInVirtualFrame = {}
-	for i, v in ipairs(seenBlocks) do
-		seenBlocksInVirtualFrame[i] = {
-			robotTypeS = v.robotTypeS,
-			type = v.type,
-			positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
-			orientationQ = vns.api.virtualFrame.Q_RtoV(v.orientationQ),
-		}
-	end
+	-- if no valid report, keep blocks for a while before forget
+	if valid_report_flag == false then
+		vns.connector.pipuckReportSightCountDown = vns.connector.pipuckReportSightCountDown - 1
+		if vns.connector.pipuckReportSightCountDown < 0 then
+			vns.avoider.blocks = {}
+		end
+	else
+	-- valid report, update blocks
+		vns.connector.pipuckReportSightCountDown = vns.Parameters.connector_pipuck_report_sight_count_down
 
-	vns.avoider.blocks = seenBlocksInVirtualFrame
+		-- convert blocks from real frame into virtual frame
+		local seenBlocksInVirtualFrame = {}
+		for i, v in ipairs(seenBlocks) do
+			seenBlocksInVirtualFrame[i] = {
+				robotTypeS = v.robotTypeS,
+				type = v.type,
+				positionV3 = vns.api.virtualFrame.V3_RtoV(v.positionV3),
+				orientationQ = vns.api.virtualFrame.Q_RtoV(v.orientationQ),
+			}
+		end
+
+		vns.avoider.blocks = seenBlocksInVirtualFrame
+	end
 
 	--[[ draw obstacles
 	for i, ob in ipairs(vns.avoider.obstacles) do

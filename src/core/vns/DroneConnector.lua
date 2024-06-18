@@ -45,6 +45,7 @@ function DroneConnector.step(vns)
 
 	-- broadcast my sight so other drones would see me
 	local report_flag = true
+	-- simulate async in reality, so there is a change that I do not send report sight
 	if robot.params.simulation == true and vns.api.parameters.droneRealNoise == true then
 		local random = robot.random.uniform()
 		if random > vns.api.parameters.droneReportSightRate then

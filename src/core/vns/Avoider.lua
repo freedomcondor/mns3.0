@@ -11,6 +11,7 @@ end
 function Avoider.reset(vns)
 	vns.avoider.obstacles = {}
 	vns.avoider.aerial_obstacles = {}
+	vns.avoider.blocks = {}
 end
 
 function Avoider.preStep(vns)

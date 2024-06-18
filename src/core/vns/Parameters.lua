@@ -82,6 +82,8 @@ return {
 		-- robots disconnect after this steps after losing visual of a robot
 	connector_heartbeat_count = tonumber(robot.params.connector_heartbeat_count or 3),
 		-- robots disconnect after this steps after stop receiving hearbeat from a neighbour (parent + children)
+	connector_pipuck_report_sight_count_down = tonumber(robot.params.connector_pipuck_report_sight_count_down or 5),
+		-- pipuck forgets blocks after this number of step without receiving sight report
 
 	brainkeeper_time = tonumber(robot.params.brainkeeper_time or 100), 
 
