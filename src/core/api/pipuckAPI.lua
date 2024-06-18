@@ -79,7 +79,7 @@ function api.pipuckSetWheelSpeed(x, y)
 	elseif th < -math.pi / 4 then
 		th = -math.pi / 4
 	end
-	api.virtualFrame.rotateInSpeed(vector3(0,0,1) * (-th))
+	--api.virtualFrame.rotateInSpeed(vector3(0,0,1) * (-th))
 end
 
 function api.pipuckSetRotationSpeed(x, th)
