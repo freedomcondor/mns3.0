@@ -10,13 +10,13 @@ parameters = {
     "block_label"        :  "30, 34",
 
     "avoid_block_vortex"   :  "nil",
-    "avoid_speed_scalar"   :  0.15,
+    "avoid_speed_scalar"   :  0.20,
     "driver_slowdown_zone" :  0.15,
     "driver_stop_zone"     :  0.03,
-    "driver_default_speed" : 0.02,
+    "driver_default_speed" : 0.03,
 
-    "dangerzone_pipuck"  :  0.25,
-    "dangerzone_block"   :  0.25,
+    "dangerzone_pipuck"  :  0.20,
+    "dangerzone_block"   :  0.20,
 
     "center_block_type"  :  32,
     "usual_block_type"   :  34,
@@ -27,7 +27,7 @@ parameters = {
     "connector_unseen_count"           : 10,
     "connector_heartbeat_count"        : 8,
 
-    "pipuck_wheel_speed_limit"   :  0.05,
+    "pipuck_wheel_speed_limit"   :  0.10,
 
     "special_pipuck"    :  "pipuck5",
 }

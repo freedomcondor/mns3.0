@@ -28,7 +28,7 @@ function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, 
 	end
 end
 
-local n = 4
+local n = 3
 local Q1 = quaternion(math.pi/(n+1), vector3(0,0,1))
 local half_Q1 = quaternion(math.pi/(n+1)/2, vector3(0,0,1))
 local Q2 = quaternion(-math.pi/(n+1), vector3(0,0,1))

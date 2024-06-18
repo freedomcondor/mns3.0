@@ -73,6 +73,12 @@ end
 
 function step()
 	logger(robot.id, api.stepCount, robot.system.time, state, substate, "----------------------------")
+	if vns.allocator.target ~= nil then
+		logger("target.idN = ", vns.allocator.target.idN, "mission = ", vns.allocator.target.mission)
+	end
+	if vns.parentR ~= nil then
+		logger("parent = ", vns.parentR.idS)
+	end
 	api.preStep()
 	vns.preStep(vns)
 
@@ -82,6 +88,12 @@ function step()
 	api.postStep()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
+
+	logger("virtual X = ", vector3(1,0,0):rotate(api.virtualFrame.orientationQ))
+	logger("goal = ")
+	logger(vns.goal)
+	logger("reportsightCountDown = ", vns.connector.pipuckReportSightCountDown)
+	logger("vns.avoider.blocks = ", #vns.avoider.blocks)
 end
 
 function destroy()
@@ -242,6 +254,10 @@ return function()
 		end end
 		if reference ~= nil then
 			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference.positionV3), true)
+			logger("reference block position: = ", reference.positionV3)
+			logger("reference block direction : X = ", vector3(1,0,0):rotate(reference.orientationQ))
+			logger("reference block direction : Y = ", vector3(0,1,0):rotate(reference.orientationQ))
+			logger("reference block direction : Z = ", vector3(0,0,1):rotate(reference.orientationQ))
 
 			-- find a target
 			local target = nil
@@ -260,6 +276,10 @@ return function()
 
 			if target ~= nil then
 				vns.api.debug.drawArrow("black", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(target.positionV3), true)
+				logger("target block position: = ", target.positionV3)
+				logger("target block direction : X = ", vector3(1,0,0):rotate(target.orientationQ))
+				logger("target block direction : Y = ", vector3(0,1,0):rotate(target.orientationQ))
+				logger("target block direction : Z = ", vector3(0,0,1):rotate(target.orientationQ))
 
 				if substate == "go_to_anchor" then
 					vns.Parameters.dangerzone_block = dangezone_block_backup
@@ -276,13 +296,17 @@ return function()
 					local anchor_point = target.positionV3 - vector3(0,1,0):rotate(reference.orientationQ) * 0.5
 					vns.api.debug.drawArrow("0,255,255,0", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(anchor_point), true)
 					vns.setGoal(vns, anchor_point, quaternion())
-					if target.positionV3:dot(reference.positionV3) < 0 then
+
+					local offset = vector3(0,-1,0):rotate(reference.orientationQ) * 0.1
+					if (target.positionV3 + offset):dot(reference.positionV3) < 0 then
 						substate = "go_to_anchor"
 					end
 				end
 			else
 				vns.Parameters.dangerzone_block = dangezone_block_backup
 			end
+		else
+			vns.setGoal(vns, vector3(), quaternion())
 		end
 	end
 

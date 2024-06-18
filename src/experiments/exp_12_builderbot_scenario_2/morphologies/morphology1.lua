@@ -1,4 +1,4 @@
-local dis = 0.4
+local dis = 0.3
 local height = 1.7
 return 
 {	robotTypeS = "pipuck",

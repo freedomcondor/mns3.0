@@ -91,6 +91,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
 
         ["ARENA_SIZE",        str(arena_size)],
         ["ARENA_Z_CENTER",    str(arena_z_center)],
+        ["REAL_SCENARIO",     generate_builderbot_real_scenario_object()],
 
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
