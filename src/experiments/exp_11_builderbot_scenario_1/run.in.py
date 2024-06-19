@@ -60,8 +60,8 @@ block_xml = generate_block_xml(1, 0, 0, 0, 34) + block_xml
 
 parameters = {
     "drone_real_noise"  :  "true",
-    "drone_tag_detection_rate"  : 1.00,
-    "drone_report_sight_rate"   : 0.8,
+    "drone_tag_detection_rate"  : 0.90,
+    "drone_report_sight_rate"   : 0.9,
 
     "mode_2D"            :  "true",
     "mode_builderbot"    :  "true",
@@ -106,7 +106,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["BLOCKS",            block_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters_txt, {"show_frustum":True, "show_tag_rays":True})],
+        ''' + parameters_txt, {"show_frustum":False, "show_tag_rays":False})],
         ["PIPUCK_CONTROLLER", generate_pipuck_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/pipuck.lua"
         ''' + parameters_txt)],

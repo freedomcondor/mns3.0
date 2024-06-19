@@ -37,6 +37,17 @@ function DroneConnector.step(vns)
 		seenBlocks
 	)
 
+	SensorUpdater.updateObstacles(vns, seenBlocks, vns.avoider.memoryBlocksInRealFrame)
+
+	for id, block in ipairs(seenBlocks) do
+		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(0,0,0.1), block.positionV3 + vector3(0,0,0.1),
+		 0.01, 0.015, 1, true)
+	end
+	for id, block in pairs(vns.avoider.memoryBlocksInRealFrame) do
+		vns.api.debug.drawCustomizeArrow("255,0,255", vector3(0,0,0), block.positionV3,
+		 0.01, 0.015, 1, true)
+	end
+
 	-- add rangefinder into aerial obstacles
 	local rangefinderAerialObstacles = {}
 	vns.api.droneAddAerialObstacles(
@@ -56,7 +67,8 @@ function DroneConnector.step(vns)
 
 	if report_flag == true then
 		local myRobotRT = DeepCopy(vns.connector.seenRobots)
-		vns.Msg.send("ALLMSG", "reportSight", {mySight = myRobotRT, myObstacles = seenObstacles, myBlocks = seenBlocks})
+		local myBlockRT = DeepCopy(vns.avoider.memoryBlocksInRealFrame)
+		vns.Msg.send("ALLMSG", "reportSight", {mySight = myRobotRT, myObstacles = seenObstacles, myBlocks = myBlockRT})
 	end
 
 	-- Add seenThrough tag for direct seen robots
@@ -211,7 +223,7 @@ function DroneConnector.step(vns)
 
 	-- convert blocks from real frame into virtual frame
 	local seenBlocksInVirtualFrame = {}
-	for i, v in ipairs(seenBlocks) do
+	for i, v in ipairs(vns.avoider.memoryBlocksInRealFrame) do
 		seenBlocksInVirtualFrame[i] = {
 			robotTypeS = v.robotTypeS,
 			type = v.type,

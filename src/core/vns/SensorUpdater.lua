@@ -3,8 +3,8 @@ local Transform = require("Transform")
 local SensorUpdater = {}
 
 function SensorUpdater.updateObstacles(vns, seenObstacles, memObstacles)
-	vns.avoider.seenObstacles = seenObstacles
-	local offset = {positionV3 = vns.api.estimateLocation.positionV3, orientationQ = vns.api.estimateLocation.orientationQ}
+	--local offset = {positionV3 = vns.api.estimateLocation.positionV3, orientationQ = vns.api.estimateLocation.orientationQ}
+	local offset = {positionV3 = vector3(), orientationQ = quaternion()}
 	-- match seenObstacles TODO: hungarian
 	for i, seenOb in ipairs(seenObstacles) do
 		local nearestDis = math.huge
@@ -27,7 +27,7 @@ function SensorUpdater.updateObstacles(vns, seenObstacles, memObstacles)
 		else
 			-- Update nearestOb
 			-- TODO : better log offset (average)
-			Transform.CxBisA(seenOb, nearestOb, offset)
+			--Transform.CxBisA(seenOb, nearestOb, offset)
 			nearestOb.positionV3 = seenOb.positionV3
 			nearestOb.orientationQ = seenOb.orientationQ
 			nearestOb.matched = true
@@ -65,7 +65,6 @@ function SensorUpdater.updateObstacles(vns, seenObstacles, memObstacles)
 end
 
 function SensorUpdater.updateObstaclesByRealFrame(vns, seenObstacles, memObstacles)
-	vns.avoider.seenObstacles = seenObstacles
 	--local offset = {positionV3 = vns.api.estimateLocation.positionV3, orientationQ = vns.api.estimateLocation.orientationQ}
 	local offset = {positionV3 = vector3(), orientationQ = quaternion()}
 	-- match seenObstacles TODO: hungarian
