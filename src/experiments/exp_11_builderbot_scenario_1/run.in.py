@@ -20,44 +20,47 @@ if Experiment_type != "no_builderbot" and Experiment_type != "builderbot" :
     print("wrong experiment type provided, please choose no_builderbot or builderbot")
     exit()
 
-n_pipuck = 8
-n_drone = 3
-n_block = 5
 arena_size = 50
 arena_z_center = 10
 
-pipuck_locations = generate_random_locations(n_pipuck,
-                                             0, 0,       # origin
-                                             -3, 0,    # random x
-                                             -3, 3,    # random y
-                                             0.3, 0.5,   # near limit and far limit
-                                             10000)      # attempt count
+drone_xml  = generate_drone_xml(1, -0.4, 0, 1.7, 90, 10, True)  # from label 1 generate drone xml tags, communication range 10
+drone_xml += generate_drone_xml(2, 0.4, 0, 1.7, 90, 10, True)  # from label 1 generate drone xml tags, communication range 10
 
-drone_locations = generate_random_locations(n_drone,
-                                             0, 0,       # origin
-                                             -3, 3,    # random x
-                                             -3, 3,    # random y
-                                             0.3, 0.5,   # near limit and far limit
-                                             10000)      # attempt count
+pipuck_locations = [
+    [-0.75, 0.6],
+    [-0.75, 0.3],
+    [-0.75, 0.05],
+    [-0.75,-0.3],
+#    [-0.75,-0.6],
+#    [-0.45, 0.6],
+#    [-0.45, 0.3],
+#    [-0.45, 0.03  ],
+#    [-0.45,-0.3],
+#    [-0.45,-0.6],
+]
 
-block_locations = generate_random_locations(n_block,
-                                            0, 0,       # origin
-                                            0, 10,    # random x
-                                            -2, 2,    # random y
-                                            0.7, 1.0,   # near limit and far limit
-                                            10000)      # attempt count
+pipuck_xml = generate_pipuck_xml(10, 0.8, -0.3, 0) + generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 
-pipuck_xml = generate_pipuck_xml(10, 2, 0, 0) + generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
-drone_xml = generate_drones(drone_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
-builderbot_xml = generate_builderbot_xml(11, 2, 0.3, 0)
+builderbot_xml = generate_builderbot_xml(11, 0.8, 0.3, 0)
 
-block_xml = generate_blocks(block_locations, 3, 33)  # from label 2 generate drone xml tags, type
-block_xml = generate_block_xml(1, 1, 0, 0, 34) + block_xml
+block_locations = [
+    [-0.15, 0.4],
+    [0.25, 0.2],
+    [0.35,-0.2],
+    [-0.15,-0.4],
+#    [ 0.15, 0.6],
+#    [ 0.15, 0.2],
+#    [ 0.15,-0.2],
+#    [ 0.15,-0.6],
+]
+
+block_xml = generate_blocks(block_locations, 3, 33)  # from label 3 generate drone xml tags, type
+block_xml = generate_block_xml(1, 0, 0, 0, 34) + block_xml
 #block_xml = generate_block_xml(2, 1, 1, 0, 32) + block_xml
 
 parameters = {
     "drone_real_noise"  :  "true",
-    "drone_tag_detection_rate"  : 0.95,
+    "drone_tag_detection_rate"  : 1.00,
     "drone_report_sight_rate"   : 0.8,
 
     "mode_2D"            :  "true",
@@ -67,8 +70,12 @@ parameters = {
     "builderbot_label"   :  "11, 15",
     "block_label"        :  "30, 34",
 
-    "driver_stop_zone"   :  0.01,
-    "avoid_block_vortex" :  "nil",
+    "avoid_block_vortex"   :  "nil",
+#    "avoid_speed_scalar"   :  0.20,
+    "driver_slowdown_zone" :  0.15,
+    "driver_stop_zone"     :  0.03,
+    "driver_default_speed" : 0.03,
+
     "dangerzone_pipuck"  :  0.25,
     "dangerzone_block"   :  0.25,
 
@@ -99,7 +106,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["BLOCKS",            block_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters_txt)],
+        ''' + parameters_txt, {"show_frustum":True, "show_tag_rays":True})],
         ["PIPUCK_CONTROLLER", generate_pipuck_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/pipuck.lua"
         ''' + parameters_txt)],

@@ -23,7 +23,8 @@ stateCount = 0
 --local type_number_in_memory = 0
 type_number_in_memory = 0
 
-dangezone_block_backup = VNS.Parameters.dangerzone_block
+--dangezone_block_backup = VNS.Parameters.dangerzone_block
+dangezone_block_backup = 0.30
 
 center_block_type = tonumber(robot.params.center_block_type)
 usual_block_type = tonumber(robot.params.usual_block_type)
@@ -67,7 +68,8 @@ function reset()
 			{type = "selector", children = {
 				create_navigation_node(vns),
 				vns.Learner.create_knowledge_node(vns, "wait_to_push_node"),
-				vns.Learner.create_knowledge_node(vns, "push_node"),
+--				vns.Learner.create_knowledge_node(vns, "push_node"),
+				create_push_node(vns),
 			}}
 		}}
 	}))
@@ -75,7 +77,7 @@ function reset()
 	state = "consensus"
 
 	if robot.id == special_pipuck then
-		setup_push_node(vns)
+		--setup_push_node(vns)
 		setup_wait_to_push_node(vns)
 	end
 end
@@ -96,6 +98,11 @@ function step()
 	api.postStep()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
+
+	for id, block in ipairs(vns.avoider.blocks) do
+		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(), vns.api.virtualFrame.V3_VtoR(block.positionV3),
+		 0.01, 0.015, 1, true)
+	end
 end
 
 function destroy()
@@ -163,10 +170,12 @@ function create_navigation_node(vns)
 	local function newState(vns, _newState, _newSubstate)
 		stateCount = 0
 		state = _newState
-		substate = _newSubstate
+		if _newSubstate ~= "KEEP" then
+			substate = _newSubstate
+		end
 	end
 
-	local function switchAndSendNewState(vns, _newState, _newSubstate)
+	function switchAndSendNewState(vns, _newState, _newSubstate)
 		newState(vns, _newState, _newSubstate)
 		sendChilrenNewState(vns, _newState, _newSubstate)
 	end
@@ -182,15 +191,23 @@ return function()
 	if state == "consensus" and vns.parentR == nil and robot.id ~= special_pipuck then
 		vns.Parameters.avoider_brain_exception = false
 		vns.Parameters.dangerzone_block = 0.2
-		local desired_distance = 0.5
+		local desired_distance = 0.4
 
+		-- check special block to find direction
+		local center_block = nil
+		for id, block in pairs(vns.avoider.blocks) do if block.type == center_block_type then
+			center_block = block
+		end end
+		if center_block ~= nil then
+			vns.setGoal(vns, vector3(), center_block.orientationQ)
+		end
 		vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
 
 		for id, robot in pairs(vns.connector.seenRobots) do
 			if robot.positionV3:length() < range then
 				local dir = vector3(robot.positionV3):normalize()
 				local speed = (robot.positionV3:length() - desired_distance) * 0.03
-				if speed > 0.03 then speed = 0.03 end
+				--if speed > 0.03 then speed = 0.03 end
 				local velocity = dir * speed
 				vns.Spreader.emergency_after_core(vns, velocity, vector3())
 				--vns.api.debug.drawArrow("blue", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(robot.positionV3), true)
@@ -226,7 +243,7 @@ return function()
 		if center ~= nil then
 			local dir = vector3(-center.positionV3):normalize()
 			local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
-			vns.setGoal(vns, center.positionV3 + dir * 0.7, ori)
+			vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
 		end
 	elseif state == "start_push" then
 		return false, false
@@ -242,8 +259,11 @@ function setup_wait_to_push_node(vns)
 	]]}
 end
 
-function setup_push_node(vns)
-	vns.learner.knowledges["push_node"] = {hash = 1, rank = 1, node = [[
+--function setup_push_node(vns)
+--	vns.learner.knowledges["push_node"] = {hash = 1, rank = 1, node = [[
+
+function create_push_node(vns)
+return
 
 	function()
 		-- get center block
@@ -257,24 +277,43 @@ function setup_push_node(vns)
 			if vns.parentR == nil then
 				local dir = vector3(-center.positionV3):normalize()
 				local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
-				vns.setGoal(vns, center.positionV3 + dir * 0.7, ori)
+				vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
+				switchAndSendNewState(vns, "start_push", "KEEP")
 				return false, true
 			end
-			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(center.positionV3), true)	
+			vns.api.debug.drawCustomizeArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(center.positionV3),
+			                                 0.01, 0.015, 1, true)
 			-- choose a target
 			local mini_dis = math.huge
 			local target = nil
 			-- iterate all type usual_block_type blocks that are far away from the center
-			for id, block in pairs(vns.avoider.blocks) do if block.type == usual_block_type and (block.positionV3 - center.positionV3):length() > 0.3 then
+			local threshold = 0.3
+			if substate == "push" then threshold = 0.15 end
+			for id, block in pairs(vns.avoider.blocks) do if block.type == usual_block_type and (block.positionV3 - center.positionV3):length() > threshold then
 				local there_is_a_robot_better_than_me = false
-				for id, robot in pairs(vns.connector.seenRobots) do
-					if robot.robotTypeS == "pipuck" and 
-					   robot.idS ~= vns.idS and  -- brain is not included
-					   (robot.positionV3 - block.positionV3):length() < (block.positionV3):length() then
-						there_is_a_robot_better_than_me = true
-						break
+				for id, robotR in pairs(vns.connector.seenRobotsInMemory) do
+					if robotR.robotTypeS == "pipuck" and 
+					   robotR.idS ~= vns.idS then  -- brain is not included
+						local _, myIdNumber = string.match(robot.id, "(%a+)(%d+)")
+						local _, hisIdNumber = string.match(robotR.idS, "(%a+)(%d+)")
+						myIdNumber = tonumber(myIdNumber)
+						hisIdNumber = tonumber(hisIdNumber)
+						print("my:  ", robot.id, myIdNumber)
+						print("his: ", robotR.idS, hisIdNumber)
+						print("hisDis: ", (robotR.positionV3 - block.positionV3):length())
+						print("myDis: ", (block.positionV3):length())
+						local hisDis_myDis = (robotR.positionV3 - block.positionV3):length() - (block.positionV3):length()
+						print("hisDis_myDis: ", hisDis_myDis)
+						local threshold = 0.1
+						--if hisDis_myDis < -threshold or
+						--   (-threshold <= hisDis_myDis and hisDis_myDis <= threshold and hisIdNumber > myIdNumber) then
+						if hisDis_myDis < -threshold then
+							there_is_a_robot_better_than_me = true
+							break
+						end
 					end
 				end
+				print("there_is_a_robot_better_than_me: ", there_is_a_robot_better_than_me)
 				if there_is_a_robot_better_than_me == false and
 				   block.positionV3:length() < mini_dis then
 					mini_dis = block.positionV3:length()
@@ -321,5 +360,5 @@ function setup_push_node(vns)
 		return false, true
 	end
 
-	]]}
+--	]]}
 end
