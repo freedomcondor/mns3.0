@@ -10,6 +10,7 @@ local Parameters = {
 	droneTagDetectionRate = tonumber(robot.params.drone_tag_detection_rate or 0.9),
 	droneReportSightRate = tonumber(robot.params.drone_report_sight_rate or 0.9),
 	droneTagDetectionError = tonumber(robot.params.drone_tag_detection_error or 0.03),
+	droneTagDetectionPixelOrientation = robot.params.drone_tag_detection_pixel_orientation or "false",
 	-- altitude control -------
 	droneAltitudeBias = tonumber(robot.params.drone_altitude_bias or 0.2),
 	droneAltitudeNoise = tonumber(robot.params.drone_altitude_noise or 0.1),
@@ -58,6 +59,12 @@ if Parameters.droneTiltSensor== "true" then
 	Parameters.droneTiltSensor = true
 else
 	Parameters.droneTiltSensor = false
+end
+
+if Parameters.droneTagDetectionPixelOrientation == "true" then
+	Parameters.droneTagDetectionPixelOrientation = true
+else
+	Parameters.droneTagDetectionPixelOrientation = false
 end
 
 return Parameters

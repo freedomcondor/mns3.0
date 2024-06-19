@@ -428,6 +428,18 @@ function api.droneDetectLeds()
 	end
 end
 
+function api.calcOrientationByPixel(tag)
+	print("calc Pixel orientation")
+	local X = (vector3(tag.corners[2].x - tag.corners[1].x ,
+	                   tag.corners[2].y - tag.corners[1].y ,
+	                   0) +
+	           vector3(tag.corners[3].x - tag.corners[4].x ,
+	                   tag.corners[3].y - tag.corners[4].y ,
+	                   0)
+              ):normalize()
+	local Z = vector3(0,0,1)
+	return Transform.fromTo2VecQuaternion(vector3(1,0,0), X, vector3(0,0,1), Z)
+end
 
 function api.droneDetectTags(option)
 	if option == nil then option = {} end
@@ -440,6 +452,9 @@ function api.droneDetectTags(option)
 	local tags = {}
 	for _, camera in pairs(robot.cameras_system) do
 		for _, newTag in ipairs(camera.tags) do
+			if api.parameters.droneTagDetectionPixelOrientation == true then
+				newTag.orientation = api.calcOrientationByPixel(newTag)
+			end
 			local positionV3 =
 			  (
 			    camera.transform.position +

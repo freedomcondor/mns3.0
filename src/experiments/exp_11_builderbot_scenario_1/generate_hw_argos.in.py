@@ -3,6 +3,7 @@ createArgosFileName = "@CMAKE_SOURCE_DIR@/scripts/createArgosScenario.py"
 exec(compile(open(createArgosFileName, "rb").read(), createArgosFileName, 'exec'))
 
 parameters = {
+    "drone_tag_detection_pixel_orientation" : "true",
     "mode_2D"            :  "true",
     "mode_builderbot"    :  "true",
     "pipuck_label"       :  "1, 10",
