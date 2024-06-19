@@ -57,6 +57,12 @@ function DroneRealistSimulator.changeTagSensor(api)
 	for _, camera in pairs(robot.cameras_system) do
 		local i = 1
 		while i <= #camera.tags do
+			local error = api.parameters.droneTagDetectionError
+			local X = (robot.random.uniform() - 0.5) * 2 * error
+			local Y = (robot.random.uniform() - 0.5) * 2 * error
+			local Z = (robot.random.uniform() - 0.5) * 2 * error
+
+			camera.tags[i].position = camera.tags[i].position + vector3(X, Y, Z)
 			local random = robot.random.uniform()
 			if random > api.parameters.droneTagDetectionRate then
 				camera.tags[i] = camera.tags[#camera.tags]
