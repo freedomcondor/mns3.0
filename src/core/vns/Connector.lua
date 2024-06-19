@@ -2,6 +2,8 @@
 ------------------------------------------------------
 local Connector = {}
 
+require("DeepCopy")
+
 --[[
 	related data:
 	vns.connector = {
@@ -27,6 +29,7 @@ function Connector.reset(vns)
 	vns.connector.waitingRobots = {}
 	vns.connector.waitingParents = {}
 	vns.connector.seenRobots = {}
+	vns.connector.seenRobotsInMemory = {}
 	vns.connector.locker_count = 0
 	vns.connector.lastid = {}
 end
@@ -121,6 +124,9 @@ function Connector.update(vns)
 		vns.parentR.connector.unseen_count = vns.parentR.connector.unseen_count - 1
 		vns.parentR.connector.heartbeat_count = vns.parentR.connector.heartbeat_count - 1
 	end
+	for idS, robotR in pairs(vns.connector.seenRobotsInMemory) do
+		robotR.connector.unseen_count = robotR.connector.unseen_count - 1
+	end
 	
 	-- update waiting list
 	for idS, robotR in pairs(vns.connector.seenRobots) do
@@ -149,6 +155,20 @@ function Connector.update(vns)
 		vns.parentR.connector.unseen_count = vns.Parameters.connector_unseen_count
 	end
 
+	-- update robots in memory
+	for idS, robotR in pairs(vns.connector.seenRobots) do
+		if vns.connector.seenRobotsInMemory[idS] == nil then
+			vns.connector.seenRobotsInMemory[idS] = DeepCopy(robotR)
+			vns.connector.seenRobotsInMemory[idS].connector = {
+				unseen_count = vns.Parameters.connector_unseen_count,
+			}
+		else
+			vns.connector.seenRobotsInMemory[idS].positionV3 = robotR.positionV3
+			vns.connector.seenRobotsInMemory[idS].orientationQ = robotR.orientationQ
+			vns.connector.seenRobotsInMemory[idS].connector.unseen_count = vns.Parameters.connector_unseen_count
+		end
+	end
+
 	-- check heartbeat
 	for idS, robotR in pairs(vns.childrenRT) do
 		for _, msgM in ipairs(vns.Msg.getAM(idS, "heartbeat")) do
@@ -173,6 +193,13 @@ function Connector.update(vns)
 		Connector.newVnsID(vns)
 		vns.deleteParent(vns)
 		vns.resetMorphology(vns)
+	end
+
+	-- check memory to forget
+	for idS, robotR in pairs(vns.connector.seenRobotsInMemory) do
+		if robotR.connector.unseen_count == 0 then
+			vns.connector.seenRobotsInMemory[idS] = nil
+		end
 	end
 
 	-- check locker
