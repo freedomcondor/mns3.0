@@ -6,9 +6,12 @@
 local PipuckConnector = {}
 local SensorUpdater = require("SensorUpdater")
 
+function PipuckConnector.reset(vns)
+	vns.connector.pipuckReportSightCountDown = vns.Parameters.connector_pipuck_report_sight_count_down
+end
+
 function PipuckConnector.preStep(vns)
 	vns.connector.seenRobots = {}
-	vns.connector.pipuckReportSightCountDown = vns.Parameters.connector_pipuck_report_sight_count_down
 end
 
 function PipuckConnector.step(vns)
@@ -83,12 +86,25 @@ function PipuckConnector.step(vns)
 					local positionV3 = quad.positionV3 +
 					                   vector3(block.positionV3):rotate(quad.orientationQ)
 					local orientationQ = quad.orientationQ * block.orientationQ
-					seenBlocks[#seenBlocks + 1] = {
-						type = block.type,
-						robotTypeS = "block",
-						positionV3 = positionV3,
-						orientationQ = orientationQ,
-					}
+
+					-- check positionV3 in existing obstacles
+					local flag = true
+					for j, existing_ob in ipairs(seenBlocks) do
+						if (existing_ob.positionV3 - positionV3):length() < vns.api.parameters.obstacle_match_distance and
+						   existing_ob.type == block.type then
+							flag = false
+							break
+						end
+					end
+
+					if flag == true then
+						seenBlocks[#seenBlocks + 1] = {
+							type = block.type,
+							robotTypeS = block.robotTypeS,
+							positionV3 = positionV3,
+							orientationQ = orientationQ,
+						}
+					end
 				end
 			end
 		end
@@ -141,6 +157,7 @@ function PipuckConnector.step(vns)
 		end
 
 		vns.avoider.blocks = seenBlocksInVirtualFrame
+		--SensorUpdater.updateObstacles(vns, seenBlocksInVirtualFrame, vns.avoider.blocks)
 	end
 
 	--[[ draw obstacles
