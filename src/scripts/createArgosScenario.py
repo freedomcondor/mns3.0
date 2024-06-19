@@ -452,16 +452,19 @@ def generate_block_xml(i, x, y, th, type) :
     '''.format(i, type, x, y, th)
     return tag
 
-def generate_drone_xml(i, x, y, th, wifi_range=None) :
+def generate_drone_xml(i, x, y, z, th, wifi_range=None, fix_mode=None) :
     wifi_range_xml = ""
     if wifi_range != None:
       wifi_range_xml = '''wifi_transmission_range="{}"'''.format(wifi_range)
+    fix_mode_xml = ""
+    if fix_mode == True:
+      fix_mode_xml = '''fix="true"'''
     tag = '''
-    <drone id="drone{}" wifi_medium="wifi" {}>
-        <body position="{},{},0" orientation="{},0,0"/>
+    <drone id="drone{}" wifi_medium="wifi" {} {}>
+        <body position="{},{},{}" orientation="{},0,0"/>
         <controller config="drone"/>
     </drone>
-    '''.format(i, wifi_range_xml, x, y, th)
+    '''.format(i, wifi_range_xml, fix_mode_xml, x, y, z, th)
     return tag
 
 def generate_pipuck_xml(i, x, y, th, wifi_range=None) :
@@ -1066,11 +1069,11 @@ def generate_slave_locations_with_origin(n, master_locations,
             break
     return a
 
-def generate_drones(locations, start_id, wifi_range=None) :
+def generate_drones(locations, start_id, wifi_range=None, fix_mode=None) :
     tagstr = ""
     i = start_id
     for loc in locations :
-        tagstr = tagstr + generate_drone_xml(i, loc[0], loc[1], 0, wifi_range)
+        tagstr = tagstr + generate_drone_xml(i, loc[0], loc[1], 0, 0, wifi_range, fix_mode)
         i = i + 1
     return tagstr
 
