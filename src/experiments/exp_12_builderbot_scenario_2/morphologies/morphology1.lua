@@ -14,11 +14,12 @@ return
 		orientationQ = quaternion(),
 	},
 	{	robotTypeS = "pipuck",
-		positionV3 = vector3(0, dis, height),
+		positionV3 = vector3(0.10, dis, height),
 		orientationQ = quaternion(),
+		mission = "pusher",
 		children = {
 		{	robotTypeS = "pipuck",
-			positionV3 = vector3(0, dis, height),
+			positionV3 = vector3(0.10, dis, height),
 			orientationQ = quaternion(),
 			mission = "pusher"
 		},

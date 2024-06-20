@@ -68,8 +68,8 @@ function reset()
 			{type = "selector", children = {
 				create_navigation_node(vns),
 				vns.Learner.create_knowledge_node(vns, "wait_to_push_node"),
---				vns.Learner.create_knowledge_node(vns, "push_node"),
-				create_push_node(vns),
+				vns.Learner.create_knowledge_node(vns, "push_node"),
+				--create_push_node(vns),
 			}}
 		}}
 	}))
@@ -77,7 +77,7 @@ function reset()
 	state = "consensus"
 
 	if robot.id == special_pipuck then
-		--setup_push_node(vns)
+		setup_push_node(vns)
 		setup_wait_to_push_node(vns)
 	end
 end
@@ -259,12 +259,11 @@ function setup_wait_to_push_node(vns)
 	]]}
 end
 
---function setup_push_node(vns)
---	vns.learner.knowledges["push_node"] = {hash = 1, rank = 1, node = [[
+--function create_push_node(vns)
+--return
 
-function create_push_node(vns)
-return
-
+function setup_push_node(vns)
+	vns.learner.knowledges["push_node"] = {hash = 1, rank = 1, node = [[
 	function()
 		-- get center block
 		local center = nil
@@ -287,33 +286,22 @@ return
 			local mini_dis = math.huge
 			local target = nil
 			-- iterate all type usual_block_type blocks that are far away from the center
-			local threshold = 0.3
+			local threshold = 0.20
 			if substate == "push" then threshold = 0.15 end
-			for id, block in pairs(vns.avoider.blocks) do if block.type == usual_block_type and (block.positionV3 - center.positionV3):length() > threshold then
+			for id, block in pairs(vns.avoider.blocks) do 
+				if block.type == usual_block_type and (block.positionV3 - center.positionV3):length() > threshold then
 				local there_is_a_robot_better_than_me = false
 				for id, robotR in pairs(vns.connector.seenRobotsInMemory) do
 					if robotR.robotTypeS == "pipuck" and 
 					   robotR.idS ~= vns.idS then  -- brain is not included
-						local _, myIdNumber = string.match(robot.id, "(%a+)(%d+)")
-						local _, hisIdNumber = string.match(robotR.idS, "(%a+)(%d+)")
-						myIdNumber = tonumber(myIdNumber)
-						hisIdNumber = tonumber(hisIdNumber)
-						print("my:  ", robot.id, myIdNumber)
-						print("his: ", robotR.idS, hisIdNumber)
-						print("hisDis: ", (robotR.positionV3 - block.positionV3):length())
-						print("myDis: ", (block.positionV3):length())
 						local hisDis_myDis = (robotR.positionV3 - block.positionV3):length() - (block.positionV3):length()
-						print("hisDis_myDis: ", hisDis_myDis)
 						local threshold = 0.1
-						--if hisDis_myDis < -threshold or
-						--   (-threshold <= hisDis_myDis and hisDis_myDis <= threshold and hisIdNumber > myIdNumber) then
 						if hisDis_myDis < -threshold then
 							there_is_a_robot_better_than_me = true
 							break
 						end
 					end
 				end
-				print("there_is_a_robot_better_than_me: ", there_is_a_robot_better_than_me)
 				if there_is_a_robot_better_than_me == false and
 				   block.positionV3:length() < mini_dis then
 					mini_dis = block.positionV3:length()
@@ -344,21 +332,22 @@ return
 				elseif substate == "push" then
 					vns.Parameters.dangerzone_block = 0
 					vns.setGoal(vns, center.positionV3, quaternion())
-					vns.api.debug.drawArrow("0,255,255,0", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(center.positionV3), true)
-					if center.positionV3:length() < 0.15 then
+					-- check if a new target is selected
+					if old_target_position == nil then old_target_position = target.positionV3 end
+					if target.positionV3:dot(center.positionV3) < 0 or
+					   (target.positionV3 - old_target_position):length() > 0.10 then -- another target is selected
 						substate = "go_to_anchor"
+						vns.Parameters.dangerzone_block = dangezone_block_backup
 					end
-					if target.positionV3:dot(center.positionV3) < 0 then
-						substate = "go_to_anchor"
-					end
+					old_target_position = target.positionV3
 				end
 			else
 				substate = "go_to_anchor"
+				vns.Parameters.dangerzone_block = dangezone_block_backup
 			end
 		end
 
 		return false, true
 	end
-
---	]]}
+	]]}
 end

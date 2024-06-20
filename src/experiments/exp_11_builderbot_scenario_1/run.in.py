@@ -106,7 +106,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["BLOCKS",            block_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters_txt, {"show_frustum":False, "show_tag_rays":False})],
+        ''' + parameters_txt, {"show_frustum":False, "show_tag_rays":True})],
         ["PIPUCK_CONTROLLER", generate_pipuck_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/pipuck.lua"
         ''' + parameters_txt)],

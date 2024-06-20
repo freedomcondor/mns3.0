@@ -94,6 +94,11 @@ function step()
 	logger(vns.goal)
 	logger("reportsightCountDown = ", vns.connector.pipuckReportSightCountDown)
 	logger("vns.avoider.blocks = ", #vns.avoider.blocks)
+
+	for id, block in ipairs(vns.avoider.blocks) do
+		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(), vns.api.virtualFrame.V3_VtoR(block.positionV3),
+		 0.01, 0.015, 1, true)
+	end
 end
 
 function destroy()
@@ -129,12 +134,14 @@ return function()
 	local range = 0.7
 	if state == "forward" then
 		if vns.parentR == nil then
-			vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
+			if vns.driver.pipuck_arrive == true and vns.scalemanager.scale["pipuck"] == 4 then
+				vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
+			end
 		end
 		local target = nil
 		local mini_dis = math.huge
 		-- iterate all type usual_block_type blocks that are far away from the center
-		for id, block in pairs(vns.avoider.blocks) do if block.type == line_block_type and block.positionV3:length() < 0.5 then
+		for id, block in pairs(vns.avoider.blocks) do if block.type == line_block_type and block.positionV3:length() < 0.25 then
 			local there_is_a_robot_better_than_me = false
 			for id, robot in pairs(vns.connector.seenRobots) do
 				if robot.robotTypeS == "pipuck" and 
@@ -188,7 +195,9 @@ return function()
 				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
 				break
 			end end
-			vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
+			if vns.driver.pipuck_arrive == true then
+				vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
+			end
 
 			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type and block.positionV3:length() < 0.5 then
 				switchAndSendNewState(vns, "push_obstacle")
@@ -242,6 +251,11 @@ return function()
 					end
 				end end
 				if obstacle_existance == false and vns.driver.pipuck_arrive == true then
+					stateCount = stateCount + 1
+				else
+					stateCount = 0
+				end
+				if stateCount == 10 then
 					switchAndSendNewState(vns, "forward")
 				end
 			end
