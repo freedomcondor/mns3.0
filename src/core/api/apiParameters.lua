@@ -9,7 +9,7 @@ local Parameters = {
 	-- tag detection rate
 	droneTagDetectionRate = tonumber(robot.params.drone_tag_detection_rate or 0.9),
 	droneReportSightRate = tonumber(robot.params.drone_report_sight_rate or 0.9),
-	droneTagDetectionError = tonumber(robot.params.drone_tag_detection_error or 0.005),
+	droneTagDetectionError = tonumber(robot.params.drone_tag_detection_error or 0.010),
 	droneTagDetectionPixelOrientation = robot.params.drone_tag_detection_pixel_orientation or "false",
 	-- altitude control -------
 	droneAltitudeBias = tonumber(robot.params.drone_altitude_bias or 0.2),
@@ -24,8 +24,8 @@ local Parameters = {
 	pipuckRotationScalar = tonumber(robot.params.pipuck_rotation_scalar or 0.3),
 
 	---- Obstacles ------------------------
-	obstacle_match_distance = tonumber(robot.params.obstacle_match_distance or 0.15),
-	obstacle_unseen_count = tonumber(robot.params.obstacle_unseen_count or 3),
+	obstacle_match_distance = tonumber(robot.params.obstacle_match_distance or 0.04),
+	obstacle_unseen_count = tonumber(robot.params.obstacle_unseen_count or 5),
 }
 
 if Parameters.mode_2D == "true" then

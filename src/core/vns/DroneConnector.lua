@@ -39,15 +39,6 @@ function DroneConnector.step(vns)
 
 	SensorUpdater.updateObstacles(vns, seenBlocks, vns.avoider.memoryBlocksInRealFrame)
 
-	for id, block in ipairs(seenBlocks) do
-		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(0,0,0.1), block.positionV3 + vector3(0,0,0.1),
-		 0.01, 0.015, 1, true)
-	end
-	for id, block in pairs(vns.avoider.memoryBlocksInRealFrame) do
-		vns.api.debug.drawCustomizeArrow("255,0,255", vector3(0,0,0), block.positionV3,
-		 0.01, 0.015, 1, true)
-	end
-
 	-- add rangefinder into aerial obstacles
 	local rangefinderAerialObstacles = {}
 	vns.api.droneAddAerialObstacles(
