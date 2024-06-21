@@ -1,4 +1,4 @@
-local dis = 0.3
+local dis = 0.45
 local height = 1.7
 return 
 {	robotTypeS = "pipuck",
@@ -12,16 +12,10 @@ return
 	{	robotTypeS = "pipuck",
 		positionV3 = vector3(0, -dis, height),
 		orientationQ = quaternion(),
+		mission = "pusher",
 	},
 	{	robotTypeS = "pipuck",
-		positionV3 = vector3(0.10, dis, height),
+		positionV3 = vector3(0., dis, height),
 		orientationQ = quaternion(),
-		mission = "pusher",
-		children = {
-		{	robotTypeS = "pipuck",
-			positionV3 = vector3(0.10, dis, height),
-			orientationQ = quaternion(),
-			mission = "pusher"
-		},
-	}},
+	},
 }}

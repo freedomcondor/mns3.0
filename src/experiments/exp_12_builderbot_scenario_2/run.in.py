@@ -20,7 +20,7 @@ if Experiment_type != "no_builderbot" and Experiment_type != "builderbot" :
     print("wrong experiment type provided, please choose no_builderbot or builderbot")
     exit()
 
-n_pipuck = 4
+n_pipuck = 3
 n_drone = 1
 n_block = 2
 arena_size = 50
@@ -50,10 +50,9 @@ drone_xml += generate_drone_xml(2, 0.4, 0, 1.7, 90, 10, True)  # from label 1 ge
 builderbot_xml = ""
 
 block_xml  = generate_blocks(block_locations, 8, 33)  # from label 2 generate drone xml tags, type
-block_xml += generate_block_xml(1, 0, 0.55, 0, 34)
-block_xml += generate_block_xml(2, 0, 0.25,    0, 34)
-block_xml += generate_block_xml(3, 0, -0.05, 0, 34)
-block_xml += generate_block_xml(4, 0, -0.35, 0, 34)
+block_xml += generate_block_xml(1, 0, 0.45, 0, 34)
+block_xml += generate_block_xml(3, 0, 0, 0, 34)
+block_xml += generate_block_xml(4, 0,-0.45, 0, 34)
 
 block_xml += generate_block_xml(5,-0.8, -0.6, 0, 32)
 block_xml += generate_block_xml(6, 0,   -0.6, 0, 32)
@@ -75,8 +74,8 @@ parameters = {
     "driver_arrive_zone" : 0.1,
 
     "avoid_block_vortex"  :  "nil",
-    "dangerzone_pipuck" :  0.17,
-    "dangerzone_block"  :  0.17,
+    "dangerzone_pipuck" :  0.20,
+    "dangerzone_block"  :  0.20,
 
     "line_block_type"      :  34,
     "obstacle_block_type"  :  33,

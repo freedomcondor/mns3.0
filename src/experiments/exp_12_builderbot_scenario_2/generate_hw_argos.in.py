@@ -10,20 +10,20 @@ parameters = {
     "builderbot_label"   :  "11, 15",
     "block_label"        :  "30, 34",
 
-    "avoid_block_vortex"   :  "nil",
-    "avoid_speed_scalar"   :  0.05,
+    "avoid_speed_scalar"   :  0.20,
     "driver_slowdown_zone" :  0.15,
     "driver_stop_zone"     :  0.01,
     "driver_default_speed" : 0.03,
     "driver_arrive_zone" : 0.1,
 
+    "avoid_block_vortex"  :  "nil",
     "dangerzone_pipuck" :  0.20,
     "dangerzone_block"  :  0.20,
 
     "line_block_type"      :  34,
     "obstacle_block_type"  :  33,
     "reference_block_type"  : 32,
-    "stabilizer_preference_brain" : "pipuck1",
+    "stabilizer_preference_brain" : "pipuck3",
 
     "connector_waiting_count"          : 5,
     "connector_waiting_parent_count"   : 10,

@@ -12,12 +12,14 @@ Transform = require("Transform")
 
 logger.enable()
 
+local n_pipuck = 3
+
 -- datas ----------------
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
 --local state
-state = "forward"
+state = "wait_to_forward"
 substate = nil
 stateCount = 0
 --local type_number_in_memory = 0
@@ -68,7 +70,7 @@ function reset()
 		}}
 	}))
 
-	state = "forward"
+	state = "wait_to_forward"
 end
 
 function step()
@@ -89,11 +91,14 @@ function step()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
 
-	logger("virtual X = ", vector3(1,0,0):rotate(api.virtualFrame.orientationQ))
-	logger("goal = ")
-	logger(vns.goal)
-	logger("reportsightCountDown = ", vns.connector.pipuckReportSightCountDown)
-	logger("vns.avoider.blocks = ", #vns.avoider.blocks)
+	print("parent")
+	if vns.parentR ~= nil then
+		logger("parent = ", vns.parentR.idS)
+	end
+	print("children")
+	for idS, robot in pairs(vns.childrenRT) do
+		print(idS)
+	end
 
 	for id, block in ipairs(vns.avoider.blocks) do
 		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(), vns.api.virtualFrame.V3_VtoR(block.positionV3),
@@ -132,9 +137,26 @@ return function()
 	end end
 
 	local range = 0.7
-	if state == "forward" then
+	if state == "wait_to_forward" then
 		if vns.parentR == nil then
-			if vns.driver.pipuck_arrive == true and vns.scalemanager.scale["pipuck"] == 4 then
+			for id, block in ipairs(vns.avoider.blocks) do if block.type == reference_block_type then
+				vns.setGoal(vns, vector3(), block.orientationQ)
+				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
+				break
+			end end
+			if stateCount > 50 and vns.driver.pipuck_arrive == true and vns.scalemanager.scale["pipuck"] == n_pipuck then
+				switchAndSendNewState(vns, "forward")
+			end
+		end
+	elseif state == "forward" then
+		if vns.parentR == nil then
+			for id, block in ipairs(vns.avoider.blocks) do if block.type == reference_block_type then
+				vns.setGoal(vns, vector3(), block.orientationQ)
+				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
+				break
+			end end
+
+			if vns.scalemanager.scale["pipuck"] == n_pipuck then
 				vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
 			end
 		end
@@ -157,10 +179,13 @@ return function()
 			end
 		end end
 		if target ~= nil then
+			logger("target")
+			logger(target)
 			vns.Parameters.dangerzone_block = 0
 			vns.setGoal(vns, target.positionV3, quaternion())
 			vns.api.debug.drawArrow("0,255,255,0", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(target.positionV3), true)
-			if target.positionV3:length() < 0.15 then
+			if target.positionV3:length() < 0.15 and
+			   vns.scalemanager.scale["pipuck"] == n_pipuck then
 				state = "wait_to_forward_2"
 			end
 		end
@@ -173,16 +198,21 @@ return function()
 		local number = 1
 		-- receive in positioni number from children
 		for idS, robotR in pairs(vns.childrenRT) do 
+			local number_from_this_children = 0
 			for _, msgM in ipairs(vns.Msg.getAM(idS, "in_position_to_push")) do
-				number = number + msgM.dataT.number
+				number_from_this_children = msgM.dataT.number
+				break
 			end 
+			number = number + number_from_this_children
 		end
 		-- report number to parent
 		if vns.parentR ~= nil then
 			vns.Msg.send(vns.parentR.idS, "in_position_to_push", {number = number})
 		end
 
-		if vns.parentR == nil and number == 4 then
+		print("Finally, I get number = ", number)
+
+		if vns.parentR == nil and number == n_pipuck then
 			switchAndSendNewState(vns, "forward_2")
 		end
 	elseif state == "forward_2" then
@@ -195,9 +225,7 @@ return function()
 				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
 				break
 			end end
-			if vns.driver.pipuck_arrive == true then
-				vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
-			end
+			vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
 
 			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type and block.positionV3:length() < 0.5 then
 				switchAndSendNewState(vns, "push_obstacle")
@@ -237,6 +265,7 @@ return function()
 			local reference = nil
 			for id, block in ipairs(vns.avoider.blocks) do if block.type == reference_block_type then
 				reference = block
+				vns.setGoal(vns, vector3(), block.orientationQ)
 				break
 			end end
 			if reference ~= nil then
@@ -250,7 +279,7 @@ return function()
 						break
 					end
 				end end
-				if obstacle_existance == false and vns.driver.pipuck_arrive == true then
+				if obstacle_existance == false and vns.driver.pipuck_arrive == true and vns.scalemanager.scale["pipuck"] == n_pipuck then
 					stateCount = stateCount + 1
 				else
 					stateCount = 0
