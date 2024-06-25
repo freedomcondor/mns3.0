@@ -443,13 +443,16 @@ def generate_obstacle_cylinder_xml(i, x, y, th, type) :
     '''.format(i, x, y, th, type)
     return tag
 
-def generate_block_xml(i, x, y, th, type) :
+def generate_block_xml(i, x, y, th, type, movable=True) :
+    movable_xml = ""
+    if movable == False:
+      movable_xml = '''movable="false"'''
     tag = '''
-    <block id="block{}" payload="{}">
+    <block id="block{}" payload="{}" {}>
         <body position="{},{},0" orientation="{},0,0" />
         <controller config="block"/>
     </block>
-    '''.format(i, type, x, y, th)
+    '''.format(i, type, movable_xml, x, y, th)
     return tag
 
 def generate_drone_xml(i, x, y, z, th, wifi_range=None, fix_mode=None) :
