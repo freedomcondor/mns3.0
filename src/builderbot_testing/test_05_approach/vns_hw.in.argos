@@ -3,7 +3,7 @@
 
   <!-- General configuration -->
   <framework>
-    <experiment length="0" ticks_per_second="3" random_seed="0"/>
+    <experiment length="0" ticks_per_second="5" random_seed="0"/>
   </framework>
 
   <!-- Controller -->
@@ -42,7 +42,7 @@
         <builderbot_system implementation="default" />
       </sensors>
 	  <params script="builderbot.lua"
-            block_label="34,34"/>
+            block_label="30,34"/>
     </lua_controller>
   </controllers>
 
