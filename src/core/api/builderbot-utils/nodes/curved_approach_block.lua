@@ -3,12 +3,15 @@ robot.logger:register_module('nodes_curved_approach_block')
 
 -- return node generator
 return function(data, target_distance)
-   local case = {
+   case = {
       left_right_case = 0,
       -- 1 left, 0 middle, -1 right  robot is to the left/right to the block, need to move to the opposite direction
       forward_backup_case = 1,
       -- are we in moving forward or backward state, 1, forward, -1 backward
       done = false,
+      success_count_down = 1,
+      success_count_down_origin = 1,
+      ready = false,
    }
    local aim = {}
    return {
@@ -107,15 +110,35 @@ return function(data, target_distance)
                --if target_block.position_robot.x > target_distance - tolerence then
                if target_block.position_robot.x > target_distance then
                   -- still too far away, move forward
-                  robot.api.move.with_velocity(default_speed, default_speed)
+                  if case.left_right_case == 0 and case.ready ~= true then
+                     -- angle right, but haven't backup yet, swith to backup
+                     case.success_count_down = case.success_count_down_origin
+                     -- close enough, but wrong angle, switch to backup
+                     case.forward_backup_case = -1
+                     aim.forwad_backup = "backup"
+                     case.success_count_down = case.success_count_down_origin
+                     return true
+                  else
+                     if case.left_right_case ~= 0 then case.ready = false end
+                     -- move forward
+                     robot.api.move.with_velocity(default_speed, default_speed)
+                     case.success_count_down = case.success_count_down_origin
                   return true
+                  end
                else
                   -- close enough, check angle
-                  if case.left_right_case == 0 then
+                  if case.left_right_case == 0 and case.ready == true then
                      -- success
-                     robot.logger:log_info("approach succeeded")
-                     return false, true
+                     robot.logger:log_info("approach succeeded, count_down = ", case.success_count_down)
+                     robot.api.move.with_velocity(0, 0)
+                     case.success_count_down = case.success_count_down - 1
+                     if case.success_count_down < 0 then
+                        return false, true
+                     else
+                        return true
+                     end
                   else
+                     case.success_count_down = case.success_count_down_origin
                      -- close enough, but wrong angle, switch to backup
                      case.forward_backup_case = -1
                      aim.forwad_backup = "backup"
@@ -125,11 +148,11 @@ return function(data, target_distance)
             elseif case.forward_backup_case == -1 then
                -- backup case
                --if target_block.position_robot.x < target_distance + 0.03 + tolerence then
-               if case.left_right_case == 0 then
-                     case.forward_backup_case = 1
-                     aim.forwad_backup = "forward"
-                     return true
-               elseif target_block.position_robot.x < target_distance + 0.04 then
+               --if case.left_right_case == 0 then
+               --      case.forward_backup_case = 1
+               --      aim.forwad_backup = "forward"
+               --      return true
+               if target_block.position_robot.x < target_distance + 0.04 then
                   -- too close, keep move backward
                   robot.api.move.with_velocity(-default_speed,
                                                 -default_speed)
@@ -138,6 +161,9 @@ return function(data, target_distance)
                   -- far enough, forward again
                   case.forward_backup_case = 1
                      aim.forwad_backup = "forward"
+                  if case.left_right_case == 0 then
+                     case.ready = true
+                  end
                   return true
                end
             end

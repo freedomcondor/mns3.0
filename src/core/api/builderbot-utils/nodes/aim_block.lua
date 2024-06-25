@@ -65,9 +65,10 @@ return function(data, aim_point)
          current_pixel = target_tag.corners.right
          target_pixel = right_target_pixel
       else
-         local tag_to_endeffector = vector3(target_tag.position):rotate(robot.camera_system.transform.orientation)
-                                    + robot.camera_system.transform.position
-         current_pixel = -math.atan(tag_to_endeffector.y / tag_to_endeffector.x) * 180 / math.pi
+         local tag_for_robot = robot.api.constants.end_effector_position_offset +
+                                    robot.camera_system.transform.position +
+                                    vector3(target_tag.position):rotate(robot.camera_system.transform.orientation)
+         current_pixel = -math.atan(tag_for_robot.y / tag_for_robot.x) * 180 / math.pi
          target_pixel = 0
          pixel_tolerance = robot.api.parameters.aim_block_angle_tolerance * 2
       end
