@@ -34,8 +34,11 @@ function step()
 	-- consider the last one as reference tag
 	if the_reference_tag == nil then return end
 
+	end_effector_position_offset = vector3(0.09800875, 0, 0.055)
 	local robot_to_ref_based_on_input = {
-		positionV3 = robot.camera_system.transform.position + vector3(the_reference_tag.position):rotate(robot.camera_system.transform.orientation),
+		positionV3 = end_effector_position_offset +
+		             robot.camera_system.transform.position +
+		             vector3(the_reference_tag.position):rotate(robot.camera_system.transform.orientation),
 		orientationQ = robot.camera_system.transform.orientation * the_reference_tag.orientation
 	}
 	print("------------- ref")
@@ -48,8 +51,8 @@ function step()
 
 	-- standard
 	local robot_to_ref = {  -- effector end to ref
-		positionV3 = vector3(0.20, 0, 0.008) - vector3(0.09, 0, 0.055),
-		orientationQ = quaternion(math.pi, vector3(1,0,0))
+		positionV3 = vector3(0.20, 0, 0) - end_effector_position_offset,
+		orientationQ = quaternion(-math.pi/2, vector3(0,0,1)) * quaternion(math.pi, vector3(1,0,0))
 	}
 
 	local camera_to_ref = {
