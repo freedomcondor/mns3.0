@@ -246,6 +246,20 @@ return function()
 			vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
 		end
 	elseif state == "start_push" then
+		if vns.parentR == nil then
+			switchAndSendNewState(vns, "start_push", "KEEP")
+			-- get center block
+			local center = nil
+			-- iterate all type center_block_type blocks
+			for id, block in pairs(vns.avoider.blocks) do if block.type == center_block_type then
+				center = block
+			end end
+			if center ~= nil then
+				local dir = vector3(-center.positionV3):normalize()
+				local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
+				vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
+			end
+		end
 		return false, false
 	end
 	return false, true
@@ -274,10 +288,9 @@ function setup_push_node(vns)
 		-- if I see center block
 		if center ~= nil then
 			if vns.parentR == nil then
-				local dir = vector3(-center.positionV3):normalize()
-				local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
-				vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
-				switchAndSendNewState(vns, "start_push", "KEEP")
+				--local dir = vector3(-center.positionV3):normalize()
+				--local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
+				--vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
 				return false, true
 			end
 			vns.api.debug.drawCustomizeArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(center.positionV3),

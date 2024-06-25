@@ -30,7 +30,7 @@ parameters = {
 
     "pipuck_wheel_speed_limit"   :  0.10,
 
-    "special_pipuck"    :  "pipuck5",
+    "special_pipuck"    :  "pipuck4",
 }
 
 #    "pipuck_rotation_scalar"     :  0.2,

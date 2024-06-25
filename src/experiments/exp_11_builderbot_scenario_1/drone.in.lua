@@ -54,7 +54,7 @@ function reset()
 			vns.create_preconnector_node(vns),
 		}}
 	--]]
-	bt = BT.create(vns.create_vns_node(vns, {connector_recruit_only_necessary = gene.children}))
+	bt = BT.create(vns.create_vns_node(vns, {connector_recruit_only_necessary = gene.children, connector_no_recruit = true}))
 end
 
 function step()

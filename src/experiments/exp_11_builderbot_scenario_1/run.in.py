@@ -54,9 +54,11 @@ block_locations = [
 #    [ 0.15,-0.6],
 ]
 
-block_xml = generate_blocks(block_locations, 3, 33)  # from label 3 generate drone xml tags, type
-block_xml = generate_block_xml(1, 0, 0, 0, 34) + block_xml
-#block_xml = generate_block_xml(2, 1, 1, 0, 32) + block_xml
+block_xml = generate_blocks(block_locations, 3, 34)  # from label 3 generate drone xml tags, type
+#block_xml = generate_block_xml(1, 0, 0, 0, 32) + block_xml
+
+block_xml = generate_block_xml(1, 0.2, 0, 0, 32) + block_xml
+block_xml = generate_block_xml(2, 0, 0, 0, 33) + block_xml
 
 parameters = {
     "drone_real_noise"  :  "true",
@@ -79,9 +81,9 @@ parameters = {
     "dangerzone_pipuck"  :  0.25,
     "dangerzone_block"   :  0.25,
 
-    "center_block_type" :  34,
-    "usual_block_type"  :  33,
-    "pickup_block_type" :  32,
+    "center_block_type" :  32,
+    "usual_block_type"  :  34,
+    "pickup_block_type" :  33,
 
     "special_pipuck"    :  "pipuck10",
 }
