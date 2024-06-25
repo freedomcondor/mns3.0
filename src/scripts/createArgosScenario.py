@@ -131,7 +131,7 @@ def generate_builderbot_controller(params) :
       </actuators>
       <sensors>
         <builderbot_camera_system implementation="default"
-          show_frustum="false" show_tag_rays="true" show_led_rays="false" />
+          show_frustum="true" show_tag_rays="true" show_led_rays="false" />
         <builderbot_rangefinders implementation="default" show_rays="false" />
         <builderbot_differential_drive implementation="default"/>
         <builderbot_electromagnet_system implementation="default" />

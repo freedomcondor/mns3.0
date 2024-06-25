@@ -3,7 +3,7 @@
 
   <!-- General configuration -->
   <framework>
-    <experiment length="0" ticks_per_second="3" random_seed="0"/>
+    <experiment length="0" ticks_per_second="5" random_seed="0"/>
   </framework>
 
   <!-- Controller -->
@@ -26,8 +26,10 @@
           implementation="default" 
           calibration="/home/root/calibration/builderbot_camera_system.xml"
           save_raw="false"
+          save_as="/home/root/saveImage/img"
           saturationLimit="120"/>
-         <!-- save_as="saveImage/img" -->
+         <!--
+            -->
         <builderbot_lift_system
           implementation="default" 
           device="las-sens"
@@ -40,7 +42,7 @@
       </sensors>
 	  <params
         PARAMS
-        my_type="drone"
+        my_type="builderbot"
         hardware="true"
     />
     </lua_controller>
