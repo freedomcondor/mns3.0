@@ -148,7 +148,9 @@ def generate_block_controller(params) :
     text = '''
     <!-- Block Controller -->
     <lua_controller id="block">
-      <actuators />
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
       <sensors />
       <params simulation="true" {} />
     </lua_controller>
