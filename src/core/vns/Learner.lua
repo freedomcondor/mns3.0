@@ -8,13 +8,18 @@ local Learner = {}
 
 function Learner.create(vns)
 	vns.learner = {
-		knowledges = {}
+		knowledges = {},
 		-- knowledges["rescue"] = {
 		--     hash = 1
 		--     rank = 1 -- the greater the better
 		--     node = a string of the node, "function() .. end" or {type="sequence" children = {..}}
 		--}
+		stepLearnLength = 0
 	}
+end
+
+function Learner.preStep(vns)
+	vns.learner.stepLearnLength = 0
 end
 
 function Learner.step(vns, BTchildren)
@@ -24,6 +29,7 @@ function Learner.step(vns, BTchildren)
 		    vns.learner.knowledges[msgM.dataT.knowledgeID].rank <  msgM.dataT.knowledge.rank
 		   ) then
 			vns.learner.knowledges[msgM.dataT.knowledgeID] = msgM.dataT.knowledge
+			vns.learner.stepLearnLength = vns.learner.stepLearnLength + string.len(msgM.dataT.knowledge.node)
 		end
 		Learner.spreadKnowledge(vns, msgM.dataT.knowledgeID, msgM.dataT.knowledge, idS)
 	end end

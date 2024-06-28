@@ -324,6 +324,8 @@ function VNS.logLoopFunctionInfoHW(vns)
 		targetID = targetID,
 		vnsID = vns.idS,
 		parentID = parentID,
+		state = vns.state,
+		stepLearnLength = vns.learner.stepLearnLength,
 		debugRecord = debugRecord,
 	}
 end
@@ -360,6 +362,13 @@ function VNS.logLoopFunctionInfo(vns)
 		str = str .. "," .. tostring(nil)
 	end
 
+	-- log state
+	str = str .. "," .. tostring(vns.state)
+
+	-- log learner length
+	str = str .. "," .. tostring(vns.learner.stepLearnLength)
+
+	-- log debug arrows
 	if vns.api.debug.recordSwitch == true then
 		str = str .. vns.api.debug.record
 	end
