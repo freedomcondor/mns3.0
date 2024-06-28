@@ -28,6 +28,27 @@ def readStrDataFrom(fileName) :
 	file.close()
 	return data
 
+def readVecFrom(fileName) :
+	file = open(fileName,"r")
+	data = []
+	for line in file :
+		lineList = line.strip().split(",")
+		stepData = []
+		stepData.append(float(lineList[0]))
+		stepData.append(float(lineList[1]))
+		stepData.append(float(lineList[2]))
+		data.append(stepData)
+	file.close()
+	return data
+
+def transposeData(data) :
+	transposeData = []
+	for i in range(0, len(data[0])) :
+		transposeData.append([])
+		for j in range(0, len(data)) :
+			transposeData[i].append(data[j][i])
+	return transposeData
+
 #----------------------------------------------------------------------------------------------
 # Takes and array of data, and draw in python matplot
 def drawData(data, color = None) :

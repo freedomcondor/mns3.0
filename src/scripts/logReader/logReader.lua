@@ -78,6 +78,8 @@ function logReader.readLine(str)
 		targetID = tonumber(strList[16]),
 		brainID = strList[17],
 		parentID = strList[18],
+		state = strList[19],
+		learnerLength = strList[20],
 	}
 	stepData.originGoalPositionV3 = stepData.goalPositionV3
 	stepData.originGoalOrientationQ = stepData.goalOrientationQ
@@ -241,6 +243,86 @@ function logReader.calcFirstRecruitStep(robotsData, saveFile)
 			end
 		end
 	end
+end
+
+function logReader.saveStateSize(robotsData, state, saveFile, startStep, endStep)
+	-- fill start and end if not provided
+	if startStep == nil then startStep = 1 end
+	if endStep == nil then
+		endStep = logReader.getEndStep(robotsData)
+	end
+
+	local f = io.open(saveFile, "w")
+	for step = startStep, endStep do
+		-- for all robots, check state
+		local size = 0
+		for robotName, robotData in pairs(robotsData) do
+			if robotData[step].failed == nil and
+			   robotData[step].state == state then
+				size = size + 1
+			end
+		end
+		f:write(tostring(size).."\n")
+	end
+	io.close(f)
+	print("save state size finish, state: ", state)
+end
+
+function logReader.saveAverageSoNSSize(robotsData, saveFile, startStep, endStep)
+	-- fill start and end if not provided
+	if startStep == nil then startStep = 1 end
+	if endStep == nil then
+		endStep = logReader.getEndStep(robotsData)
+	end
+
+	local f = io.open(saveFile, "w")
+	for step = startStep, endStep do
+		-- put all brain to brainIndex
+		local brainIndex = {}
+		for robotName, robotData in pairs(robotsData) do
+			if robotData[step].failed == nil then
+				local brainID = robotData[step].brainID
+				if brainIndex[brainID] == nil then
+					brainIndex[brainID] = 1
+				else
+					brainIndex[brainID] = brainIndex[brainID] + 1
+				end
+			end
+		end
+		-- average brainIndex
+		local total = 0
+		local number = 0
+		for brainID, value in pairs(brainIndex) do
+			number = number + 1
+			total = total + value
+		end
+		local average = total / number
+		f:write(tostring(average).."\n")
+	end
+	io.close(f)
+	print("save average SoNS size finish")
+end
+
+function logReader.saveLearnerLength(robotsData, saveFile, startStep, endStep)
+	-- fill start and end if not provided
+	if startStep == nil then startStep = 1 end
+	if endStep == nil then
+		endStep = logReader.getEndStep(robotsData)
+	end
+
+	local f = io.open(saveFile, "w")
+	for step = startStep, endStep do
+		-- for all robots, sum learner length
+		local length = 0
+		for robotName, robotData in pairs(robotsData) do
+			if robotData[step].failed == nil then
+				length = length + robotData[step].learnerLength
+			end
+		end
+		f:write(tostring(length).."\n")
+	end
+	io.close(f)
+	print("save learner length finish")
 end
 
 function logReader.saveSoNSNumber(robotsData, saveFile, startStep, endStep)
