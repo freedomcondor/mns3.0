@@ -34,7 +34,7 @@ return function(data, forward_distance)
          --]]
          function()
             lift_target = robot.lift_system.position -
-                          robot.api.constants.block_side_length / 2 + 0.005
+                          robot.api.constants.block_side_length / 2 - 0
             robot.lift_system.set_position(lift_target)
             return false, true
          end,

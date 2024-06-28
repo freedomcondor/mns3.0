@@ -28,14 +28,20 @@ return function(data, forward_distance)
                end,
                --]]
                -- low lift
-               function()
-                  robot.lift_system.set_position(0)
-                  if robot.lift_system.position < 0 + robot.api.parameters.lift_system_position_tolerance then
-                     return false, true
-                  else
-                     return true
-                  end
-               end
+               {
+                  type = 'sequence',
+                  children = {
+                  function()
+                     robot.lift_system.set_position(0)
+                     if robot.lift_system.position < 0 + robot.api.parameters.lift_system_position_tolerance then
+                        return false, true
+                     else
+                        return true
+                     end
+                  end,
+                  robot.nodes.create_timer_node(1.0),
+                  }
+               }
             }
          },
          -- count and raise

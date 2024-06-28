@@ -10,9 +10,10 @@ return function(data, target_distance)
       -- are we in moving forward or backward state, 1, forward, -1 backward
       done = false,
       success_count_down = 1,
-      success_count_down_origin = 1,
+      success_count_down_origin = 2,
       ready = false,
    }
+   backward_offset = 0.04
    local aim = {}
    return {
       type = "sequence",
@@ -127,7 +128,8 @@ return function(data, target_distance)
                   end
                else
                   -- close enough, check angle
-                  if case.left_right_case == 0 and case.ready == true then
+                  if case.left_right_case == 0 and case.ready == true and
+                     target_distance - target_block.position_robot.x < 0.01 then
                      -- success
                      robot.logger:log_info("approach succeeded, count_down = ", case.success_count_down)
                      robot.api.move.with_velocity(0, 0)
@@ -138,6 +140,13 @@ return function(data, target_distance)
                         return true
                      end
                   else
+                     if case.left_right_case == 0 and case.ready == true and
+                        target_distance - target_block.position_robot.x >= 0.01 then
+                        -- too close
+                        backward_offset = 0.02
+                     else
+                        backward_offset = 0.04
+                     end
                      case.success_count_down = case.success_count_down_origin
                      -- close enough, but wrong angle, switch to backup
                      case.forward_backup_case = -1
@@ -152,7 +161,7 @@ return function(data, target_distance)
                --      case.forward_backup_case = 1
                --      aim.forwad_backup = "forward"
                --      return true
-               if target_block.position_robot.x < target_distance + 0.04 then
+               if target_block.position_robot.x < target_distance + backward_offset then
                   -- too close, keep move backward
                   robot.api.move.with_velocity(-default_speed,
                                                 -default_speed)
