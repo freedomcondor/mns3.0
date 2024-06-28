@@ -9,6 +9,7 @@ local api = require("pipuckAPI")
 local VNS = require("VNS")
 local BT = require("DynamicBehaviorTree")
 Transform = require("Transform")
+local RecruitLogger = require("RecruitLogger")
 
 logger.enable()
 
@@ -52,6 +53,7 @@ function init()
 	vns = VNS.create("pipuck")
 	reset()
 
+	RecruitLogger:init(robot.id)
 --	api.debug.show_all = true
 end
 
@@ -99,6 +101,14 @@ function step()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
 
+	vns.state = state
+	if state == "consensus" then
+		vns.state = state .. "_" .. type_number_in_memory
+	end
+	vns.logLoopFunctionInfo(vns)
+
+	RecruitLogger:step(vns.Msg.waitToSend)
+
 	for id, block in ipairs(vns.avoider.blocks) do
 		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(), vns.api.virtualFrame.V3_VtoR(block.positionV3),
 		 0.01, 0.015, 1, true)
@@ -108,6 +118,8 @@ end
 function destroy()
 	vns.destroy()
 	api.destroy()
+
+	RecruitLogger:destroy()
 end
 
 function create_consensus_node(vns)

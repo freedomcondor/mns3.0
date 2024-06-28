@@ -69,6 +69,8 @@ function step()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
 
+	vns.logLoopFunctionInfo(vns)
+
 	-- show type blocks
 	local type1 = center_block_type
 	local type2 = pickup_block_type

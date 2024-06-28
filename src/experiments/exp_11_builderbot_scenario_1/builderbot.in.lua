@@ -88,6 +88,8 @@ function step()
 	api.postStep()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
+
+	vns.logLoopFunctionInfo(vns)
 end
 
 function destroy()
