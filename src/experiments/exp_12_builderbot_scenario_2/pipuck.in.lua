@@ -288,7 +288,7 @@ return function()
 					-- calc reference to block
 					local reference_to_block = {}
 					Transform.AxCisB(reference, block, reference_to_block)
-					if reference_to_block.positionV3.y > 0 then
+					if reference_to_block.positionV3.y > 0.20 then
 						obstacle_existance = true
 						break
 					end
@@ -320,10 +320,10 @@ function setup_push_node(vns)
 		end end
 		if reference ~= nil then
 			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference.positionV3), true)
-			logger("reference block position: = ", reference.positionV3)
-			logger("reference block direction : X = ", vector3(1,0,0):rotate(reference.orientationQ))
-			logger("reference block direction : Y = ", vector3(0,1,0):rotate(reference.orientationQ))
-			logger("reference block direction : Z = ", vector3(0,0,1):rotate(reference.orientationQ))
+			--logger("reference block position: = ", reference.positionV3)
+			--logger("reference block direction : X = ", vector3(1,0,0):rotate(reference.orientationQ))
+			--logger("reference block direction : Y = ", vector3(0,1,0):rotate(reference.orientationQ))
+			--logger("reference block direction : Z = ", vector3(0,0,1):rotate(reference.orientationQ))
 
 			-- find a target
 			local target = nil
@@ -332,8 +332,8 @@ function setup_push_node(vns)
 				-- calc reference to block
 				local reference_to_block = {}
 				Transform.AxCisB(reference, block, reference_to_block)
-				local threshold = 0
-				if substate == "start_push" then threshold = -0.2 end
+				local threshold = 0.2
+				if substate == "start_push" then threshold = 0.1 end
 				if reference_to_block.positionV3.y > threshold and block.positionV3:length() < mini_dis then
 					mini_dis = block.positionV3:length()
 					target = block
@@ -342,10 +342,10 @@ function setup_push_node(vns)
 
 			if target ~= nil then
 				vns.api.debug.drawArrow("black", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(target.positionV3), true)
-				logger("target block position: = ", target.positionV3)
-				logger("target block direction : X = ", vector3(1,0,0):rotate(target.orientationQ))
-				logger("target block direction : Y = ", vector3(0,1,0):rotate(target.orientationQ))
-				logger("target block direction : Z = ", vector3(0,0,1):rotate(target.orientationQ))
+				--logger("target block position: = ", target.positionV3)
+				--logger("target block direction : X = ", vector3(1,0,0):rotate(target.orientationQ))
+				--logger("target block direction : Y = ", vector3(0,1,0):rotate(target.orientationQ))
+				--logger("target block direction : Z = ", vector3(0,0,1):rotate(target.orientationQ))
 
 				if substate == "go_to_anchor" then
 					vns.Parameters.dangerzone_block = dangezone_block_backup
