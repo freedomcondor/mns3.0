@@ -29,7 +29,7 @@ return function(data, forward_distance)
                --]]
                -- low lift
                {
-                  type = 'sequence',
+                  type = 'sequence*',
                   children = {
                   function()
                      robot.lift_system.set_position(0)
