@@ -58,7 +58,7 @@ block_xml = generate_blocks(block_locations, 3, 34)  # from label 3 generate dro
 #block_xml = generate_block_xml(1, 0, 0, 0, 32) + block_xml
 
 block_xml = generate_block_xml(1, 0.2, 0, 0, 32) + block_xml
-block_xml = generate_block_xml(2, 0, 0, 0, 33, False) + block_xml
+#block_xml = generate_block_xml(2, 0, 0, 0, 33, False) + block_xml
 
 parameters = {
     "drone_real_noise"  :  "true",

@@ -7,28 +7,25 @@ function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, 
 		{	robotTypeS = "pipuck",
 			positionV3 = startPositionV3,
 			orientationQ = startOrientationQ,
-			children = {
-			{	robotTypeS = "drone",
-				positionV3 = vector3(0,0,height),
-				orientationQ = quaternion(),
-			},
-		}}
+		}
 	else
-		return 
+		local node = 
 		{	robotTypeS = "pipuck",
 			positionV3 = startPositionV3,
 			orientationQ = startOrientationQ,
 			children = {
-			{	robotTypeS = "drone",
-				positionV3 = vector3(0,0,height),
-				orientationQ = quaternion(),
-			},
 			generate_line(n - 1, offsetPositionV3, offsetOrientationQ, offsetPositionV3, offsetOrientationQ),
 		}}
+		table.insert(node.children,
+		{	robotTypeS = "drone",
+			positionV3 = vector3(0,0,height),
+			orientationQ = quaternion(),
+		})
+		return node
 	end
 end
 
-local n = 4
+local n = 2
 local Q1 = quaternion(math.pi/(n+1), vector3(0,0,1))
 local half_Q1 = quaternion(math.pi/(n+1)/2, vector3(0,0,1))
 local Q2 = quaternion(-math.pi/(n+1), vector3(0,0,1))
@@ -40,5 +37,5 @@ return
 	orientationQ = quaternion(),
 	children = {
 		generate_line(n, vector3(0, dis, 0):rotate(half_Q1), half_Q1, vector3(0, dis, 0):rotate(Q1), Q1),
-		generate_line(n+1, vector3(0, -dis, 0):rotate(half_Q2), half_Q2, vector3(0, -dis, 0):rotate(Q2), Q2),
+		generate_line(n, vector3(0, -dis, 0):rotate(half_Q2), half_Q2, vector3(0, -dis, 0):rotate(Q2), Q2),
 }}

@@ -253,9 +253,8 @@ return function()
 		end end
 		-- if I see center block
 		if center ~= nil then
-			local dir = vector3(-center.positionV3):normalize()
 			local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
-			vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
+			vns.setGoal(vns, center.positionV3 + vector3(0,0.45,0):rotate(center.orientationQ), ori)
 		end
 	elseif state == "start_push" then
 		if vns.parentR == nil then
@@ -267,9 +266,8 @@ return function()
 				center = block
 			end end
 			if center ~= nil then
-				local dir = vector3(-center.positionV3):normalize()
 				local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
-				vns.setGoal(vns, center.positionV3 + dir * 0.45, ori)
+				vns.setGoal(vns, center.positionV3 + vector3(0,0.45,0):rotate(center.orientationQ), ori)
 			end
 		end
 		return false, false
