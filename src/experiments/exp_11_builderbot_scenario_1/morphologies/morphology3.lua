@@ -1,4 +1,4 @@
-local dis = 0.3
+local dis = 0.4
 local height = 1.7
 
 function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, offsetOrientationQ)
@@ -40,12 +40,8 @@ return
 	orientationQ = quaternion(),
 	children = {
 	{	robotTypeS = "builderbot",
-		positionV3 = vector3(0,dis,0):rotate(half_Q1),
+		positionV3 = vector3(0,-dis,0):rotate(half_Q1),
 		orientationQ = half_Q1,
-	},
-	{	robotTypeS = "builderbot",
-		positionV3 = vector3(0,-dis,0):rotate(half_Q2),
-		orientationQ = half_Q2,
 	},
 	generate_line(n, vector3(0, dis*2, 0):rotate(half_Q1*half_Q1), half_Q1*half_Q1, vector3(0, dis, 0):rotate(Q1), Q1),
 	generate_line(n, vector3(0, -dis*2, 0):rotate(half_Q2*half_Q2), half_Q2*half_Q2, vector3(0, -dis, 0):rotate(Q2), Q2),

@@ -16,8 +16,8 @@ parameters = {
     "driver_stop_zone"     :  0.03,
     "driver_default_speed" : 0.03,
 
-    "dangerzone_pipuck"  :  0.20,
-    "dangerzone_block"   :  0.20,
+    "dangerzone_pipuck"  :  0.25,
+    "dangerzone_block"   :  0.15,
 
     "center_block_type"  :  32,
     "usual_block_type"   :  34,
@@ -30,7 +30,7 @@ parameters = {
 
     "pipuck_wheel_speed_limit"   :  0.10,
 
-    "special_pipuck"    :  "pipuck4",
+    "special_pipuck"    :  "pipuck5",
 }
 
 #    "pipuck_rotation_scalar"     :  0.2,
