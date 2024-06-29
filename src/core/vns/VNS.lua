@@ -82,6 +82,11 @@ function VNS.create(myType)
 	end
 
 	VNS.reset(vns)
+
+	if robot.params.hardware == true then
+		vns.logfile = io.open("/home/root/" .. robot.id .. ".log", "w")
+	end
+
 	return vns
 end
 
@@ -101,6 +106,9 @@ end
 
 function VNS.destroy(vns)
 	--TODO
+	if robot.params.hardware == true then
+		vns.logfile:close()
+	end
 end
 
 function VNS.preStep(vns)
@@ -331,10 +339,12 @@ function VNS.logLoopFunctionInfoHW(vns)
 end
 
 function VNS.logLoopFunctionInfo(vns)
-	if robot.params.hardware == true then
-		return VNS.logLoopFunctionInfoHW(vns)
+--	if robot.params.hardware == true then
+--		return VNS.logLoopFunctionInfoHW(vns)
+--	end
+	if robot.params.simulation == true then
+		if robot.debug == nil or robot.debug.write == nil then return end
 	end
-	if robot.debug == nil or robot.debug.write == nil then return end
 
 	-- log virtual frame
 	local str = tostring(vns.api.virtualFrame.orientationQ)
@@ -373,7 +383,12 @@ function VNS.logLoopFunctionInfo(vns)
 		str = str .. vns.api.debug.record
 	end
 
-	robot.debug.write(str)
+	if robot.params.hardware == true then
+		vns.logfile:write(tostring(robot.system.time) .. ", 0,0, 0,0,0, " .. str .. "\n")
+		vns.logfile:flush()
+	else
+		robot.debug.write(str)
+	end
 end
 
 ---- Behavior Tree Node ------------------------------------------

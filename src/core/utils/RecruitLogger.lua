@@ -3,8 +3,12 @@ local RecruitLogger = {
 }
 
 function RecruitLogger:init(robotID)
-	os.execute("mkdir -p logs_recruit")
-	self.file = io.open("logs_recruit/" .. robotID .. ".recruitlog", "w")
+	if robot.params.simulation == true then
+		os.execute("mkdir -p logs_recruit")
+		self.file = io.open("logs_recruit/" .. robotID .. ".recruitlog", "w")
+	else
+		self.file = io.open("/home/root/" .. robotID .. ".recruitlog", "w")
+	end
 	if self.file == nil then
 		print("create recruit log file wrong")
 	end
