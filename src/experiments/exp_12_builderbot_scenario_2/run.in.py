@@ -22,7 +22,6 @@ if Experiment_type != "no_builderbot" and Experiment_type != "builderbot" :
 
 n_pipuck = 3
 n_drone = 1
-n_block = 2
 arena_size = 50
 arena_z_center = 10
 
@@ -33,12 +32,15 @@ pipuck_locations = generate_random_locations(n_pipuck,
                                              0.3, 0.5,   # near limit and far limit
                                              10000)      # attempt count
 
+'''
+n_block = 2
 block_locations = generate_random_locations(n_block,
                                             0.5, 0,       # origin
                                             0.2, 0.8,    # random x
                                             -0.7, 0.7,    # random y
                                             0.3, 0.5,   # near limit and far limit
                                             10000)      # attempt count
+'''
 
 #pipuck_xml = generate_pipuck_xml(10, 2, 0, 0) + generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
@@ -46,17 +48,18 @@ pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate 
 drone_xml  = generate_drone_xml(1, -0.4, 0, 1.7, 90, 10, True)  # from label 1 generate drone xml tags, communication range 10
 drone_xml += generate_drone_xml(2, 0.4, 0, 1.7, 90, 10, True)  # from label 1 generate drone xml tags, communication range 10
 
-#builderbot_xml = generate_builderbot_xml(11, 2, 0, 0)
-builderbot_xml = ""
+builderbot_xml = generate_builderbot_xml(11, 2, 0, 0)
 
-block_xml  = generate_blocks(block_locations, 8, 33)  # from label 2 generate drone xml tags, type
-block_xml += generate_block_xml(1, 0, 0.45, 0, 34)
-block_xml += generate_block_xml(3, 0, 0, 0, 34)
-block_xml += generate_block_xml(4, 0,-0.45, 0, 34)
+#block_xml  = generate_blocks(block_locations, 10, 33)  # from label 2 generate drone xml tags, type
+block_xml  = generate_block_xml(10, 0.5, -0.2, 0, 33)
+block_xml += generate_block_xml(1, -0.2, 0.45, 0, 34)
+block_xml += generate_block_xml(3, -0.2, 0, 0, 34)
+block_xml += generate_block_xml(4, -0.2,-0.45, 0, 34)
 
 block_xml += generate_block_xml(5,-0.8, -0.6, 0, 32)
-block_xml += generate_block_xml(6, 0,   -0.6, 0, 32)
-block_xml += generate_block_xml(7, 0.8, -0.6, 0, 32)
+block_xml += generate_block_xml(6,-0.2, -0.6, 0, 32)
+block_xml += generate_block_xml(7, 0.2, -0.6, 0, 32)
+block_xml += generate_block_xml(8, 0.8, -0.6, 0, 32)
 
 parameters = {
     "drone_real_noise"  :  "true",

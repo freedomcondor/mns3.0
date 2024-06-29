@@ -9,6 +9,7 @@ local api = require("pipuckAPI")
 local VNS = require("VNS")
 local BT = require("DynamicBehaviorTree")
 Transform = require("Transform")
+local RecruitLogger = require("RecruitLogger")
 
 logger.enable()
 
@@ -56,6 +57,7 @@ function init()
 	reset()
 
 --	api.debug.show_all = true
+	RecruitLogger:init(robot.id)
 end
 
 function reset()
@@ -66,11 +68,17 @@ function reset()
 	bt = BT.create(vns.create_vns_node(vns, {
 		connector_recruit_only_necessary = gene.children,
 		navigation_node_post_core = {type = "sequence", children = {
-			create_navigation_node(vns),
+			vns.Learner.create_learner_node(vns),
+			{type = "selector", children = {
+				create_navigation_node(vns),
+				vns.Learner.create_knowledge_node(vns, "push_node"),
+			}}
 		}}
 	}))
 
 	state = "wait_to_forward"
+
+	setup_push_node(vns)
 end
 
 function step()
@@ -88,17 +96,16 @@ function step()
 
 	vns.postStep(vns)
 	api.postStep()
-	api.debug.showVirtualFrame()
+	api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
 
-	print("parent")
-	if vns.parentR ~= nil then
-		logger("parent = ", vns.parentR.idS)
+	vns.state = state
+	if state == "consensus" then
+		vns.state = state .. "_" .. type_number_in_memory
 	end
-	print("children")
-	for idS, robot in pairs(vns.childrenRT) do
-		print(idS)
-	end
+	vns.logLoopFunctionInfo(vns)
+
+	RecruitLogger:step(vns.Msg.waitToSend)
 
 	for id, block in ipairs(vns.avoider.blocks) do
 		vns.api.debug.drawCustomizeArrow("255,255,0", vector3(), vns.api.virtualFrame.V3_VtoR(block.positionV3),
@@ -109,6 +116,8 @@ end
 function destroy()
 	vns.destroy()
 	api.destroy()
+
+	RecruitLogger:destroy()
 end
 
 function create_navigation_node(vns)
@@ -118,7 +127,7 @@ function create_navigation_node(vns)
 		end
 	end
 
-	local function newState(vns, _newState, _newSubstate)
+	function newState(vns, _newState, _newSubstate)
 		stateCount = 0
 		state = _newState
 		substate = _newSubstate
@@ -220,12 +229,17 @@ return function()
 			vns.goal.positionV3.x = 0
 		end
 		if vns.parentR == nil then
+			local left_right_speed = 0
 			for id, block in ipairs(vns.avoider.blocks) do if block.type == reference_block_type then
+				local from_block_to_me = Transform.AxCis0(block)
+				local right_dis = from_block_to_me.positionV3.y
+				local target_dis = 0.6
+				left_right_speed = (target_dis - right_dis) * 0.03
 				vns.setGoal(vns, vector3(), block.orientationQ)
 				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
 				break
 			end end
-			vns.Spreader.emergency_after_core(vns, vector3(0.01, 0, 0), vector3())
+			vns.Spreader.emergency_after_core(vns, vector3(0.01, left_right_speed, 0), vector3())
 
 			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type and block.positionV3:length() < 0.5 then
 				switchAndSendNewState(vns, "push_obstacle")
@@ -290,6 +304,15 @@ return function()
 			end
 		end
 	elseif state == "push" then -- only pusher will enter this state
+		return false, false
+	end
+
+	return false, true
+end end
+
+function setup_push_node(vns)
+	vns.learner.knowledges["push_node"] = {hash = 1, rank = 1, node = [[
+	function()
 		-- find a reference
 		local reference = nil
 		for id, block in ipairs(vns.avoider.blocks) do if block.type == reference_block_type then
@@ -352,6 +375,5 @@ return function()
 			vns.setGoal(vns, vector3(), quaternion())
 		end
 	end
-
-	return false, true
-end end
+	]]}
+end

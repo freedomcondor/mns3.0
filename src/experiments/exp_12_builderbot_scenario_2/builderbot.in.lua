@@ -23,6 +23,7 @@ local BT = require("DynamicBehaviorTree")
 
 line_block_type = tonumber(robot.params.line_block_type)
 obstacle_block_type = tonumber(robot.params.obstacle_block_type)
+reference_block_type = tonumber(robot.params.reference_block_type)
 
 ----- data
 local bt
@@ -68,7 +69,7 @@ function reset()
 		create_approach_and_driver_node(vns),
 	}}
 
-	setup_not_to_push_node(vns)
+	setup_false_push_node(vns)
 end
 
 function step()
@@ -79,30 +80,24 @@ function step()
 
 	bt()
 
-	vns.Learner.spreadKnowledge(vns, "wait_to_push_node", vns.learner.knowledges["wait_to_push_node"])
+	vns.Learner.spreadKnowledge(vns, "push_node", vns.learner.knowledges["push_node"])
 
 	vns.postStep(vns)
 	api.postStep()
 	api.debug.showVirtualFrame()
 	api.debug.showChildren(vns, {drawOrientation = false})
+
+	vns.logLoopFunctionInfo(vns)
 end
 
 function destroy()
 	api.destroy()
 end
 
-function setup_not_to_push_node(vns)
-	vns.learner.knowledges["wait_to_push_node"] = {hash = 2, rank = 2, node = [[
+function setup_false_push_node(vns)
+	vns.learner.knowledges["push_node"] = {hash = 2, rank = 2, node = [[
 	function()
-		return false, true -- don't push
-	end
-	]]}
-end
-
-function setup_start_to_push_node(vns)
-	vns.learner.knowledges["wait_to_push_node"] = {hash = 3, rank = 3, node = [[
-	function()
-		return false, false -- start push
+		newState(vns, "step_back")
 	end
 	]]}
 end
@@ -140,10 +135,10 @@ return
 				local target_type = nil
 				local target_offset = nil
 				if state == "pickup" then
-					target_type = center_block_type
+					target_type = obstacle_block_type
 					target_offset = vector3(0,0,0)
 				elseif state == "place" then
-					target_type = pickup_block_type
+					target_type = reference_block_type
 					target_offset = vector3(0,0,1)
 				end
 
