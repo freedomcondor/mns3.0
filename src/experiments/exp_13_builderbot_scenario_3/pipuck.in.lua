@@ -151,7 +151,7 @@ return function()
 				end
 			end end
 		elseif state == "meet_obstacle" then
-			if stateCount > 200 then
+			if stateCount > 100 then
 				switchAndSendNewState(vns, "send_help")
 			end
 		end

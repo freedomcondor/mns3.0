@@ -33,7 +33,7 @@ parameters = {
 
     "stabilizer_preference_brain" : "pipuck1",
 
-    "special_pipuck"    :  "pipuck5",
+    "special_pipuck"    :  "pipuck6",
 }
 
 #    "pipuck_rotation_scalar"     :  0.2,
