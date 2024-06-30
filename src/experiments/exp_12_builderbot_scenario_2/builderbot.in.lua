@@ -160,16 +160,17 @@ return
 		{type = "sequence", children = {
 			function() return false, state == "pickup" end,
 			{type = "sequence*", children = {
-				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.20),
-				robot.nodes.create_pick_up_block_node(data, 0.20), --0.170 for old motor hardware
+				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.22),
+				robot.nodes.create_pick_up_block_node(data, 0.240), --0.170 for old motor hardware
 				function() state = "place" end,
 			}},
 		}},
 		{type = "sequence", children = {
 			function() return false, state == "place" end,
 			{type = "sequence*", children = {
-				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.20),
-				robot.nodes.create_place_block_node(data, 0.20), --0.170 for old motor hardware
+				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.22),
+				robot.nodes.create_place_block_node(data, 0.235), --0.170 for old motor hardware
+				robot.nodes.create_timer_node(2, function() robot.api.move.with_velocity(-0.02, -0.02) return false, true end),
 				function()
 					state = "finish"
 					setup_start_to_push_node(vns)
