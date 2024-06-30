@@ -108,8 +108,8 @@ api.setSpeed = api.pipuckSetSpeed
 
 ---- Debugs --------------------
 api.debug.commonShowChildren = api.debug.showChildren -- TODO: change to show parent
-function api.debug.showChildren(vns)
-	api.debug.commonShowChildren(vns)
+function api.debug.showChildren(vns, option)
+	api.debug.commonShowChildren(vns, option)
 	-- draw children location
 	if vns.parentR ~= nil then
 		api.pipuckShowLED(api.virtualFrame.V3_VtoR(vector3(vns.parentR.positionV3)))
