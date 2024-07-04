@@ -21,19 +21,19 @@ end
 function DroneConnector.step(vns)
 	-- add tags into seen Robots
 	vns.api.droneAddSeenRobots(
-		vns.api.droneDetectTags(),
+		vns.api.droneDetectTags({check_vertical = vns.api.parameters.mode_2D}),
 		vns.connector.seenRobots
 	)
 
 	local seenObstacles = {}
 	vns.api.droneAddObstacles(
-		vns.api.droneDetectTags(),
+		vns.api.droneDetectTags({check_vertical = vns.api.parameters.mode_2D}),
 		seenObstacles
 	)
 
 	local seenBlocks = {}
 	vns.api.droneAddBlocks(
-		vns.api.droneDetectTags(),
+		vns.api.droneDetectTags({check_vertical = vns.api.parameters.mode_2D}),
 		seenBlocks
 	)
 
