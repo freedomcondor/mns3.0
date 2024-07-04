@@ -1,0 +1,148 @@
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.cpp b/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.cpp
+index 98d98c33..580b97be 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.cpp
++++ b/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.cpp
+@@ -147,12 +147,16 @@ namespace argos {
+    /****************************************/
+    /****************************************/
+ 
+-   const UInt32 CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_RESOLUTION_X = 700;
+-   const UInt32 CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_RESOLUTION_Y = 700;
++   //const UInt32 CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_RESOLUTION_X = 700;
++   //const UInt32 CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_RESOLUTION_Y = 700;
++   const UInt32 CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_RESOLUTION_X = 1024;
++   const UInt32 CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_RESOLUTION_Y = 768;
+    const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_FOCAL_LENGTH_X = 864.0;
+    const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_FOCAL_LENGTH_Y = 864.0;
+-   const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_PRINCIPAL_POINT_X = 350.0;
+-   const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_PRINCIPAL_POINT_Y = 350.0;
++   //const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_PRINCIPAL_POINT_X = 350.0;
++   //const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_PRINCIPAL_POINT_Y = 350.0;
++   const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_PRINCIPAL_POINT_X = 512.0;
++   const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_PRINCIPAL_POINT_Y = 384.0;
+    const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_XY_OFFSET = 0.12;
+    const Real CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_Z_OFFSET = 0.16;
+    const CDegrees CCI_DroneCamerasSystemSensor::DEFAULT_CAMERA_ANGLE = CDegrees(180 - 22);
+@@ -185,4 +189,13 @@ namespace argos {
+    /****************************************/
+    /****************************************/
+ 
++   const std::map<std::string, CCI_DroneCamerasSystemSensor::TConfiguration>
++      CCI_DroneCamerasSystemSensor::SINGLE_CAMERA_SENSOR_CONFIGURATION = {
++      std::make_pair("arm0",
++                     std::make_tuple("origin",
++                                     CVector3(0, 0, 0),
++                                     CQuaternion(ToRadians(CDegrees(180)), CVector3(1,0,0).Normalize())
++                                        * CQuaternion(CRadians::PI, CVector3::Z))),
++   };
++
+ }
+diff --git a/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.h b/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.h
+index 7e68f624..7f2ae241 100644
+--- a/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.h
++++ b/src/plugins/robots/drone/control_interface/ci_drone_cameras_system_sensor.h
+@@ -91,6 +91,7 @@ namespace argos {
+       static const Real DEFAULT_CAMERA_Z_OFFSET;
+       static const CDegrees DEFAULT_CAMERA_ANGLE;
+       static const std::map<std::string, TConfiguration> DEFAULT_SENSOR_CONFIGURATION;
++      static const std::map<std::string, TConfiguration> SINGLE_CAMERA_SENSOR_CONFIGURATION;
+ 
+    };
+ 
+diff --git a/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp b/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp
+index 8ea774bb..2acd6fdd 100644
+--- a/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp
++++ b/src/plugins/robots/drone/simulator/drone_cameras_system_default_sensor.cpp
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include "drone_cameras_system_default_sensor.h"
++#include "drone_flight_system_entity.h"
+ 
+ #include <argos3/core/simulator/simulator.h>
+ #include <argos3/core/simulator/entity/composable_entity.h>
+@@ -39,9 +40,11 @@ namespace argos {
+          m_pcEmbodiedEntity =
+             &(c_entity.GetComponent<CEmbodiedEntity>("body"));
+          /* allocate memory for the sensor interfaces */
+-         m_vecSimulatedInterfaces.reserve(DEFAULT_SENSOR_CONFIGURATION.size());
++         //m_vecSimulatedInterfaces.reserve(DEFAULT_SENSOR_CONFIGURATION.size());
++         m_vecSimulatedInterfaces.reserve(SINGLE_CAMERA_SENSOR_CONFIGURATION.size());
+          /* get the anchors for the sensor interfaces from m_mapSensorConfig */
+-         for(const std::pair<const std::string, TConfiguration>& t_config : DEFAULT_SENSOR_CONFIGURATION) {
++         //for(const std::pair<const std::string, TConfiguration>& t_config : DEFAULT_SENSOR_CONFIGURATION) {
++         for(const std::pair<const std::string, TConfiguration>& t_config : SINGLE_CAMERA_SENSOR_CONFIGURATION) {
+             const char* pchAnchor = std::get<const char*>(t_config.second);
+             const SAnchor& sAnchor =
+                c_entity.GetComponent<CEmbodiedEntity>("body").GetAnchor(pchAnchor);
+diff --git a/src/plugins/robots/drone/simulator/drone_entity.cpp b/src/plugins/robots/drone/simulator/drone_entity.cpp
+index 8f329a0a..74586e14 100644
+--- a/src/plugins/robots/drone/simulator/drone_entity.cpp
++++ b/src/plugins/robots/drone/simulator/drone_entity.cpp
+@@ -60,6 +60,11 @@ namespace argos {
+          /* create and initialize the flight system entity */
+          m_pcFlightSystemEntity = 
+             new CDroneFlightSystemEntity(this, "flight_system_0");
++         /* check fix mode switch*/
++         bool bFixSwitch = false;
++         GetNodeAttributeOrDefault(t_tree, "fix", bFixSwitch, bFixSwitch);
++         if (bFixSwitch == true) m_pcFlightSystemEntity->SetFixMode(true);
++                            else m_pcFlightSystemEntity->SetFixMode(false);
+          m_pcFlightSystemEntity->Enable();
+          AddComponent(*m_pcFlightSystemEntity);
+          /* create and initialize a radio equipped entity for WiFi */
+diff --git a/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp b/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp
+index aeefaa01..b2b0034e 100644
+--- a/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp
++++ b/src/plugins/robots/drone/simulator/drone_flight_system_entity.cpp
+@@ -24,7 +24,8 @@ namespace argos {
+       m_cTargetVelocity(CVector3::ZERO),
+       m_fTargetYawAngle(0.0),
+       m_bIdealMode(false),
+-      m_bVelocityMode(false) {}
++      m_bVelocityMode(false),
++      m_bFixMode(false) {}
+ 
+    /****************************************/
+    /****************************************/
+diff --git a/src/plugins/robots/drone/simulator/drone_flight_system_entity.h b/src/plugins/robots/drone/simulator/drone_flight_system_entity.h
+index bd18262a..322eea43 100644
+--- a/src/plugins/robots/drone/simulator/drone_flight_system_entity.h
++++ b/src/plugins/robots/drone/simulator/drone_flight_system_entity.h
+@@ -123,6 +123,14 @@ namespace argos {
+          return m_bVelocityMode;
+       }
+ 
++      void SetFixMode(const bool b_fix_mode) {
++         m_bFixMode = b_fix_mode;
++      }
++
++      const bool GetFixMode() const {
++         return m_bFixMode;
++      }
++
+    private:
+       CVector3 m_cPositionReading;
+       CVector3 m_cOrientationReading;
+@@ -132,6 +140,7 @@ namespace argos {
+       CVector3 m_cTargetVelocity;
+       CRadians m_fTargetYawAngle;
+       CRadians m_fTargetYawVelocity;
++      bool m_bFixMode;
+       bool m_bIdealMode;
+       bool m_bVelocityMode;
+    };
+diff --git a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
+index 1302f657..17ab0214 100644
+--- a/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
++++ b/src/plugins/robots/drone/simulator/pointmass3d_drone_model.cpp
+@@ -118,6 +118,9 @@ namespace argos
+    /****************************************/
+ 
+    void CPointMass3DDroneModel::UpdatePhysics() {
++      if (m_cFlightSystemEntity.GetFixMode()) {
++         return;
++      }
+       if (m_cFlightSystemEntity.GetIdealMode()) {
+          m_cVelocity = m_cInputVelocity;
+          m_cAngularVelocity.SetZ(m_fInputYawVelocity);
