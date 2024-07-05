@@ -86,14 +86,23 @@ function CollectiveSensor.step(vns)
 	for i, ob in ipairs(vns.avoider.obstacles) do
 		totalObstaclesList[#totalObstaclesList + 1] = ob
 	end
+	local totalBlocksList = {}
+	for i, ob in ipairs(vns.avoider.blocks) do
+		totalBlocksList[#totalBlocksList + 1] = ob
+	end
 	for i, ob in ipairs(vns.collectivesensor.receiveList) do
 		totalObstaclesList[#totalObstaclesList + 1] = ob
+		totalBlocksList[#totalBlocksList + 1] = ob
 	end
 	vns.collectivesensor.totalObstaclesList = totalObstaclesList
+	vns.collectivesensor.totalBlocksList = totalBlocksList
 end
 
 function CollectiveSensor.reportAll(vns)
 	for i, ob in pairs(vns.avoider.obstacles) do
+		CollectiveSensor.addToSendList(vns, ob)
+	end
+	for i, ob in pairs(vns.avoider.blocks) do
 		CollectiveSensor.addToSendList(vns, ob)
 	end
 	for i, ob in pairs(vns.collectivesensor.receiveList) do
@@ -115,19 +124,19 @@ end
 ------ behaviour tree ---------------------------------------
 function CollectiveSensor.create_collectivesensor_node_reportAll(vns)
 	return function()
-		if vns.robotTypeS == "drone" then
+		--if vns.robotTypeS == "drone" then
 		CollectiveSensor.step(vns)
 		CollectiveSensor.reportAll(vns)
-		end
+		--end
 		return false, true
 	end
 end
 
 function CollectiveSensor.create_collectivesensor_node(vns)
 	return function()
-		if vns.robotTypeS == "drone" then
+		--if vns.robotTypeS == "drone" then
 			CollectiveSensor.step(vns)
-		end
+		--end
 		return false, true
 	end
 end
