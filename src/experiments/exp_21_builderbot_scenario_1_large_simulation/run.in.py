@@ -37,7 +37,7 @@ n_pipuck = 8
 pipuck_locations = generate_random_locations(
     n_pipuck,
     -2, 0,       # origin location
-    -4, -2,      # random x range
+    -3, -1,      # random x range
     -1, 1,       # random y range
     0.3, 0.5,    # near limit and far limit
     10000        # attempt count
@@ -62,20 +62,30 @@ n_block = 20
 center_block_type = 32
 usual_block_type = 34
 pickup_block_type = 33
+border_block_type = 31
 
 block_locations = generate_random_locations(
     n_block,
     0, 0.5,     # origin location
     -2, 2,      # random x range
-    -1, 1,       # random y range
+    -2, 2,       # random y range
     0.7, 1.5,    # near limit and far limit
     10000        # attempt count
 )
 
-block_xml = generate_blocks(block_locations, 33, usual_block_type)  # from label 3 generate drone xml tags, type
+block_xml = generate_blocks(block_locations, 33, usual_block_type)  # from label 33 generate drone xml tags, type
 
-block_xml = generate_block_xml(31, 0.2, 0, 0, center_block_type) + block_xml
+block_xml = generate_block_xml(31, 1.0, 0, 0, center_block_type) + block_xml
 block_xml = generate_block_xml(32, -0.5, 0, 0, pickup_block_type, False) + block_xml
+
+length = 3.5
+margin = 0.2
+border  = generate_line_locations(25, -length,        -length+margin, -length,        length-margin)
+border += generate_line_locations(25, -length+margin, length,         length-margin,  length)
+border += generate_line_locations(25,  length,        length-margin,  length,         -length+margin)
+border += generate_line_locations(25,  length-margin, -length,        -length+margin, -length)
+
+block_xml += generate_blocks(border, 60, border_block_type)  # from label 3 generate drone xml tags, type
 
 parameters = {
 #    "drone_real_noise"  :  "true",
@@ -90,7 +100,7 @@ parameters = {
 
     "pipuck_label"       :  "1, 20",
     "builderbot_label"   :  "21, 29",
-    "block_label"        :  "30, 50",
+    "block_label"        :  "30, 100",
 
     "avoid_block_vortex"   :  "nil",
 #    "avoid_speed_scalar"   :  0.20,
@@ -101,10 +111,14 @@ parameters = {
     "dangerzone_pipuck"  :  0.30,
     "dangerzone_block"   :  0.30,
     "dangerzone_drone"   :  0.5,
+    "safezone_default"   :  3.0,   # for recruit builderbot
 
     "center_block_type" :  center_block_type,
     "usual_block_type"  :  usual_block_type,
     "pickup_block_type" :  pickup_block_type,
+    "border_block_type" :  border_block_type,
+
+    "n_pipuck" :  n_pipuck,
 }
 
 parameters_txt = generateParametersText(parameters)
@@ -137,7 +151,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
               script="@CMAKE_SOURCE_DIR@/scripts/libreplayer/dummy.lua"
         ''' + parameters_txt)],
 
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True, "white")],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white")],
     ]
 )
 

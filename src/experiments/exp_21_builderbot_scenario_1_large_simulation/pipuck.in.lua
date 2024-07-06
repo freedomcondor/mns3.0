@@ -18,9 +18,10 @@ local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
 --local state
-state = "consensus"
+state = "init"
 substate = nil
 stateCount = 0
+consensus_cue = 500
 --local type_number_in_memory = 0
 type_number_in_memory = 0
 
@@ -30,8 +31,9 @@ dangezone_block_backup = 0.30
 center_block_type = tonumber(robot.params.center_block_type)
 usual_block_type = tonumber(robot.params.usual_block_type)
 pickup_block_type = tonumber(robot.params.pickup_block_type)
+border_block_type = tonumber(robot.params.border_block_type)
 
-normal_pipuck_number = 8
+normal_pipuck_number = tonumber(robot.params.n_pipuck)
 special_pipuck = false
 local robotType, number = string.match(robot.id, "(%a+)(%d+)")
 if tonumber(number) > normal_pipuck_number then special_pipuck = true end
@@ -62,7 +64,8 @@ end
 
 function reset()
 	vns.reset(vns)
-	if vns.idS == robot.params.stabilizer_preference_brain then vns.idN = 1 end
+	--if vns.idS == robot.params.stabilizer_preference_brain then vns.idN = 1 end
+	vns.idN = vns.idN + 1
 	vns.setGene(vns, gene)
 	vns.setMorphology(vns, structure1)
 	bt = BT.create(vns.create_vns_node(vns, {
@@ -76,11 +79,11 @@ function reset()
 				vns.Learner.create_knowledge_node(vns, "push_node"),
 				--create_push_node(vns),
 			}},
-			--create_dismiss_node(vns),
+			create_dismiss_node(vns),
 		}}
 	}))
 
-	state = "consensus"
+	state = "init"
 
 	if special_pipuck == true then
 		setup_push_node(vns)
@@ -144,7 +147,7 @@ return function()
 		end
 
 		local targetDroneScale = vns.allocator.target.scale["drone"] or 0
-		local currentDroneScale = vns.scalemanager.scale["pipuck"] or 0
+		local currentDroneScale = vns.scalemanager.scale["drone"] or 0
 		if currentDroneScale > targetDroneScale then
 			for idS, robotR in pairs(vns.childrenRT) do
 				if robotR.robotTypeS == "drone" and
@@ -166,7 +169,7 @@ return function()
 	local range = 1.0
 	-- check neighbour blocks
 	for id, block in pairs(vns.avoider.blocks) do
-		if block.positionV3:length() < range then
+		if block.positionV3:length() < range and block.type ~= border_block_type then
 			--vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
 
 			-- check type exist
@@ -188,11 +191,18 @@ return function()
 		type_number = type_number + 1
 	end
 
+	if type_number_in_memory ~= type_number then
+		stateCount = 0
+	end
 	type_number_in_memory = type_number
 
 	-- draw type_number
+	local color = "black"
+	if stateCount > consensus_cue then
+		color = "green"
+	end
 	for i = 1, type_number do
-		vns.api.debug.drawRing("black", vector3(0,0,0.15 + 0.06 * i), 0.04, true)
+		vns.api.debug.drawRing(color, vector3(0,0,0.15 + 0.06 * i), 0.04, true)
 	end
 
 	logger("type_number = ", type_number)
@@ -236,16 +246,50 @@ return function()
 		switchAndSendNewState(vns, msgM.dataT.state, msgM.dataT.substate)
 	end end
 
-	local range = 2.5
-	local desired_distance = 1
-	if state == "consensus" and vns.parentR == nil and special_pipuck ~= true then
+	-- random walk is not used
+	if state == "init" then
+		if stateCount > 100 then
+			state = "consensus"
+		end
+	elseif state == "randomwalk" and vns.parentR == nil and special_pipuck ~= true then
+		local range = 1.5
+		-- random walk
+		local random = (robot.random.uniform() - 0.5) * 2 * 45 * math.pi/180
+		local speed = 0.03
+		local velocity = vector3(speed*math.cos(random), speed*math.sin(random), 0)
+		vns.Spreader.emergency_after_core(vns, velocity, vector3())
+
+		-- avoid other pipucks in a long distance
+		for id, robot in pairs(vns.connector.seenRobots) do if robot.robotTypeS == "pipuck" then
+			-- check special pipuck
+			local seen_special_pipuck = false
+			--local robotType, number = string.match(robot.idS, "(%a+)(%d+)")
+			--if tonumber(number) > normal_pipuck_number then seen_special_pipuck = true end
+
+			-- avoid
+			if seen_special_pipuck == false and robot.positionV3:length() < range then
+				local dir = -vector3(robot.positionV3):normalize()
+				vns.Spreader.emergency_after_core(vns, dir * 0.05, vector3())
+				--vns.api.debug.drawArrow("blue", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(robot.positionV3), true)
+			end
+		end end
+
+	elseif state == "consensus" and vns.parentR == nil and special_pipuck == true then
+		vns.setGoal(vns, vector3(), quaternion())
+		vns.goal.transV3 = vector3()
+	elseif state == "consensus" and vns.parentR == nil and special_pipuck ~= true then
+		local range = 1.5
+		local desired_distance = 1
+
 		vns.Parameters.avoider_brain_exception = false
 		vns.Parameters.dangerzone_block = 0.2
 
 		-- check usual_block_type block to find direction
-		local usual_block_type = nil
-		for id, block in pairs(vns.avoider.blocks) do
-			vns.setGoal(vns, vector3(), block.orientationQ)
+		if stateCount > consensus_cue then
+			local usual_block_type = nil
+			for id, block in pairs(vns.avoider.blocks) do
+				vns.setGoal(vns, vector3(), block.orientationQ)
+			end
 		end
 
 		vns.Spreader.emergency_after_core(vns, vector3(0.03, 0, 0), vector3())
@@ -268,7 +312,9 @@ return function()
 
 		-- state switch
 		for id, robot in pairs(vns.connector.seenRobots) do
-			if robot.robotTypeS == "builderbot" and robot.positionV3:length() < 1.0 then
+			if stateCount > consensus_cue and
+			   robot.robotTypeS == "builderbot" and
+			   robot.positionV3:length() < 1.0 then
 				if type_number_in_memory == 2 then
 					vns.setMorphology(vns, structure2)
 				elseif type_number_in_memory == 3 then
@@ -303,7 +349,11 @@ return function()
 			--else
 				--local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
 				--vns.setGoal(vns, center.positionV3 + vector3(0,1.9,0):rotate(center.orientationQ), ori)
-				vns.setGoal(vns, center.positionV3 + vector3(1.9, 0, 0):rotate(center.orientationQ), center.orientationQ)
+				-- go to 0 degree front of center
+				--vns.setGoal(vns, center.positionV3 + vector3(1.9, 0, 0):rotate(center.orientationQ), center.orientationQ)
+				-- go to any degree a fix distance of center
+				local ori = Transform.fromToQuaternion(vector3(1, 0, 0), -center.positionV3)
+				vns.setGoal(vns, center.positionV3 + vector3(1.9,0,0):rotate(ori), ori)
 			--end
 		end
 	elseif state == "start_push" then
@@ -316,9 +366,14 @@ return function()
 				center = block
 			end end
 			if center ~= nil then
+				-- go to 90 degree side of center
 				--local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
 				--vns.setGoal(vns, center.positionV3 + vector3(0,1.9,0):rotate(center.orientationQ), ori)
-				vns.setGoal(vns, center.positionV3 + vector3(1.9, 0, 0):rotate(center.orientationQ), center.orientationQ)
+				-- go to 0 degree front of center
+				--vns.setGoal(vns, center.positionV3 + vector3(1.9, 0, 0):rotate(center.orientationQ), center.orientationQ)
+				-- go to any degree a fix distance of center
+				local ori = Transform.fromToQuaternion(vector3(1, 0, 0), -center.positionV3)
+				vns.setGoal(vns, center.positionV3 + vector3(1.9,0,0):rotate(ori), ori)
 			end
 		end
 		return false, false
