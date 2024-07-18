@@ -12,7 +12,7 @@ function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, 
 		node.children = {}
 		table.insert(node.children,
 		{	robotTypeS = "drone",
-			positionV3 = vector3(0,dis/2,height),
+			positionV3 = vector3(dis*1.2,0,height),
 			orientationQ = quaternion(),
 		})
 		return node
@@ -27,7 +27,7 @@ function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, 
 		}}
 		table.insert(node.children,
 		{	robotTypeS = "drone",
-			positionV3 = vector3(0,dis/2,height),
+			positionV3 = vector3(dis*1.2,0,height),
 			orientationQ = quaternion(),
 		})
 		return node

@@ -27,7 +27,7 @@ arena_z_center = 10
 
 pipuck_locations = generate_random_locations(n_pipuck,
                                              -2.0, -0,       # origin
-                                             -3.0, -0.5,    # random x
+                                             -3.0, -1.5,    # random x
                                              0, 5.0,    # random y
                                              0.7, 1.5,   # near limit and far limit
                                              10000)      # attempt count
@@ -51,13 +51,15 @@ builderbot_xml = generate_builderbot_xml(11, 2, 0, 0)
 block_xml = ""
 reference_length = 20
 for i in range(0, reference_length) :
-    block_xml += generate_block_xml(i, i*0.5 - 2.5, -1, 0, 32)
+    block_xml += generate_block_xml(i, i*0.5 - 2.5, -0.8, 0, 32)
 
 line_length = 8
 for i in range(0, line_length) :
-    block_xml += generate_block_xml(reference_length + i, 1.5, i * 1, 0, 34)
+    block_xml += generate_block_xml(reference_length + i, 0, i * 1, 0, 34)
 
-block_xml += generate_block_xml(reference_length + line_length + 1, 3, 2, 0, 33)
+block_xml += generate_block_xml(reference_length + line_length + 1, 2.3, 2, 0, 33)
+block_xml += generate_block_xml(reference_length + line_length + 2, 2.5, 5, 0, 33)
+block_xml += generate_block_xml(reference_length + line_length + 3, 4.7, 5, 0, 33)
 
 parameters = {
     "drone_real_noise"  :  False,

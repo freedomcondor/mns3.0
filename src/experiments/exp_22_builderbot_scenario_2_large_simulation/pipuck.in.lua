@@ -198,13 +198,19 @@ return function()
 	elseif state == "forward" then
 		switchAndSendNewState(vns, "forward")
 		if vns.parentR == nil then
+			local left_right_speed = 0
 			if reference_block ~= nil then
 				vns.setGoal(vns, vector3(), reference_block.orientationQ)
 				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
+
+				local from_block_to_me = Transform.AxCis0(reference_block)
+				local right_dis = from_block_to_me.positionV3.y
+				local target_dis = 0.8
+				left_right_speed = (target_dis - right_dis) * 0.10
 			end
 
 			if vns.scalemanager.scale["pipuck"] == n_pipuck then
-				vns.Spreader.emergency_after_core(vns, vector3(0.03, 0, 0), vector3())
+				vns.Spreader.emergency_after_core(vns, vector3(0.015, left_right_speed, 0), vector3())
 			end
 		end
 		local target = nil
@@ -272,8 +278,16 @@ return function()
 		end
 	elseif state == "forward_2" then
 		-- refuse to move backwards
-		if vns.goal.positionV3.x < -0.1 then
-			vns.goal.positionV3.x = 0
+		local degree = math.atan(vns.goal.positionV3.y / vns.goal.positionV3.x) * 180 / math.pi
+		local threshold = 45
+		if vns.goal.positionV3.x < 0 or degree < -threshold or degree > threshold then
+			vns.goal.positionV3 = vector3()
+			vns.goal.transV3 = vector3()
+		end
+		local degree = math.atan(vns.goal.transV3.y / vns.goal.transV3.x) * 180 / math.pi
+		if vns.goal.transV3.x < 0 or degree < -threshold or degree > threshold then
+			vns.goal.positionV3 = vector3()
+			vns.goal.transV3 = vector3()
 		end
 		-- move forward
 		if vns.parentR == nil then
@@ -283,8 +297,8 @@ return function()
 				reference = block
 				local from_block_to_me = Transform.AxCis0(block)
 				local right_dis = from_block_to_me.positionV3.y
-				local target_dis = 1
-				left_right_speed = (target_dis - right_dis) * 0.03
+				local target_dis = 0.8
+				left_right_speed = (target_dis - right_dis) * 0.10
 				vns.setGoal(vns, vector3(), block.orientationQ)
 				--vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
 				break
@@ -296,7 +310,7 @@ return function()
 				local obstacle_existance = false
 				for id, block in pairs(vns.collectivesensor.totalBlocksList) do
 					if block.type == obstacle_block_type and
-					   block.positionV3.x < 1.0 then
+					   block.positionV3.x < 0.5 then
 						local reference_to_block = {}
 						Transform.AxCisB(reference, block, reference_to_block)
 						if reference_to_block.positionV3.y > 0.20 then
@@ -320,6 +334,10 @@ return function()
 			state = "step_back"
 		end
 	elseif state == "step_back" then
+		-- anchor direction
+		local reference_dir = quaternion()
+		if reference_block ~= nil then reference_dir = reference_block.orientationQ end
+	
 		-- find nearest_block
 		local nearest_block = nil
 		local dis = math.huge
@@ -329,13 +347,14 @@ return function()
 		end end
 		if nearest_block ~= nil then
 			local dir = vector3(nearest_block.positionV3):normalize()
-			local anchor_point = nearest_block.positionV3 - dir * 1
-			vns.setGoal(vns, anchor_point, quaternion())
+			if reference_block ~= nil then dir = reference_dir end
+			local anchor_point = nearest_block.positionV3 - vector3(1, 0, 0):rotate(dir) * 1.5
+			vns.setGoal(vns, anchor_point, reference_dir)
 			if anchor_point:length() < 0.1 then
 				state = "wait_for_obstacle_clearance"
 			end
 		end
-	elseif state == "wait_for_obstacle_clearance" then
+elseif state == "wait_for_obstacle_clearance" then
 		-- stop moving
 		vns.setGoal(vns, vector3(), quaternion())
 		vns.goal.transV3 = vector3()
@@ -352,7 +371,7 @@ return function()
 				local obstacle_existance = false
 				for id, block in pairs(vns.collectivesensor.totalBlocksList) do
 					if block.type == obstacle_block_type and
-						block.positionV3.x < 2 then
+						block.positionV3.x < 1.0 then
 						local reference_to_block = {}
 						Transform.AxCisB(reference, block, reference_to_block)
 						if reference_to_block.positionV3.y > 0.20 then
@@ -362,7 +381,7 @@ return function()
 					end
 				end
 				if obstacle_existance == false and vns.driver.pipuck_arrive == true and vns.scalemanager.scale["pipuck"] == n_pipuck then
-					--stateCount = stateCount + 1
+					--stateCount = stateCount + 0
 				else
 					stateCount = 0
 				end
@@ -393,7 +412,7 @@ function setup_push_node(vns)
 			-- find a target
 			local target = nil
 			local mini_dis = math.huge
-			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type then
+			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type and block.positionV3:length() < 0.8 then
 				-- calc reference to block
 				local reference_to_block = {}
 				Transform.AxCisB(reference, block, reference_to_block)
