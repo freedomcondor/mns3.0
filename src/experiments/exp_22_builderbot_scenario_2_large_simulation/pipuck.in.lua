@@ -170,14 +170,12 @@ return function()
 	-- spread reference block to children
 	if reference_block ~= nil then
 		for idS, robotR in pairs(vns.childrenRT) do
-			if robotR.robotTypeS == "pipuck" then
-				vns.Msg.send(idS, "downstream_reference",{
-					reference_block = {
-						positionV3 = vns.api.virtualFrame.V3_VtoR(reference_block.positionV3),
-						orientationQ = vns.api.virtualFrame.Q_VtoR(reference_block.orientationQ),
-					}
-				})
-			end
+			vns.Msg.send(idS, "downstream_reference",{
+				reference_block = {
+					positionV3 = vns.api.virtualFrame.V3_VtoR(reference_block.positionV3),
+					orientationQ = vns.api.virtualFrame.Q_VtoR(reference_block.orientationQ),
+				}
+			})
 		end
 	end
 
@@ -346,7 +344,7 @@ return function()
 			dis = block.positionV3:length()
 		end end
 		if nearest_block ~= nil then
-			local dir = vector3(nearest_block.positionV3):normalize()
+			local dir = nearest_block.orientationQ
 			if reference_block ~= nil then dir = reference_dir end
 			local anchor_point = nearest_block.positionV3 - vector3(1, 0, 0):rotate(dir) * 1.5
 			vns.setGoal(vns, anchor_point, reference_dir)
@@ -371,7 +369,7 @@ elseif state == "wait_for_obstacle_clearance" then
 				local obstacle_existance = false
 				for id, block in pairs(vns.collectivesensor.totalBlocksList) do
 					if block.type == obstacle_block_type and
-						block.positionV3.x < 1.0 then
+						block.positionV3.x < 2.0 then
 						local reference_to_block = {}
 						Transform.AxCisB(reference, block, reference_to_block)
 						if reference_to_block.positionV3.y > 0.20 then
@@ -412,7 +410,7 @@ function setup_push_node(vns)
 			-- find a target
 			local target = nil
 			local mini_dis = math.huge
-			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type and block.positionV3:length() < 0.8 then
+			for id, block in pairs(vns.avoider.blocks) do if block.type == obstacle_block_type and block.positionV3:length() < 1.8 then
 				-- calc reference to block
 				local reference_to_block = {}
 				Transform.AxCisB(reference, block, reference_to_block)

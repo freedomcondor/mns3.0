@@ -15,6 +15,11 @@ function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, 
 			positionV3 = vector3(dis*1.2,0,height),
 			orientationQ = quaternion(),
 		})
+		table.insert(node.children,
+		{	robotTypeS = "builderbot",
+			positionV3 = vector3(dis, 0, 0),
+			orientationQ = quaternion(),
+		})
 		return node
 	else
 		local node = 
@@ -30,10 +35,17 @@ function generate_line(n, startPositionV3, startOrientationQ, offsetPositionV3, 
 			positionV3 = vector3(dis*1.2,0,height),
 			orientationQ = quaternion(),
 		})
+		table.insert(node.children,
+		{	robotTypeS = "builderbot",
+			positionV3 = vector3(dis, 0, 0),
+			orientationQ = quaternion(),
+		})
 		return node
 	end
 end
 
 local n = 8
 
-return generate_line(n, vector3(0, dis, 0), quaternion(), vector3(0, dis, 0), quaternion())
+local node = generate_line(n, vector3(0, dis, 0), quaternion(), vector3(0, dis, 0), quaternion())
+
+return node

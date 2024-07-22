@@ -46,20 +46,27 @@ block_locations = generate_random_locations(n_block,
 pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 drone_xml = generate_drones(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 
-builderbot_xml = generate_builderbot_xml(11, 2, 0, 0)
+builderbot_xml = generate_builderbot_xml(11, 1.5, 0, 0)
+builderbot_xml += generate_builderbot_xml(12, 1.5, 5, 0)
 
 block_xml = ""
-reference_length = 20
+reference_length = 40
 for i in range(0, reference_length) :
-    block_xml += generate_block_xml(i, i*0.5 - 2.5, -0.8, 0, 32)
+    block_xml += generate_block_xml(i, i*0.20 - 1.5, -0.8, 0, 32, False)
 
 line_length = 8
 for i in range(0, line_length) :
     block_xml += generate_block_xml(reference_length + i, 0, i * 1, 0, 34)
 
-block_xml += generate_block_xml(reference_length + line_length + 1, 2.3, 2, 0, 33)
-block_xml += generate_block_xml(reference_length + line_length + 2, 2.5, 5, 0, 33)
-block_xml += generate_block_xml(reference_length + line_length + 3, 4.7, 5, 0, 33)
+obstacle_locations = generate_random_locations(5,
+                                               None, None,       # origin
+                                               1, 5,    # random x
+                                               1, 5,    # random y
+                                               1.5, 5,   # near limit and far limit
+                                               10000)      # attempt count
+
+
+block_xml += generate_blocks(obstacle_locations, reference_length + line_length + 1, 33)
 
 parameters = {
     "drone_real_noise"  :  False,
@@ -68,7 +75,7 @@ parameters = {
 
     "mode_2D"           :  "true",
     "mode_builderbot"   :  "true",
-    "drone_default_height" : 2,
+    "drone_default_height" : 2.5,
 
     "pipuck_label"      :  "1, 10",
     "builderbot_label"  :  "11, 15",
@@ -78,6 +85,8 @@ parameters = {
     "dangerzone_pipuck" :  0.20,
     "dangerzone_block"  :  0.20,
     "dangerzone_drone"  :  1.0,
+
+    "obstacle_unseen_count" : 0,
 
     "safezone_pipuck_pipuck" : 2.0,
 
@@ -103,7 +112,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
 
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
-        #["BUILDERBOTS",       builderbot_xml], 
+        ["BUILDERBOTS",       builderbot_xml], 
         ["BLOCKS",            block_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
@@ -113,6 +122,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ''' + parameters_txt)],
         ["BUILDERBOT_CONTROLLER", generate_builderbot_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/builderbot.lua"
+              pipuck_wheel_speed_limit="0.03"
         ''' + parameters_txt)],
         ["BLOCK_CONTROLLER", generate_block_controller('''
               script="@CMAKE_SOURCE_DIR@/scripts/libreplayer/dummy.lua"

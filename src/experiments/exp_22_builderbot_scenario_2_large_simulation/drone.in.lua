@@ -8,6 +8,7 @@ pairs = require("AlphaPairs")
 local api = require("droneAPI")
 local VNS = require("VNS")
 local BT = require("DynamicBehaviorTree")
+Transform = require("Transform")
 
 logger.enable("DroneConnector")
 
@@ -17,6 +18,10 @@ local bt
 
 line_block_type = tonumber(robot.params.line_block_type)
 obstacle_block_type = tonumber(robot.params.obstacle_block_type)
+
+state = "wait_to_forward"
+substate = nil
+stateCount = 0
 
 local structure1 = require("morphology1")
 local structure2 = require("morphology2")
@@ -52,7 +57,10 @@ function reset()
 			vns.create_preconnector_node(vns),
 		}}
 	--]]
-	bt = BT.create(vns.create_vns_node(vns, {connector_recruit_only_necessary = gene.children}))
+	bt = BT.create(vns.create_vns_node(vns, {
+		connector_recruit_only_necessary = gene.children,
+		navigation_node_post_core = create_navigation_node(vns),
+	}))
 end
 
 function step()
@@ -85,3 +93,66 @@ function destroy()
 	vns.destroy()
 	api.destroy()
 end
+
+function create_navigation_node(vns)
+	local function sendChilrenNewState(vns, newState, newSubstate)
+		for idS, childR in pairs(vns.childrenRT) do
+			vns.Msg.send(idS, "switch_to_state", {state = newState, substate = newSubstate})
+		end
+	end
+
+	function newState(vns, _newState, _newSubstate)
+		stateCount = 0
+		state = _newState
+		substate = _newSubstate
+	end
+
+	local function switchAndSendNewState(vns, _newState, _newSubstate)
+		newState(vns, _newState, _newSubstate)
+		sendChilrenNewState(vns, _newState, _newSubstate)
+	end
+
+return function()
+	stateCount = stateCount + 1
+	-- if I receive switch state cmd from parent
+	if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "switch_to_state")) do
+		switchAndSendNewState(vns, msgM.dataT.state, msgM.dataT.substate)
+	end end
+
+	reference_block = nil
+	local reference_block_acc = Transform.createAccumulator()
+	-- spread reference block
+	for id, block in ipairs(vns.avoider.blocks) do if block.type == reference_block_type then
+		Transform.addAccumulator(reference_block_acc, block)
+	end end
+	if reference_block_acc.n ~= 0 then
+		reference_block = Transform.averageAccumulator(reference_block_acc)
+	end
+
+	-- receive reference block
+	if vns.parentR ~= nil and reference_block == nil then
+		for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "downstream_reference")) do
+			reference_block = {
+				positionV3 = vns.parentR.positionV3 + vector3(msgM.dataT.reference_block.positionV3):rotate(vns.parentR.orientationQ),
+				orientationQ = vns.parentR.orientationQ * msgM.dataT.reference_block.orientationQ,
+			}
+			break
+		end 
+	end
+
+	-- spread reference block to children
+	if reference_block ~= nil then
+		for idS, robotR in pairs(vns.childrenRT) do
+			vns.Msg.send(idS, "downstream_reference",{
+				reference_block = {
+					positionV3 = vns.api.virtualFrame.V3_VtoR(reference_block.positionV3),
+					orientationQ = vns.api.virtualFrame.Q_VtoR(reference_block.orientationQ),
+				}
+			})
+		end
+	end
+
+	if reference_block ~= nil then
+		vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
+	end
+end end
