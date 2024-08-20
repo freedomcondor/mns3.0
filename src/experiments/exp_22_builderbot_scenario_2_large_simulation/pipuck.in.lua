@@ -179,9 +179,9 @@ return function()
 		end
 	end
 
-	if reference_block ~= nil then
-		vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
-	end
+	--if reference_block ~= nil then
+	--	vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
+	--end
 
 	local range = 0.7
 	if state == "wait_to_forward" then
@@ -199,7 +199,7 @@ return function()
 			local left_right_speed = 0
 			if reference_block ~= nil then
 				vns.setGoal(vns, vector3(), reference_block.orientationQ)
-				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
+				--vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
 
 				local from_block_to_me = Transform.AxCis0(reference_block)
 				local right_dis = from_block_to_me.positionV3.y

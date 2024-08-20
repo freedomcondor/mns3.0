@@ -152,7 +152,7 @@ return function()
 		end
 	end
 
-	if reference_block ~= nil then
-		vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
-	end
+	--if reference_block ~= nil then
+	--	vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(reference_block.positionV3), true)
+	--end
 end end
