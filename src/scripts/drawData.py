@@ -28,11 +28,23 @@ def readStrDataFrom(fileName) :
 	file.close()
 	return data
 
-def readVecFrom(fileName) :
+def readMatrixDataFrom(fileName) :
 	file = open(fileName,"r")
 	data = []
 	for line in file :
 		lineList = line.strip().split(",")
+		stepData = []
+		for col in lineList :
+			stepData.append(float(col))
+		data.append(stepData)
+	file.close()
+	return data
+
+def readVecFrom(fileName) :
+	file = open(fileName,"r")
+	data = []
+	for line in file :
+		lineList = line.strip().strip("()").split(",")
 		stepData = []
 		stepData.append(float(lineList[0]))
 		stepData.append(float(lineList[1]))
