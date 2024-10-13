@@ -1015,13 +1015,15 @@ def generate_random_locations(n, origin_x,    origin_y,
 def generate_slave_locations(n, master_locations,
                                 x_min_limit, x_max_limit,
                                 y_min_limit, y_max_limit,
-                                near_limit, far_limit) :
+                                near_limit, far_limit,
+                                attempt_count_down_input=attempt_count_down_default) :
     return generate_slave_locations_with_origin(n,
                                                 master_locations,
                                                 None, None,
                                                 x_min_limit, x_max_limit,
                                                 y_min_limit, y_max_limit,
-                                                near_limit, far_limit)
+                                                near_limit, far_limit,
+                                                attempt_count_down_input=attempt_count_down_default)
 
 
 def generate_slave_locations_with_origin(n, master_locations,
