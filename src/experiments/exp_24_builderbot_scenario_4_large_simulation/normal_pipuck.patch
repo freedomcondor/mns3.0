@@ -1,0 +1,35 @@
+diff --git a/src/extensions/pipuck_ext/dynamics3d_pipuck_ext_model.cpp b/src/extensions/pipuck_ext/dynamics3d_pipuck_ext_model.cpp
+index b9402d2..4fd025f 100644
+--- a/src/extensions/pipuck_ext/dynamics3d_pipuck_ext_model.cpp
++++ b/src/extensions/pipuck_ext/dynamics3d_pipuck_ext_model.cpp
+@@ -87,10 +87,11 @@ namespace argos {
+       m_ptrBody = std::make_shared<CBase>(*this, psBodyAnchor, ptrBodyShape, sBodyData);
+       m_ptrLeftWheel = std::make_shared<CLink>(*this, 0, psLeftWheelAnchor, ptrWheelShape, sLeftWheelData);
+       m_ptrRightWheel = std::make_shared<CLink>(*this, 1, psRightWheelAnchor, ptrWheelShape, sRightWheelData);
+-      m_ptrMount = std::make_shared<CLink>(*this, 2, nullptr, ptrMountShape, sMountData);
+-      m_ptrMount2 = std::make_shared<CLink>(*this, 3, nullptr, ptrMount2Shape, sMount2Data);
++      //m_ptrMount = std::make_shared<CLink>(*this, 2, nullptr, ptrMountShape, sMountData);
++      //m_ptrMount2 = std::make_shared<CLink>(*this, 3, nullptr, ptrMount2Shape, sMount2Data);
+       /* copy the bodies to the base class */
+-      m_vecBodies = {m_ptrBody, m_ptrLeftWheel, m_ptrRightWheel, m_ptrMount, m_ptrMount2};
++      //m_vecBodies = {m_ptrBody, m_ptrLeftWheel, m_ptrRightWheel, m_ptrMount, m_ptrMount2};
++      m_vecBodies = {m_ptrBody, m_ptrLeftWheel, m_ptrRightWheel};
+       /* synchronize with the entity with the space */
+       Reset();
+    }
+@@ -102,6 +103,7 @@ namespace argos {
+       /* reset the base class */
+       CDynamics3DMultiBodyObjectModel::Reset();
+       /* set up mount */
++      /*
+       m_cMultiBody.setupFixed(m_ptrMount->GetIndex(),
+                               m_ptrMount->GetData().Mass,
+                               m_ptrMount->GetData().Inertia,
+@@ -118,6 +120,7 @@ namespace argos {
+                               BODY_TO_MOUNT2_JOINT_OFFSET,
+                               MOUNT2_TO_BODY_JOINT_OFFSET,
+                               true);
++      */
+       /* set up wheels */
+       m_cMultiBody.setupRevolute(m_ptrLeftWheel->GetIndex(),
+                                  m_ptrLeftWheel->GetData().Mass,
