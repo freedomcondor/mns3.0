@@ -89,7 +89,7 @@ robotNames = findRobotLogs(InputFolder, "drone")
 drone_xml = ""
 for robotName in robotNames:
     id = re.findall(r'\d+', robotName)[0]
-    drone_xml += generate_drone_xml(id, 0, 0, 0)
+    drone_xml += generate_drone_xml(id, 0, 0, 0, 0)
 
 robotNames = findRobotLogs(InputFolder, "pipuck")
 pipuck_xml = ""
