@@ -26,6 +26,7 @@ for i = startStep, logReader.getEndStep(robotsData) do
 		sumVelocity = sumVelocity + deltaPosition
 	end
 	averageVelocity[i] = sumVelocity * (1 / swarmSize)
+	averageVelocity[i] = averageVelocity[i] / 0.2
 end
 
 logReader.savePlainData(averageVelocity, "average_velocity.log", startStep, endStep)

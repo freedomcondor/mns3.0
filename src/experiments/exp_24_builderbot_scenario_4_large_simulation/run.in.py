@@ -34,11 +34,12 @@ pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)    # from label 1 generat
 
 #pipuck_xml += generate_pipuck_xml(10, 0, -4.0, 90)
 
+dis = 3
 block_xml = ""
-block_xml += generate_block_xml(1, 0, 0, 0, 34, False)
-block_xml += generate_block_xml(2, 0, 3, 0, 34, False)
-block_xml += generate_block_xml(3, -3, 3, 0, 34, False)
-block_xml += generate_block_xml(4, -3, 0, 0, 34, False)
+block_xml += generate_block_xml(1, 0,      0, 0, 34, False)
+block_xml += generate_block_xml(2, 0,    dis, 0, 34, False)
+block_xml += generate_block_xml(3, -dis, dis, 0, 34, False)
+block_xml += generate_block_xml(4, -dis,   0, 0, 34, False)
 
 #line_length = 8
 #for i in range(0, line_length) :

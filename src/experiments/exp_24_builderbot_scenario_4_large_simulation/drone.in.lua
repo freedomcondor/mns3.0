@@ -35,6 +35,7 @@ function init()
 	reset()
 
 --	api.debug.show_all = true
+	api.debug.recordSwitch = true
 end
 
 function reset()
