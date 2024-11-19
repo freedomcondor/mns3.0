@@ -9,8 +9,10 @@ import os
 # start to draw
 #--------------------------------------
 fig = plt.figure()
+rows = 4
+cols = 1
 
-ax_SoNS_number = fig.add_subplot(2,2,1)
+ax_SoNS_number = fig.add_subplot(rows,cols,1)
 ax_SoNS_number.set_xlabel("time(step)")
 ax_SoNS_number.set_ylabel("SoNS Number")
 
@@ -21,7 +23,7 @@ data_SoNS_size = readDataFrom("SoNSSize.dat")
 drawDataInSubplot(data_SoNS_size, ax_SoNS_number)
 
 #--------------------------------------------
-ax_state = fig.add_subplot(2,2,2)
+ax_state = fig.add_subplot(rows,cols,2)
 ax_state.set_xlabel("time(step)")
 ax_state.set_ylabel("Robot Number in Different States")
 
@@ -39,7 +41,7 @@ state6 = readDataFrom("result_push_size.dat")
 drawDataInSubplot(state6, ax_state)
 
 #--------------------------------------------
-ax_recruit = fig.add_subplot(2,2,3)
+ax_recruit = fig.add_subplot(rows,cols,3)
 ax_recruit.set_xlabel("time(step)")
 ax_recruit.set_ylabel("Robot Number in recruitment")
 
@@ -49,7 +51,7 @@ drawDataInSubplot(recruit_data[1], ax_recruit)
 drawDataInSubplot(recruit_data[2], ax_recruit)
 
 #--------------------------------------------
-ax_learner = fig.add_subplot(2,2,4)
+ax_learner = fig.add_subplot(rows,cols,4)
 ax_learner.set_xlabel("time(step)")
 ax_learner.set_ylabel("Leaner Length")
 
