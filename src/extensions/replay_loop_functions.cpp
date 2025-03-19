@@ -483,8 +483,9 @@ namespace argos {
          char buff[bufferLength];
          if (!fgets(buff, bufferLength, s_tracked_entity.LogFile))
          {
-            m_bFinishSignal = true;
-            break;
+            // m_bFinishSignal = true;
+            // break;
+            continue; // For non-debug entities, there may be incomplete data. Do not consider them as an end flag influencer.
          }
          std::string strLine = buff;
          // strip \n from end
