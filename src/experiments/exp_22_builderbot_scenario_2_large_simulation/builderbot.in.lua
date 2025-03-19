@@ -29,16 +29,16 @@ reference_block_type = tonumber(robot.params.reference_block_type)
 ----- data
 local bt
 local structure1 = require("morphology1")
-local structure2 = require("morphology2")
-local structure3 = require("morphology3")
+--local structure2 = require("morphology2")
+--local structure3 = require("morphology3")
 local gene = {
 	robotTypeS = "pipuck",
 	positionV3 = vector3(),
 	orientationQ = quaternion(),
 	children = {
 		structure1,
-		structure2,
-		structure3,
+		--structure2,
+		--structure3,
 	}
 }
 

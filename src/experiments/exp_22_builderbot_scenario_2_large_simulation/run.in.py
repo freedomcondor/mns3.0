@@ -46,8 +46,10 @@ block_locations = generate_random_locations(n_block,
 pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 drone_xml = generate_drones(pipuck_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 
-builderbot_xml = generate_builderbot_xml(11, 1.5, 0, 0)
-builderbot_xml += generate_builderbot_xml(12, 1.5, 5, 0)
+builderbot_xml = ""
+if Experiment_type == "builderbot" :
+    builderbot_xml = generate_builderbot_xml(11, 1.5, 0, 0)
+    builderbot_xml += generate_builderbot_xml(12, 1.5, 5, 0)
 
 block_xml = ""
 reference_length = 40

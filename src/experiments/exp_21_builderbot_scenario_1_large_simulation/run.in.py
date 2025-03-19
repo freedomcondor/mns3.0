@@ -75,8 +75,11 @@ block_locations = generate_random_locations(
 
 block_xml = generate_blocks(block_locations, 33, usual_block_type)  # from label 33 generate drone xml tags, type
 
-block_xml = generate_block_xml(31, 1.0, 0, 0, center_block_type) + block_xml
-block_xml = generate_block_xml(32, -0.5, 0, 0, pickup_block_type, False) + block_xml
+if Experiment_type == "builderbot" :
+    block_xml = generate_block_xml(31, 1.0, 0, 0, center_block_type) + block_xml
+    block_xml = generate_block_xml(32, -0.5, 0, 0, pickup_block_type, False) + block_xml
+else :
+    block_xml = generate_block_xml(31, 0, 0, 0, center_block_type, False) + block_xml
 
 length = 3.5
 margin = 0.2
