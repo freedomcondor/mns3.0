@@ -8,15 +8,8 @@ experiment_type=$1
 declare -A index
 index=(\
 #                 exp length    argos threads    run per thread   threads
-	[polyhedron_12]='500              16                 10              2'      \
-	[polyhedron_20]='500              24                 10              2'      \
-	[cube_27]='      600              32                 10              2'      \
-	[cube_64]='      1200             32                 20              1'      \
-	[cube_125]='     2500             32                 20              1'      \
-	[screen_64]='    1200             32                 20              1'      \
-	[donut_48]='     1200             32                 10              2'      \
-	[donut_64]='     1800             32                 20              1'      \
-	[donut_80]='     2200             32                 20              1'      \
+	[discrete]='     2000           32                 20              1'      \
+	[continuous]='   2000           32                 20              1'      \
 )
 
 tuple_line=${index[${experiment_type}]}
@@ -45,7 +38,7 @@ echo "----------------------------"
 
 #-----------------------------------------------------
 # prepare to run threads
-DATADIR=@CMAKE_MNS_DATA_PATH@/exp_01_formation/$experiment_type/run_data
+DATADIR=@CMAKE_MNS_DATA_PATH@/exp_07_acceleration/$experiment_type/run_data
 CODEDIR=$DATADIR/../code
 TMPDIR=@CMAKE_BINARY_DIR@/threads
 #THREADS_LOG_OUTPUT=`pwd`/threads_output.txt

@@ -5,10 +5,12 @@ exec(compile(open(drawDataFileName, "rb").read(), drawDataFileName, 'exec'))
 import sys
 import getopt
 import os
+import numpy
+import seaborn as sns
 
 # Get experiment type
 #--------------------------------------
-usage="[usage] example: python3 xxx.py -t polyhedron_12"
+usage="[usage] example: python3 xxx.py -t discrete"
 try:
     optlist, args = getopt.getopt(sys.argv[1:], "t:h")
 except:
@@ -22,10 +24,10 @@ for opt, value in optlist:
         Experiment_type = value
         print("Experiment_type provided: ", Experiment_type)
 if Experiment_type == None :
-    Experiment_type = "polyhedron_12"
+    Experiment_type = "discrete"
     print("Experiment_type not provided: using default", Experiment_type)
 
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_07_acceleration"
 DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
 
 # check experiment type existence
@@ -39,23 +41,77 @@ if not os.path.isdir(DATADIR) :
 
 # create figure and ax
 #--------------------------------------
-fig = plt.figure()
-ax_main = fig.add_subplot(1,1,1)
-ax_main.set_ylim([-1,23])
+fig, (ax_main, ax_violin1, ax_violin2) = plt.subplots(1, 3, gridspec_kw={'width_ratios': [2, 1, 1]})
+#ax_main.set_ylim([-1,23])
 
 # read data sets
 #--------------------------------------
-dataSet = []
+
+hoveringData = []
+movingData = []
 
 for subfolder in getSubfolders(DATADIR) :
-    dataSet.append(readDataFrom(subfolder + "result_data.txt"))
+    #if subfolder != "/home/harry/code/mns3.0/src/../../mns3.0-3Ddrone-data/exp_07_acceleration/discrete/run_data/run2/" :
+    #    continue
 
-step_time_scalar = 5
-#----- data1 -----
-stepsData, X = transferTimeDataToRunSetData(dataSet)
-mean, mini, maxi, upper, lower = calcMeanFromStepsData(stepsData)
-X = [i / step_time_scalar for i in X]
-drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, ax_main, {'color':'blue'})
+    # for each run
+    print("loading ", subfolder)
 
-#plt.show()
-plt.savefig("exp01_plot_" + Experiment_type + ".pdf")
+    # read total error
+    drawDataInSubplot(readDataFrom(subfolder + "result_local_errors.txt"), ax_main)
+
+    robotsData = []
+    # load from eachRobotGoalError
+    for subfile in getSubfiles(subfolder + "result_eachRobotGoalError") :
+        robotData = readDataFrom(subfile)
+        drawDataInSubplot(robotData, ax_main)
+        robotsData.append(robotData)
+    # convert into step data
+    stepData, positions = transferTimeDataToBoxData(robotsData, step_length = 1, interval_steps = False)
+        # stepData[0] has all the robots data in step 1
+    
+    # read key steps
+    switchSteps = readDataFrom(subfolder + "switchSteps.dat")
+    switchSteps = [int(step) for step in switchSteps]
+    # switch Steps[0] enter hovering
+    # switch Steps[1] hovering over, start acc
+
+    # read hover data
+    for i in range(switchSteps[1] - 50, switchSteps[1]) :
+        hoveringData = hoveringData + stepData[i]
+
+    #ax_main.axvline(x=switchSteps[1] - 50, color='red', linestyle='--', label='Hover Start')
+    #ax_main.axvline(x=switchSteps[1], color='red', linestyle='--', label='Hover End')
+
+    # read moving data for discrete
+    if Experiment_type == "discrete" :
+        #for k in range(2, len(switchSteps)) :
+        for k in range(2, 5) :
+            for i in range(switchSteps[k] - 50, switchSteps[k]) :
+                movingData = movingData + stepData[i]
+
+                #ax_main.axvline(x=switchSteps[k] - 50, color='green', linestyle='--', label='Move Start ' + str(k))
+                #ax_main.axvline(x=switchSteps[k], color='green', linestyle='--', label='Move End ' + str(k))
+
+    # read moving data for continuous
+    if Experiment_type == "continuous" :
+        #for i in range(switchSteps[1] + 1, len(stepData)) :
+        #switch Steps[2] reach 4m/s
+        for i in range(switchSteps[1] + 1, switchSteps[2]) :
+            movingData = movingData + stepData[i]
+
+maxData = max(max(hoveringData), max(movingData)) if movingData else max(hoveringData)
+# Draw violin plot for hoveringData
+sns.violinplot(ax=ax_violin1, data=hoveringData, color='red')
+ax_violin1.set_title('Hovering Data Distribution')
+ax_violin1.set_ylabel('Error')
+ax_violin1.set_ylim(0, maxData)  # Set y-limits to match the other violin plot
+
+# Draw violin plot for movingData
+sns.violinplot(ax=ax_violin2, data=movingData, color='green')
+ax_violin2.set_title('Moving Data Distribution')
+ax_violin2.set_ylabel('Error')
+ax_violin2.set_ylim(0, maxData)  # Set y-limits to match the other violin plot
+
+plt.show()
+#plt.savefig("exp07_plot_" + Experiment_type + ".pdf")

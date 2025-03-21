@@ -66,8 +66,7 @@ function reset()
 
 	bt = BT.create(vns.create_vns_node(vns,
 			{navigation_node_post_core = {type = "sequence", children = {
-				--create_navigation_node(vns),
-				create_navigation_acc_node(vns),
+				create_navigation_node(vns),
 				create_failsafe_node(vns),
 			}}}
 
@@ -114,6 +113,16 @@ return function()
 end end
 
 function create_navigation_node(vns)
+	if robot.params.experiment_type == "discrete" then
+		return create_navigation_discrete_node(vns)
+	elseif robot.params.experiment_type == "continuous" then
+		return create_navigation_continuous_node(vns)
+	else
+		return function() return false, true end
+	end
+end
+
+function create_navigation_discrete_node(vns)
 	state = "init"
 	stateCount = 0
 
@@ -134,7 +143,7 @@ return function()
 		if robot.id == "drone1" and stateCount > 300 and vns.driver.all_arrive == true then
 			newState(vns, 0)
 			logger("formation complete, enter hovering", vns.api.stepCount)
-			os.execute("echo " ..tostring(vns.api.stepCount) .. " > steps.dat")
+			os.execute("echo " ..tostring(vns.api.stepCount) .. " > switchSteps.dat")
 		end
 	-- forward
 	elseif type(state) == "number" and vns.parentR == nil then
@@ -142,7 +151,7 @@ return function()
 
 		if stateCount >= levelTime then
 			logger("switch state to ", state + 1, vns.api.stepCount)
-			os.execute("echo " ..tostring(vns.api.stepCount) .. " >> steps.dat")
+			os.execute("echo " ..tostring(vns.api.stepCount) .. " >> switchSteps.dat")
 			newState(vns, state + 1)
 		end
 	end
@@ -151,7 +160,7 @@ return function()
 
 end end
 
-function create_navigation_acc_node(vns)
+function create_navigation_continuous_node(vns)
 	state = "init"
 	stateCount = 0
 
@@ -171,17 +180,21 @@ return function()
 		if robot.id == "drone1" and stateCount > 300 and vns.driver.all_arrive == true then
 			newState(vns, "hover")
 			logger("formation complete, enter hovering", vns.api.stepCount)
-			os.execute("echo " ..tostring(vns.api.stepCount) .. " > steps.dat")
+			os.execute("echo " ..tostring(vns.api.stepCount) .. " > switchSteps.dat")
 		end
 	-- hover
 	elseif state == "hover" and vns.parentR == nil then
 		if stateCount >= 200 then
 			newState(vns, "acc")
 			logger("hover complete, enter acceleration", vns.api.stepCount)
+			os.execute("echo " ..tostring(vns.api.stepCount) .. " >> switchSteps.dat")
 		end
 	-- forward
 	elseif state == "acc" and vns.parentR == nil then
 		vns.Spreader.emergency_after_core(vns, vector3(stateCount * speedEachlevel, 0, 0), vector3())
+		if stateCount * speedEachlevel == 4 then
+			os.execute("echo " ..tostring(vns.api.stepCount) .. " >> switchSteps.dat")
+		end
 		if stateCount % 50 == 0 then
 			logger("accelerating, speed is ", stateCount * speedEachlevel, "at step", vns.api.stepCount)
 		end

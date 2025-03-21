@@ -9,12 +9,16 @@ for opt, value in optlist:
         Experiment_type = value
         print("Experiment_type provided: ", Experiment_type)
 if Experiment_type == None :
-    Experiment_type = "polyhedron_12"
+    Experiment_type = "discrete"
     print("Experiment_type not provided: using default", Experiment_type)
 
-import os
+if Experiment_type not in ["discrete", "continuous"]:
+    print("wrong experiment type provided, please choose among : ")
+    for key in ["discrete", "continuous"] :
+        print("    " + key)
+    exit()
 
-# drone and pipuck
+import os
 
 n_drone_index = {
     "cube_27"       :    27,
@@ -25,12 +29,7 @@ n_drone_index = {
     "cube_1000"     :  1000,
 }
 
-structure = Experiment_type
-if structure not in n_drone_index :
-    print("wrong experiment type provided, please choose among : ")
-    for key in n_drone_index :
-        print("    " + key)
-    exit()
+structure = "cube_64"
 
 n_drone = n_drone_index[structure]
 
@@ -67,6 +66,7 @@ drone_xml = generate_drones(drone_locations, 1, 12)                  # from labe
 
 parameters = generate3DdroneParameters()
 parameters["structure"] = structure
+parameters["experiment_type"] = Experiment_type
 
 if n_drone == 1000 :
     parameters["drone_flight_preparation_state_duration"] = 50
@@ -94,6 +94,6 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
     ]
 )
 
-os.system("echo " + structure + "> type.txt")
+os.system("echo " + Experiment_type + "> type.txt")
 os.system("argos3 -c vns.argos" + VisualizationArgosFlag)
 
