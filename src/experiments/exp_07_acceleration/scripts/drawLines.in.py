@@ -66,6 +66,10 @@ for subfolder in getSubfolders(DATADIR) :
         robotData = readDataFrom(subfile)
         drawDataInSubplot(robotData, ax_main)
         robotsData.append(robotData)
+
+        if robotData[1275] > 1.0 :
+            print("wrong case : ", subfolder)
+
     # convert into step data
     stepData, positions = transferTimeDataToBoxData(robotsData, step_length = 1, interval_steps = False)
         # stepData[0] has all the robots data in step 1
@@ -80,18 +84,18 @@ for subfolder in getSubfolders(DATADIR) :
     for i in range(switchSteps[1] - 50, switchSteps[1]) :
         hoveringData = hoveringData + stepData[i]
 
-    #ax_main.axvline(x=switchSteps[1] - 50, color='red', linestyle='--', label='Hover Start')
-    #ax_main.axvline(x=switchSteps[1], color='red', linestyle='--', label='Hover End')
+    ax_main.axvline(x=switchSteps[1] - 50, color='red', linestyle='--', label='Hover Start')
+    ax_main.axvline(x=switchSteps[1], color='red', linestyle='--', label='Hover End')
 
     # read moving data for discrete
     if Experiment_type == "discrete" :
         #for k in range(2, len(switchSteps)) :
-        for k in range(2, 5) :
+        for k in range(2, 6) :
             for i in range(switchSteps[k] - 50, switchSteps[k]) :
                 movingData = movingData + stepData[i]
 
-                #ax_main.axvline(x=switchSteps[k] - 50, color='green', linestyle='--', label='Move Start ' + str(k))
-                #ax_main.axvline(x=switchSteps[k], color='green', linestyle='--', label='Move End ' + str(k))
+                ax_main.axvline(x=switchSteps[k] - 50, color='green', linestyle='--', label='Move Start ' + str(k))
+                ax_main.axvline(x=switchSteps[k], color='green', linestyle='--', label='Move End ' + str(k))
 
     # read moving data for continuous
     if Experiment_type == "continuous" :

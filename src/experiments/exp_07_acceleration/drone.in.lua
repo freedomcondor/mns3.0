@@ -39,7 +39,7 @@ function init()
 
 	number = tonumber(string.match(robot.id, "%d+"))
 	local baseHeight = 8
-	local distribute_scale = 4
+	local distribute_scale = 5
 	local layers = 5
 	if robot.params.structure == "cube_512" then
 		baseHeight = 30
@@ -140,7 +140,7 @@ return function()
 
 	-- state
 	if state == "init" then
-		if robot.id == "drone1" and stateCount > 300 and vns.driver.all_arrive == true then
+		if robot.id == "drone1" and stateCount > 1000 and vns.driver.all_arrive == true then
 			newState(vns, 0)
 			logger("formation complete, enter hovering", vns.api.stepCount)
 			os.execute("echo " ..tostring(vns.api.stepCount) .. " > switchSteps.dat")
@@ -177,7 +177,7 @@ return function()
 
 	-- state
 	if state == "init" then
-		if robot.id == "drone1" and stateCount > 300 and vns.driver.all_arrive == true then
+		if robot.id == "drone1" and stateCount > 1000 and vns.driver.all_arrive == true then
 			newState(vns, "hover")
 			logger("formation complete, enter hovering", vns.api.stepCount)
 			os.execute("echo " ..tostring(vns.api.stepCount) .. " > switchSteps.dat")

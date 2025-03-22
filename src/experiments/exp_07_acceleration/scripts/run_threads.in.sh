@@ -8,8 +8,8 @@ experiment_type=$1
 declare -A index
 index=(\
 #                 exp length    argos threads    run per thread   threads
-	[discrete]='     2000           32                 20              1'      \
-	[continuous]='   2000           32                 20              1'      \
+	[discrete]='     2500           32                 20              1'      \
+	[continuous]='   2500           32                 20              1'      \
 )
 
 tuple_line=${index[${experiment_type}]}

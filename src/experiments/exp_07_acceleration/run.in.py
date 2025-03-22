@@ -47,8 +47,8 @@ arena_size_x = half_side_length * 30 + race_length
 
 offset = 0
 yoffset = 0
-x_scale = 1.2
-y_scale = 1.2
+x_scale = 1
+y_scale = 1
 near_limit = 1.5
 far_limit = 3
 if n_drone == 512 :
