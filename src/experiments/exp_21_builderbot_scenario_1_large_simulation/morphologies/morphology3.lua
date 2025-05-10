@@ -49,7 +49,7 @@ return
 	orientationQ = quaternion(),
 	children = {
 		{	robotTypeS = "builderbot",
-			positionV3 = vector3(dis/2,0,0),
+			positionV3 = vector3(dis/2,dis/2,0),
 			orientationQ = quaternion(),
 		},
 		generate_line(n, vector3(0, dis, 0):rotate(half_Q1), Q1, vector3(0, dis, 0):rotate(half_Q1), Q1, 1),

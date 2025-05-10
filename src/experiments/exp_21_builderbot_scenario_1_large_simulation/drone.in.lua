@@ -55,6 +55,8 @@ function reset()
 		}}
 	--]]
 	bt = BT.create(vns.create_vns_node(vns, {connector_recruit_only_necessary = gene.children, connector_no_recruit = true}))
+
+	api.debug.recordSwitch = true
 end
 
 function step()
@@ -69,8 +71,6 @@ function step()
 	api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false}, true)
 
-	vns.logLoopFunctionInfo(vns)
-
 	-- show type blocks
 	local type1 = center_block_type
 	local type2 = pickup_block_type
@@ -81,6 +81,8 @@ function step()
 			vns.api.debug.drawRing("green", vns.api.virtualFrame.V3_VtoR(block.positionV3), 0.1, true)
 		end
 	end
+
+	vns.logLoopFunctionInfo(vns)
 end
 
 function destroy()

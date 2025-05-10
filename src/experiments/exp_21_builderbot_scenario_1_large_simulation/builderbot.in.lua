@@ -45,6 +45,7 @@ local gene = {
 
 data = api.builderbot_utils_data -- for data editor check
 state = "pickup"
+substate_count = 0
 
 function init()
 	api.linkRobotInterface(VNS)
@@ -72,6 +73,8 @@ function reset()
 	}}
 
 	setup_not_to_push_node(vns)
+
+	api.debug.recordSwitch = true
 end
 
 function step()
@@ -114,6 +117,7 @@ end
 
 function create_navigation_node(vns)
 return function()
+	vns.arrive = false
 	if vns.parentR ~= nil then
 		local target_type = nil
 		if state == "pickup" then
@@ -131,6 +135,15 @@ return function()
 		end
 		if target_block ~= nil then
 			vns.setGoal(vns, target_block.positionV3, quaternion())
+			if target_block.positionV3:length() < 0.35 then
+				substate_count = substate_count + 1
+				if substate_count > 30 then
+					vns.arrive = api.virtualFrame.V3_VtoR(target_block.positionV3).y
+				end
+			else
+				vns.arrive = false
+				substate_count = 0
+			end
 		end
 	end
 	return false, true
@@ -165,7 +178,22 @@ return
 				end
 				return false, true 
 			end,
-			vns.Driver.create_driver_node(vns),
+			{type = "selector", children = {
+				function()
+					if vns.arrive ~= false then
+						-- arrive the target, but not find the block
+						-- ignore driver, but rotate the robot
+						if vns.arrive > 0 then
+							robot.api.move.with_bearing(0, 5)
+						else
+							robot.api.move.with_bearing(0, -5)
+						end
+						return false, true
+					end
+					return false, false
+				end,
+				vns.Driver.create_driver_node(vns),
+			}},
 		}},
 		{type = "sequence", children = {
 			function() return false, state == "pickup" end,
@@ -180,6 +208,7 @@ return
 			{type = "sequence*", children = {
 				robot.nodes.create_approach_block_node(data, function() return false, true end, 0.18),
 				robot.nodes.create_place_block_node(data, 0.19), --0.170 for old motor hardware
+				robot.nodes.create_timer_node(5, function() robot.api.move.with_bearing(-0.03, 0) return true end),
 				function()
 					state = "finish"
 					setup_start_to_push_node(vns)

@@ -58,37 +58,48 @@ pipuck_xml += generate_pipucks(pipuck_group_2_locations, 13, 10)    # from label
 
 builderbot_xml = generate_builderbot_xml(21, 2.25, 0, 0)
 
-n_block = 20
+avoid_points = [[2.25, 0]]
+
+n_block = 15
 center_block_type = 32
 usual_block_type = 34
 pickup_block_type = 33
 border_block_type = 31
 
-block_locations = generate_random_locations(
+block_xml = ""
+if Experiment_type == "builderbot" :
+    block_xml = generate_block_xml(31, 1.0, 0, 0, center_block_type) + block_xml
+    block_xml = generate_block_xml(32, -0.5, 0, 0, pickup_block_type, False) + block_xml
+    avoid_points.append([1.0, 0])
+    avoid_points.append([-0.5, 0])
+else :
+    block_xml = generate_block_xml(31, 0, 0, 0, center_block_type, False) + block_xml
+    avoid_points.append([0, 0])
+
+
+block_locations = generate_random_locations_with_avoid_points(
     n_block,
-    0, 0.5,     # origin location
-    -2, 2,      # random x range
-    -2, 2,       # random y range
+    avoid_points, 0.7,   # avoid points, avoid distance
+    -1.7, 1.7,      # random x range
+    -1.7, 1.7,       # random y range
     0.7, 1.5,    # near limit and far limit
     10000        # attempt count
 )
 
-block_xml = generate_blocks(block_locations, 33, usual_block_type)  # from label 33 generate drone xml tags, type
-
-if Experiment_type == "builderbot" :
-    block_xml = generate_block_xml(31, 1.0, 0, 0, center_block_type) + block_xml
-    block_xml = generate_block_xml(32, -0.5, 0, 0, pickup_block_type, False) + block_xml
-else :
-    block_xml = generate_block_xml(31, 0, 0, 0, center_block_type, False) + block_xml
+block_xml = block_xml + generate_blocks(block_locations, 33, usual_block_type)  # from label 33 generate drone xml tags, type
 
 length = 3.5
 margin = 0.2
 border  = generate_line_locations(25, -length,        -length+margin, -length,        length-margin)
 border += generate_line_locations(25, -length+margin, length,         length-margin,  length)
-border += generate_line_locations(25,  length,        length-margin,  length,         -length+margin)
 border += generate_line_locations(25,  length-margin, -length,        -length+margin, -length)
+block_xml += generate_blocks(border, 60, border_block_type)  # from label 60 generate drone xml tags, type
 
-block_xml += generate_blocks(border, 60, border_block_type)  # from label 3 generate drone xml tags, type
+last_border_left = generate_line_locations(12,  length,        length-margin,  length,        margin)
+block_xml += generate_blocks_with_th(last_border_left, 60 + len(border), -90, border_block_type)   # turn 90
+
+last_border_right = generate_line_locations(13,  length,       -length+margin,  length,       0)
+block_xml += generate_blocks_with_th(last_border_right, 60 + len(border) + len(last_border_left), 90, border_block_type)   # turn 90
 
 parameters = {
 #    "drone_real_noise"  :  "true",
@@ -154,7 +165,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
               script="@CMAKE_SOURCE_DIR@/scripts/libreplayer/dummy.lua"
         ''' + parameters_txt)],
 
-        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white")],
+        ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", True, "white")],
     ]
 )
 

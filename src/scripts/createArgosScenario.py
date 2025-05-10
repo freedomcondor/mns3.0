@@ -960,6 +960,63 @@ def generate_line_locations(number, x_left, y_left, x_right, y_right) :
     return a
 
 #- random locations ------------------------------------------------------------------------
+def generate_random_locations_with_avoid_points(
+    n,
+    avoid_points, avoid_distance, 
+    x_min_limit, x_max_limit,
+    y_min_limit, y_max_limit, 
+    near_limit,  far_limit,
+    margin,
+    attempt_count_down_input=attempt_count_down_default) :
+    a = []
+
+    # start generating
+    for i in range(0, n) : # 0 to n - 1
+        valid = False
+        attempt_count_down = attempt_count_down_input
+        while valid == False :
+            # check attempt
+            if attempt_count_down == 0 :
+                print("[warning] random locations incomplete")
+                break
+            else :
+                attempt_count_down = attempt_count_down - 1
+
+            # generate a random location
+            loc_x = x_min_limit + random.random() * (x_max_limit - x_min_limit)
+            loc_y = y_min_limit + random.random() * (y_max_limit - y_min_limit)
+
+            #check avoid points
+            valid = True
+            for avoid_point in avoid_points :
+                if (loc_x - avoid_point[0]) ** 2 + (loc_y - avoid_point[1]) ** 2 < avoid_distance ** 2 :
+                    valid = False
+                    break
+            if valid == False :
+                continue
+
+            #check near
+            for j in range(0, i) :
+                if (loc_x - a[j][0]) ** 2 + (loc_y - a[j][1]) ** 2 < near_limit ** 2 :
+                    valid = False
+                    break
+            if valid == False :
+                continue
+
+            #check faraway
+            valid = False
+            if i == 0 :
+                valid = True
+            for j in range(0, i) :
+                if (loc_x - a[j][0]) ** 2 + (loc_y - a[j][1]) ** 2 < far_limit ** 2 :
+                    valid = True
+                    break
+            if valid == True :
+                a.append([loc_x, loc_y])
+        if attempt_count_down == 0 :
+            break
+    return a
+
 def generate_random_locations(n, origin_x,    origin_y, 
                                  x_min_limit, x_max_limit,
                                  y_min_limit, y_max_limit, 
@@ -1105,6 +1162,14 @@ def generate_blocks(locations, start_id, type) :
     i = start_id
     for loc in locations :
         tagstr = tagstr + generate_block_xml(i, loc[0], loc[1], 0, type)
+        i = i + 1
+    return tagstr
+  
+def generate_blocks_with_th(locations, start_id, th, type) :
+    tagstr = ""
+    i = start_id
+    for loc in locations :
+        tagstr = tagstr + generate_block_xml(i, loc[0], loc[1], th, type)
         i = i + 1
     return tagstr
 

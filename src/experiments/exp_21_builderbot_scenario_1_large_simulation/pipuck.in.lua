@@ -72,6 +72,7 @@ function reset()
 		connector_recruit_only_necessary = gene.children,
 		navigation_node_pre_core = create_consensus_node(vns),
 		navigation_node_post_core = {type = "sequence", children = {
+			vns.CollectiveSensor.create_collectivesensor_node(vns),
 			vns.Learner.create_learner_node(vns),
 			{type = "selector", children = {
 				create_navigation_node(vns),
@@ -89,6 +90,8 @@ function reset()
 		setup_push_node(vns)
 		setup_wait_to_push_node(vns)
 	end
+
+	api.debug.recordSwitch = true
 end
 
 function step()
@@ -284,11 +287,14 @@ return function()
 		vns.Parameters.avoider_brain_exception = false
 		vns.Parameters.dangerzone_block = 0.2
 
-		-- check usual_block_type block to find direction
 		if stateCount > consensus_cue then
-			local usual_block_type = nil
+			local acc = Transform.createAccumulator()
 			for id, block in pairs(vns.avoider.blocks) do
-				vns.setGoal(vns, vector3(), block.orientationQ)
+				Transform.addAccumulator(acc, block)
+			end
+			if acc.n > 0 then
+				local res = Transform.averageAccumulator(acc)
+				vns.setGoal(vns, vector3(), res.orientationQ)
 			end
 		end
 
@@ -341,6 +347,14 @@ return function()
 		for id, block in pairs(vns.avoider.blocks) do if block.type == center_block_type then
 			center = block
 		end end
+		if center == nil then
+			for id, block in pairs(vns.collectivesensor.receiveList) do if block.type == center_block_type then
+				center = block
+			end end
+		end
+		if center ~= nil then
+			vns.CollectiveSensor.addToSendList(vns, center)
+		end
 		-- if I see center block
 		if center ~= nil then
 			--if vns.scalemanager.scale["pipuck"] == 8 then
@@ -365,6 +379,14 @@ return function()
 			for id, block in pairs(vns.avoider.blocks) do if block.type == center_block_type then
 				center = block
 			end end
+			if center == nil then
+				for id, block in pairs(vns.collectivesensor.receiveList) do if block.type == center_block_type then
+					center = block
+				end end
+			end
+			if center ~= nil then
+				vns.CollectiveSensor.addToSendList(vns, center)
+			end
 			if center ~= nil then
 				-- go to 90 degree side of center
 				--local ori = Transform.fromToQuaternion(vector3(-1, 0, 0), center.positionV3)
@@ -401,6 +423,14 @@ function setup_push_node(vns)
 		for id, block in pairs(vns.avoider.blocks) do if block.type == center_block_type then
 			center = block
 		end end
+		if center == nil then
+			for id, block in pairs(vns.collectivesensor.receiveList) do if block.type == center_block_type then
+				center = block
+			end end
+		end
+		if center ~= nil then
+			vns.CollectiveSensor.addToSendList(vns, center)
+		end
 		-- if I see center block
 		if center ~= nil then
 			if vns.parentR == nil then
