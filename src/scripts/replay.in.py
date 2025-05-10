@@ -12,6 +12,8 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/libreplayer/replayer_template.ar
         ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["DRONES",            drone_xml], 
         ["PIPUCKS",           pipuck_xml], 
+        ["BUILDERBOT",        builderbot_xml],
+        ["BLOCKS",            block_xml],
         ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, "white", True)],
         ["ARENA_SIZE",        arena_size_xml], 
         ["ARENA_CENTER",      arena_center_xml], 

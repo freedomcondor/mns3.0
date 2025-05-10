@@ -42,10 +42,12 @@ namespace argos {
       // Get a line from log
       int bufferLength = 4096;
       char buff[bufferLength];
-      if (!fgets(buff, bufferLength, s_tracked_entity.LogFile))
-      {
-         m_bFinishSignal = true;
-         return;
+      for (int i = 0; i < 1; i++) { // change replay speed
+         if (!fgets(buff, bufferLength, s_tracked_entity.LogFile))
+         {
+            m_bFinishSignal = true;
+            return;
+         }
       }
       std::string strLine = buff;
       // strip \n from end
@@ -436,6 +438,7 @@ namespace argos {
       UInt16 unDarkLineNumber = 5;
       UInt16 unColorMapStepLength = std::floor(vecDarkColorMap.size() / unRobotNumber);
       UInt16 unDarkColorEveryXRobots = std::floor(unRobotNumber / unDarkLineNumber);
+      if (unDarkColorEveryXRobots == 0) unDarkColorEveryXRobots = 1;
       UInt16 unColorMapIndex = 0;
       UInt16 unEntityCount = 0;
       for(CEntity* pc_entity : tRootEntityVector) {
@@ -467,6 +470,8 @@ namespace argos {
             continue;
          }
       }
+      // read the first line
+      GetSpace().IterateOverControllableEntities(EntityMultiThreadIteration);
    }
 
    /****************************************/

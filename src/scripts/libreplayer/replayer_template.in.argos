@@ -29,6 +29,22 @@
       <sensors />
       <params simulation="true" script="@CMAKE_CURRENT_BINARY_DIR@/dummy.lua" />
     </lua_controller>
+    <!-- Builderbot Controller -->
+    <lua_controller id="builderbot">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_CURRENT_BINARY_DIR@/dummy.lua" />
+    </lua_controller>
+    <!-- Block Controller -->
+    <lua_controller id="block">
+      <actuators>
+        <debug implementation="default" />
+      </actuators>
+      <sensors />
+      <params simulation="true" script="@CMAKE_CURRENT_BINARY_DIR@/dummy.lua" />
+    </lua_controller>
   </controllers>
 
   <!-- *********************** -->
@@ -45,6 +61,10 @@
     DRONES
     <!-- pipucks -->
     PIPUCKS
+    <!-- builderbots -->
+    BUILDERBOTS
+    <!-- blocks -->
+    BLOCKS
     <!-- walls -->
     WALL 
     <!-- target -->

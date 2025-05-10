@@ -97,6 +97,20 @@ for robotName in robotNames:
     id = re.findall(r'\d+', robotName)[0]
     pipuck_xml += generate_pipuck_xml(id, 0, 0, 0)
 
+builderbotNames = findRobotLogs(InputFolder, "builderbot")
+builderbot_xml = ""
+for robotName in builderbotNames:
+    id = re.findall(r'\d+', robotName)[0]
+    builderbot_xml += generate_builderbot_xml(id, 0, 0, 0)
+
+blockNames = findRobotLogs(InputFolder, "block")
+block_xml = ""
+count = 0
+for robotName in blockNames:
+    id = re.findall(r'\d+', robotName)[0]
+    block_xml += generate_block_xml(id, 0.06 * count, 0, 0, 255)
+    count += 1
+
 #----------------------------------------------------------------------------------------------
 # write input folder to file so that replay_loop_functions can read it
 InputFolderNameFile = open("replay_input_folder.txt", "w")
@@ -125,6 +139,8 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/replayer_template.argos",
         ["MULTITHREADS",      str(MultiThreads)],  # MultiThreads is inherit from createArgosScenario.py
         ["DRONES",            drone_xml],
         ["PIPUCKS",           pipuck_xml],
+        ["BUILDERBOT",        builderbot_xml],
+        ["BLOCKS",            block_xml],
         ["SIMULATION_SETUP",  generate_physics_media_loop_visualization("@CMAKE_BINARY_DIR@", False, True)],
         ["ARENA_SIZE",        arena_size_xml],
         ["ARENA_CENTER",      arena_center_xml],

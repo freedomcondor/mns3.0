@@ -198,34 +198,36 @@ end
 function api.debug.showVirtualFrame(essential)
 	local upOffset = vector3(0,0,0.1)
 	local offset = api.virtualFrame.positionV3 + upOffset
-	local length = 0.15
-	api.debug.drawArrow("green",
+	local length = 0.1
+	local virtualColor = "128,255,128,0"
+	local bodyColor = "128,255,255,0"
+	api.debug.drawArrow(virtualColor,
 		offset + vector3(-1 * length, 0, 0):rotate(api.virtualFrame.orientationQ),
 		offset + vector3( 3 * length, 0, 0):rotate(api.virtualFrame.orientationQ),
 		essential
 	)
-	api.debug.drawArrow("green",
+	api.debug.drawArrow(virtualColor,
 		offset + vector3(0, -1 * length, 0):rotate(api.virtualFrame.orientationQ),
 		offset + vector3(0,  2 * length, 0):rotate(api.virtualFrame.orientationQ),
 		essential
 	)
-	api.debug.drawArrow("green",
+	api.debug.drawArrow(virtualColor,
 		offset + vector3(0, 0, -1 * length):rotate(api.virtualFrame.orientationQ),
 		offset + vector3(0, 0,  1 * length):rotate(api.virtualFrame.orientationQ),
 		essential
 	)
 
-	api.debug.drawArrow("blue",
+	api.debug.drawArrow(bodyColor,
 		upOffset + vector3(-1 * length, 0, 0),
 		upOffset + vector3( 3 * length, 0, 0),
 		essential
 	)
-	api.debug.drawArrow("blue",
+	api.debug.drawArrow(bodyColor,
 		upOffset + vector3(0, -1 * length, 0),
 		upOffset + vector3(0,  2 * length, 0),
 		essential
 	)
-	api.debug.drawArrow("blue",
+	api.debug.drawArrow(bodyColor,
 		upOffset + vector3(0, 0, -1 * length),
 		upOffset + vector3(0, 0,  1 * length),
 		essential
