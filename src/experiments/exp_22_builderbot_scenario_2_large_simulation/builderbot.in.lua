@@ -79,6 +79,8 @@ function reset()
 
 	vns.Parameters.dangerzone_pipuck = 0.40
 	vns.Parameters.dangerzone_block = 0.40
+
+	api.debug.recordSwitch = true
 end
 
 function step()

@@ -90,7 +90,7 @@ parameters = {
 
     "obstacle_unseen_count" : 0,
 
-    "safezone_pipuck_pipuck" : 2.0,
+    "safezone_pipuck_pipuck" : 3.0,
 
     "line_block_type"      :  34,
     "obstacle_block_type"  :  33,

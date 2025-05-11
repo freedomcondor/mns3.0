@@ -6,55 +6,75 @@ import sys
 import getopt
 import os
 
-# start to draw
+# Get experiment type
+#--------------------------------------
+usage="[usage] example: python3 xxx.py -t no_builderbot"
+try:
+    optlist, args = getopt.getopt(sys.argv[1:], "t:h")
+except:
+    print("[error] unexpected opts")
+    print(usage)
+    sys.exit(0)
+
+Experiment_type = None
+for opt, value in optlist:
+    if opt == "-t":
+        Experiment_type = value
+        print("Experiment_type provided: ", Experiment_type)
+if Experiment_type == None :
+    Experiment_type = "no_builderbot"
+    print("Experiment_type not provided: using default", Experiment_type)
+
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_22_builderbot_scenario_2_large_simulation"
+DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
+
+# check experiment type existence
+#--------------------------------------
+if not os.path.isdir(DATADIR) :
+    print("Data folder doesn't exist : ", DATADIR)
+    print("Existing Datafolder are : ")
+    for subfolder in getSubfolders(ExperimentsDIR) :
+        print("    " + subfolder)
+    exit()
+
+# create figure and ax
 #--------------------------------------
 fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
+ax2 = ax1.twinx()  # 创建第二个Y轴
 
-ax_SoNS_number = fig.add_subplot(2,2,1)
-ax_SoNS_number.set_xlabel("time(step)")
-ax_SoNS_number.set_ylabel("SoNS Number")
+# read data sets
+#--------------------------------------
+dataSet1 = []
+dataSet2 = []
+for subfolder in getSubfolders(DATADIR) :
+    dataSet1.append(readDataFrom(subfolder + "result_push_size.dat"))
+    dataSet2.append(readDataFrom(subfolder + "learner_length.dat"))
 
-#ax_SoNS_number.set_ylim([-0.7, 13])
-data_SoNS_number = readDataFrom("SoNSNumber.dat")
-drawDataInSubplot(data_SoNS_number, ax_SoNS_number)
-data_SoNS_size = readDataFrom("SoNSSize.dat")
-drawDataInSubplot(data_SoNS_size, ax_SoNS_number)
+step_time_scalar = 5
+#----- data1 -----
+stepsData1, X1 = transferTimeDataToRunSetData(dataSet1)
+mean1, mini1, maxi1, upper1, lower1 = calcMeanFromStepsData(stepsData1)
+X1 = [i / step_time_scalar for i in X1]
+drawShadedLinesInSubplot(X1, mean1, maxi1, mini1, upper1, lower1, ax2, {'color':'blue'})
 
-#--------------------------------------------
-ax_state = fig.add_subplot(2,2,2)
-ax_state.set_xlabel("time(step)")
-ax_state.set_ylabel("Robot Number in Different States")
+#----- data2 -----
+stepsData2, X2 = transferTimeDataToRunSetData(dataSet2)
+mean2, mini2, maxi2, upper2, lower2 = calcMeanFromStepsData(stepsData2)
+X2 = [i / step_time_scalar for i in X2]
+drawShadedLinesInSubplot(X2, mean2, maxi2, mini2, upper2, lower2, ax1, {'color':'red'})
 
-state1 = readDataFrom("result_wait_to_forward_size.dat")
-drawDataInSubplot(state1, ax_state)
-state2 = readDataFrom("result_forward_size.dat")
-drawDataInSubplot(state2, ax_state)
-state3 = readDataFrom("result_wait_to_forward_2_size.dat")
-drawDataInSubplot(state3, ax_state)
-state4 = readDataFrom("result_forward_2_size.dat")
-drawDataInSubplot(state4, ax_state)
-state5 = readDataFrom("result_wait_for_obstacle_clearance_size.dat")
-drawDataInSubplot(state5, ax_state)
-state6 = readDataFrom("result_push_size.dat")
-drawDataInSubplot(state6, ax_state)
+# 设置标签和图例
+ax1.set_xlabel('Time')
+ax1.set_ylabel('Learner Length', color='red')
+ax2.set_ylabel('Push Size', color='blue')
 
-#--------------------------------------------
-ax_recruit = fig.add_subplot(2,2,3)
-ax_recruit.set_xlabel("time(step)")
-ax_recruit.set_ylabel("Robot Number in recruitment")
+# set ax2 limit
+ax1.set_ylim([-1,1000])
 
-recruit_data = transposeData(readVecFrom("recruit.dat"))
-drawDataInSubplot(recruit_data[0], ax_recruit)
-drawDataInSubplot(recruit_data[1], ax_recruit)
-drawDataInSubplot(recruit_data[2], ax_recruit)
+# 设置刻度颜色
+ax1.tick_params(axis='y', labelcolor='red')
+ax2.tick_params(axis='y', labelcolor='blue')
 
-#--------------------------------------------
-ax_learner = fig.add_subplot(2,2,4)
-ax_learner.set_xlabel("time(step)")
-ax_learner.set_ylabel("Leaner Length")
-
-drawDataInSubplot(readDataFrom("learner_length.dat"), ax_learner)
-
-#--------------------------------------------
 plt.show()
-#plt.savefig("exp_11_plot_" + Experiment_type + ".pdf")
+#plt.savefig("exp21_plot_" + Experiment_type + ".pdf")

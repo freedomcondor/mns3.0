@@ -61,6 +61,8 @@ function reset()
 		connector_recruit_only_necessary = gene.children,
 		navigation_node_post_core = create_navigation_node(vns),
 	}))
+
+	api.debug.recordSwitch = true
 end
 
 function step()

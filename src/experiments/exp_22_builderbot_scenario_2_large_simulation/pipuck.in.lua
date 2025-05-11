@@ -78,6 +78,8 @@ function reset()
 	state = "wait_to_forward"
 
 	setup_push_node(vns)
+
+	api.debug.recordSwitch = true
 end
 
 function step()
@@ -301,10 +303,11 @@ return function()
 				--vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
 				break
 			end end
-			vns.Spreader.emergency_after_core(vns, vector3(0.03, left_right_speed, 0), vector3())
 
-			-- if see obstacle
 			if reference ~= nil then
+				vns.Spreader.emergency_after_core(vns, vector3(0.03, left_right_speed, 0), vector3())
+
+				-- if see obstacle
 				local obstacle_existance = false
 				for id, block in pairs(vns.collectivesensor.totalBlocksList) do
 					if block.type == obstacle_block_type and
@@ -352,7 +355,7 @@ return function()
 				state = "wait_for_obstacle_clearance"
 			end
 		end
-elseif state == "wait_for_obstacle_clearance" then
+	elseif state == "wait_for_obstacle_clearance" then
 		-- stop moving
 		vns.setGoal(vns, vector3(), quaternion())
 		vns.goal.transV3 = vector3()

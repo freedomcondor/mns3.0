@@ -27,6 +27,6 @@ logReader.saveStateSize(robotsData, "push", "result_push_size.dat")
 logReader.saveLearnerLength(robotsData, "learner_length.dat")
 
 -- read recruit logs
-recruitRobotsData = recruitLogReader.loadData("logs_recruit")
-recruitResultData = recruitLogReader.sumData(recruitRobotsData)
-recruitLogReader.saveData(recruitResultData, "recruit.dat")
+--recruitRobotsData = recruitLogReader.loadData("logs_recruit")
+--recruitResultData = recruitLogReader.sumData(recruitRobotsData)
+--recruitLogReader.saveData(recruitResultData, "recruit.dat")
