@@ -41,7 +41,7 @@ if not os.path.isdir(DATADIR) :
 #--------------------------------------
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
-ax2 = ax1.twinx()  # 创建第二个Y轴
+ax2 = ax1.twinx()  # create a second y-axis
 
 # read data sets
 #--------------------------------------

@@ -1,0 +1,89 @@
+drawDataFileName = "@CMAKE_SOURCE_DIR@/scripts/drawData.py"
+#execfile(drawDataFileName)
+exec(compile(open(drawDataFileName, "rb").read(), drawDataFileName, 'exec'))
+
+import sys
+import getopt
+import os
+
+# Get experiment type
+#--------------------------------------
+usage="[usage] example: python3 xxx.py -t no_builderbot"
+try:
+    optlist, args = getopt.getopt(sys.argv[1:], "t:h")
+except:
+    print("[error] unexpected opts")
+    print(usage)
+    sys.exit(0)
+
+Experiment_type = None
+for opt, value in optlist:
+    if opt == "-t":
+        Experiment_type = value
+        print("Experiment_type provided: ", Experiment_type)
+if Experiment_type == None :
+    Experiment_type = "no_builderbot"
+    print("Experiment_type not provided: using default", Experiment_type)
+
+ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_22_builderbot_scenario_2_large_simulation"
+
+# Process both experiment types
+#--------------------------------------
+experiment_types = ["no_builderbot", "builderbot"]
+fig = plt.figure(figsize=(10, 4))  # Make figure taller for two subplots
+
+for idx, exp_type in enumerate(experiment_types):
+    DATADIR = ExperimentsDIR + "/" + exp_type + "/run_data"
+    
+    # check experiment type existence
+    if not os.path.isdir(DATADIR):
+        print("Data folder doesn't exist : ", DATADIR)
+        print("Existing Datafolder are : ")
+        for subfolder in getSubfolders(ExperimentsDIR):
+            print("    " + subfolder)
+        continue
+
+    # create subplot and twin axis
+    ax1 = fig.add_subplot(2, 1, idx+1)
+    ax2 = ax1.twinx()
+
+    # read data sets
+    dataSet1 = []
+    dataSet2 = []
+    for subfolder in getSubfolders(DATADIR):
+        dataSet1.append(readDataFrom(subfolder + "result_push_size.dat"))
+        dataSet2.append(readDataFrom(subfolder + "learner_length.dat"))
+
+    step_time_scalar = 5
+    #----- data1 -----
+    stepsData1, X1 = transferTimeDataToRunSetData(dataSet1)
+    mean1, mini1, maxi1, upper1, lower1 = calcMeanFromStepsData(stepsData1)
+    X1 = [i / step_time_scalar for i in X1]
+    drawShadedLinesInSubplot(X1, mean1, maxi1, mini1, upper1, lower1, ax2, {'color':'blue'})
+
+    #----- data2 -----
+    stepsData2, X2 = transferTimeDataToRunSetData(dataSet2)
+    mean2, mini2, maxi2, upper2, lower2 = calcMeanFromStepsData(stepsData2)
+    X2 = [i / step_time_scalar for i in X2]
+    drawShadedLinesInSubplot(X2, mean2, maxi2, mini2, upper2, lower2, ax1, {'color':'red'})
+
+    # 设置标签和图例
+    ax1.set_xlabel('Time')
+    #ax1.set_ylabel('Learner Length', color='red')
+    #ax2.set_ylabel('Push Size', color='blue')
+    fig.text(0.04, 0.5, 'Code Transfer Amount', va='center', ha='center', rotation='vertical', color='red')
+    fig.text(0.96, 0.5, 'Robot Number in Pushing State', va='center', ha='center', rotation='vertical', color='blue')
+
+    # set ax1 limit
+    ax1.set_ylim([-1,200])
+
+    # 设置刻度颜色
+    ax1.tick_params(axis='y', labelcolor='red')
+    ax2.tick_params(axis='y', labelcolor='blue')
+
+    # Add title for each subplot
+    plt.title(f'Experiment Type: {exp_type}')
+
+plt.tight_layout()  # Adjust subplot spacing
+#plt.show()
+plt.savefig("exp22_plot_combined.pdf")
