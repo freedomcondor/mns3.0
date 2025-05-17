@@ -48,11 +48,22 @@ for idx, exp_type in enumerate(experiment_types):
     ax2 = ax1.twinx()
 
     # read data sets for first subplot
-    dataSet1 = []
-    dataSet2 = []
+    dataSet1 = []  # for push size
+    dataSet2 = []  # for learner length
+
+    #dataSet10 = [] # for robots think there are 0 blocks
+    dataSet11 = [] # for robots think there are 1 blocks
+    dataSet12 = [] # for robots think there are 2 blocks
+    dataSet13 = [] # for robots think there are 3 blocks
+
     for subfolder in getSubfolders(DATADIR):
         dataSet1.append(readDataFrom(subfolder + "start_push_size.dat"))
         dataSet2.append(readDataFrom(subfolder + "learner_length.dat"))
+
+        #dataSet10.append(readDataFrom(subfolder + "consensus_0_size.dat"))
+        dataSet11.append(readDataFrom(subfolder + "consensus_1_size.dat"))
+        dataSet12.append(readDataFrom(subfolder + "consensus_2_size.dat"))
+        dataSet13.append(readDataFrom(subfolder + "consensus_3_size.dat"))
 
     step_time_scalar = 5
     #----- data1 -----
@@ -66,6 +77,32 @@ for idx, exp_type in enumerate(experiment_types):
     mean2, mini2, maxi2, upper2, lower2 = calcMeanFromStepsData(stepsData2)
     X2 = [i / step_time_scalar for i in X2]
     drawShadedLinesInSubplot(X2, mean2, maxi2, mini2, upper2, lower2, ax1, {'color':'red'})
+
+    #----- data10 ----- 0 blocks
+    '''
+    stepsData10, X10 = transferTimeDataToRunSetData(dataSet10)
+    mean10, mini10, maxi10, upper10, lower10 = calcMeanFromStepsData(stepsData10)
+    X10 = [i / step_time_scalar for i in X10]
+    drawShadedLinesInSubplot(X10, mean10, maxi10, mini10, upper10, lower10, ax2, {'color':'orange'})
+    '''
+
+    #----- data10 ----- 1 blocks
+    stepsData11, X11 = transferTimeDataToRunSetData(dataSet11)
+    mean11, mini11, maxi11, upper11, lower11 = calcMeanFromStepsData(stepsData11)
+    X11 = [i / step_time_scalar for i in X11]
+    drawShadedLinesInSubplot(X11, mean11, maxi11, mini11, upper11, lower11, ax2, {'color':'green'})
+
+    #----- data10 ----- 2 blocks
+    stepsData12, X12 = transferTimeDataToRunSetData(dataSet12)
+    mean12, mini12, maxi12, upper12, lower12 = calcMeanFromStepsData(stepsData12)
+    X12 = [i / step_time_scalar for i in X12]
+    drawShadedLinesInSubplot(X12, mean12, maxi12, mini12, upper12, lower12, ax2, {'color':'yellow'})
+
+    #----- data13 ----- 3 blocks
+    stepsData13, X13 = transferTimeDataToRunSetData(dataSet13)
+    mean13, mini13, maxi13, upper13, lower13 = calcMeanFromStepsData(stepsData13)
+    X13 = [i / step_time_scalar for i in X13]
+    drawShadedLinesInSubplot(X13, mean13, maxi13, mini13, upper13, lower13, ax2, {'color':'purple'})
 
     # Second subplot - new data
     ax3 = fig.add_subplot(4, 1, idx*2+2)
