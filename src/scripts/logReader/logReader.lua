@@ -303,6 +303,40 @@ function logReader.saveAverageSoNSSize(robotsData, saveFile, startStep, endStep)
 	print("save average SoNS size finish")
 end
 
+function logReader.saveMaxSoNSSize(robotsData, saveFile, startStep, endStep)
+	-- fill start and end if not provided
+	if startStep == nil then startStep = 1 end
+	if endStep == nil then
+		endStep = logReader.getEndStep(robotsData)
+	end
+
+	local f = io.open(saveFile, "w")
+	for step = startStep, endStep do
+		-- put all brain to brainIndex
+		local brainIndex = {}
+		for robotName, robotData in pairs(robotsData) do
+			if robotData[step].failed == nil then
+				local brainID = robotData[step].brainID
+				if brainIndex[brainID] == nil then
+					brainIndex[brainID] = 1
+				else
+					brainIndex[brainID] = brainIndex[brainID] + 1
+				end
+			end
+		end
+		-- max brainIndex
+		local max = 0
+		for brainID, value in pairs(brainIndex) do
+			if max < value then
+				max = value
+			end
+		end
+		f:write(tostring(max).."\n")
+	end
+	io.close(f)
+	print("save max SoNS size finish")
+end
+
 function logReader.saveLearnerLength(robotsData, saveFile, startStep, endStep)
 	-- fill start and end if not provided
 	if startStep == nil then startStep = 1 end

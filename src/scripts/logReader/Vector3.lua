@@ -183,5 +183,9 @@ function Vector3:rotatedby(q)
 	end
 end
 
+function Vector3:rotate(q)
+	return self:rotatedby(q)
+end
+
 
 return Vector3

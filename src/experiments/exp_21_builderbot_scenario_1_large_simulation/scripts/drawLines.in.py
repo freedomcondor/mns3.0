@@ -40,16 +40,23 @@ if not os.path.isdir(DATADIR) :
 # create figure and ax
 #--------------------------------------
 fig = plt.figure()
-ax1 = fig.add_subplot(1,1,1)
+ax1 = fig.add_subplot(2,1,1)
 ax2 = ax1.twinx()  # create a second y-axis
+
+ax3 = fig.add_subplot(2,1,2)
+ax4 = ax3.twinx()  # create a second y-axis
 
 # read data sets
 #--------------------------------------
 dataSet1 = []
 dataSet2 = []
+dataSet3 = []
+dataSet4 = []
 for subfolder in getSubfolders(DATADIR) :
     dataSet1.append(readDataFrom(subfolder + "start_push_size.dat"))
     dataSet2.append(readDataFrom(subfolder + "learner_length.dat"))
+    dataSet3.append(readDataFrom(subfolder + "result_data.txt"))
+    dataSet4.append(readDataFrom(subfolder + "SoNSSize.dat"))
 
 step_time_scalar = 5
 #----- data1 -----
@@ -63,6 +70,18 @@ stepsData2, X2 = transferTimeDataToRunSetData(dataSet2)
 mean2, mini2, maxi2, upper2, lower2 = calcMeanFromStepsData(stepsData2)
 X2 = [i / step_time_scalar for i in X2]
 drawShadedLinesInSubplot(X2, mean2, maxi2, mini2, upper2, lower2, ax1, {'color':'red'})
+
+#----- data3 -----
+stepsData3, X3 = transferTimeDataToRunSetData(dataSet3)
+mean3, mini3, maxi3, upper3, lower3 = calcMeanFromStepsData(stepsData3)
+X3 = [i / step_time_scalar for i in X3]
+drawShadedLinesInSubplot(X3, mean3, maxi3, mini3, upper3, lower3, ax3, {'color':'blue'})
+
+#----- data4 -----
+stepsData4, X4 = transferTimeDataToRunSetData(dataSet4)
+mean4, mini4, maxi4, upper4, lower4 = calcMeanFromStepsData(stepsData4)
+X4 = [i / step_time_scalar for i in X4]
+drawShadedLinesInSubplot(X4, mean4, maxi4, mini4, upper4, lower4, ax4, {'color':'red'})
 
 # 设置标签和图例
 ax1.set_xlabel('Time')

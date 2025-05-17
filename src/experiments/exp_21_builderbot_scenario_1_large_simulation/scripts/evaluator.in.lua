@@ -14,8 +14,25 @@ print("experiment type : ", experimentType)
 -- Read logs
 local robotsData = logReader.loadData("./logs", {"drone", "pipuck", "builderbot"})
 
+local structure1 = require("morphology1")
+local structure2 = require("morphology2")
+local structure3 = require("morphology3")
+local gene = {
+	robotTypeS = "pipuck",
+	positionV3 = vector3(),
+	orientationQ = quaternion(),
+	children = {
+		structure1,
+		structure2,
+		structure3,
+	}
+}
+local geneIndex = logReader.calcMorphID(gene)
+logReader.calcSegmentData(robotsData, geneIndex)
+logReader.saveData(robotsData, "result_data.txt", "error")
+
 logReader.saveSoNSNumber(robotsData, "SoNSNumber.dat")
-logReader.saveAverageSoNSSize(robotsData, "SoNSSize.dat")
+logReader.saveMaxSoNSSize(robotsData, "SoNSSize.dat")
 
 logReader.saveStateSize(robotsData, "consensus_0", "consensus_0_size.dat")
 logReader.saveStateSize(robotsData, "consensus_1", "consensus_1_size.dat")
