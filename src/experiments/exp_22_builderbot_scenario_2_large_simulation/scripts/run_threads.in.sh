@@ -8,7 +8,7 @@ experiment_type=$1
 declare -A index
 index=(\
 #                     exp length    argos threads    run per thread   threads
-	[no_builderbot]=' 8000              2                 1              20'      \
+	[no_builderbot]=' 10000             2                 1              20'      \
 	[builderbot]='    10000             2                 1              20'      \
 )
 

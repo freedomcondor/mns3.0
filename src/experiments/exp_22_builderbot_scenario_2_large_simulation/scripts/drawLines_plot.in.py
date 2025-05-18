@@ -30,7 +30,7 @@ ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_22_builderbot_scenario_2_large_simul
 # Process both experiment types
 #--------------------------------------
 experiment_types = ["no_builderbot", "builderbot"]
-fig = plt.figure(figsize=(10, 4))  # Make figure taller for two subplots
+fig = plt.figure(figsize=(10, 8))  # Make figure taller for four subplots
 
 for idx, exp_type in enumerate(experiment_types):
     DATADIR = ExperimentsDIR + "/" + exp_type + "/run_data"
@@ -43,11 +43,11 @@ for idx, exp_type in enumerate(experiment_types):
             print("    " + subfolder)
         continue
 
-    # create subplot and twin axis
-    ax1 = fig.add_subplot(2, 1, idx+1)
+    # First subplot - original data
+    ax1 = fig.add_subplot(4, 1, idx*2+1)
     ax2 = ax1.twinx()
 
-    # read data sets
+    # read data sets for first subplot
     dataSet1 = []
     dataSet2 = []
     for subfolder in getSubfolders(DATADIR):
@@ -67,23 +67,54 @@ for idx, exp_type in enumerate(experiment_types):
     X2 = [i / step_time_scalar for i in X2]
     drawShadedLinesInSubplot(X2, mean2, maxi2, mini2, upper2, lower2, ax1, {'color':'red'})
 
-    # 设置标签和图例
-    ax1.set_xlabel('Time')
-    #ax1.set_ylabel('Learner Length', color='red')
-    #ax2.set_ylabel('Push Size', color='blue')
-    fig.text(0.04, 0.5, 'Code Transfer Amount', va='center', ha='center', rotation='vertical', color='red')
-    fig.text(0.96, 0.5, 'Robot Number in Pushing State', va='center', ha='center', rotation='vertical', color='blue')
+    # Second subplot - error data
+    ax3 = fig.add_subplot(4, 1, idx*2+2)
+    ax4 = ax3.twinx()
 
-    # set ax1 limit
+    # read data sets for error analysis
+    dataSet3 = []
+    dataSet4 = []
+    for subfolder in getSubfolders(DATADIR):
+        dataSet3.append(readDataFrom(subfolder + "non_push_average_error.dat"))
+        dataSet4.append(readDataFrom(subfolder + "push_average_error.dat"))
+
+    #----- data3 -----
+    stepsData3, X3 = transferTimeDataToRunSetData(dataSet3)
+    mean3, mini3, maxi3, upper3, lower3 = calcMeanFromStepsData(stepsData3)
+    X3 = [i / step_time_scalar for i in X3]
+    drawShadedLinesInSubplot(X3, mean3, maxi3, mini3, upper3, lower3, ax3, {'color':'red'})
+
+    #----- data4 -----
+    stepsData4, X4 = transferTimeDataToRunSetData(dataSet4)
+    mean4, mini4, maxi4, upper4, lower4 = calcMeanFromStepsData(stepsData4)
+    X4 = [i / step_time_scalar for i in X4]
+    drawShadedLinesInSubplot(X4, mean4, maxi4, mini4, upper4, lower4, ax4, {'color':'blue'})
+
+    # Set labels for both subplots
+    ax1.set_xlabel('Time(s)')
+    ax3.set_xlabel('Time(s)')
+    
+    # Set limits
     ax1.set_ylim([-1,200])
-
-    # 设置刻度颜色
+    ax2.set_ylim([-1,8])
+    ax2.yaxis.set_major_locator(plt.MultipleLocator(1))
+    ax3.set_ylim([-0.3,3])
+    ax4.set_ylim([-0.3,3])
+    
+    # Set colors
     ax1.tick_params(axis='y', labelcolor='red')
     ax2.tick_params(axis='y', labelcolor='blue')
+    ax3.tick_params(axis='y', labelcolor='red')
+    ax4.tick_params(axis='y', labelcolor='blue')
 
-    # Add title for each subplot
-    plt.title(f'Experiment Type: {exp_type}')
+    # Add titles
+    ax1.set_title(f'Experiment Type: {exp_type} - Push Size vs Learner Length')
+    ax3.set_title(f'Experiment Type: {exp_type} - Push vs Non-Push Error')
 
-plt.tight_layout()  # Adjust subplot spacing
+# Add shared y-axis labels
+fig.text(0.04, 0.5, 'Code Transfer Amount / Non-Push Error', va='center', ha='center', rotation='vertical', color='red')
+fig.text(0.96, 0.5, 'Robot Number in Pushing State / Push Error', va='center', ha='center', rotation='vertical', color='blue')
+
+plt.tight_layout()
 #plt.show()
 plt.savefig("exp22_plot_combined.pdf")

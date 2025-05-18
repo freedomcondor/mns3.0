@@ -104,7 +104,11 @@ function step()
 	if state == "consensus" then
 		vns.state = state .. "_" .. type_number_in_memory
 	end
+
+	local tmp = vector3(vns.goal.positionV3)
+	vns.goal.positionV3 = vns.goal_position_backup
 	vns.logLoopFunctionInfo(vns)
+	vns.goal.positionV3 = tmp
 
 	RecruitLogger:step(vns.Msg.waitToSend)
 
@@ -142,6 +146,7 @@ function create_navigation_node(vns)
 	end
 
 return function()
+	vns.goal_position_backup = vector3(vns.goal.positionV3)
 	stateCount = stateCount + 1
 	-- if I receive switch state cmd from parent
 	if vns.parentR ~= nil then for _, msgM in ipairs(vns.Msg.getAM(vns.parentR.idS, "switch_to_state")) do
