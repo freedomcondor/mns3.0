@@ -7,51 +7,91 @@ logger.register("main")
 pairs = require("AlphaPairs")
 local api = require("droneAPI")
 local VNS = require("VNS")
-local BT = require("DynamicBehaviorTree")
-
-local socket = require("socket")
-local client = socket.tcp()
-client:settimeout(0.2)
-client_connected = nil
+local BT = require("BehaviorTree")
 
 -- datas ----------------
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
 
-local structure = require("morphology")
-local gene = {
-	robotTypeS = "pipuck",
-	positionV3 = vector3(),
-	orientationQ = quaternion(),
-	children = {
-		structure,
-	}
-}
+require("morphologyGenerateCube")
+require("screenGenerator")
+require("trussGenerator")
+
+local structure
+if robot.params.structure == "polyhedron_12" then
+	structure = require("morphology_polyhedron_12")
+elseif robot.params.structure == "polyhedron_20" then
+	structure = require("morphology_polyhedron_20")
+elseif robot.params.structure == "cube_27" then
+	structure = generate_cube_morphology(27)
+elseif robot.params.structure == "cube_64" then
+	structure = generate_cube_morphology(64)
+elseif robot.params.structure == "cube_125" then
+	structure = generate_cube_morphology(125)
+elseif robot.params.structure == "screen_64" then
+	structure = generate_screen_square(8)
+elseif robot.params.structure == "donut_48" then
+	nodes = 48 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif robot.params.structure == "donut_64" then
+	nodes = 64 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif robot.params.structure == "donut_80" then
+	nodes = 80 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5,0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+-- demo
+elseif robot.params.structure == "cube_216" then
+	structure = generate_cube_morphology(216)
+elseif robot.params.structure == "cube_512" then
+	structure = generate_cube_morphology(512)
+elseif robot.params.structure == "cube_1000" then
+	structure = generate_cube_morphology(1000)
+end
 
 function init()
 	api.linkRobotInterface(VNS)
-	api.init() 
+	api.init()
+	api.debug.recordSwitch = true
 	vns = VNS.create("drone")
 	reset()
 
---	api.debug.show_all = true
-	api.debug.recordSwitch = true
+	number = tonumber(string.match(robot.id, "%d+"))
+	local baseHeight = 8
+	local distribute_scale = 4
+	local layers = 5
+	if robot.params.structure == "cube_512" then
+		baseHeight = 30
+		distribute_scale = 8
+	end
+	if robot.params.structure == "cube_1000" then
+		baseHeight = 50
+		distribute_scale = 5
+		layers = 10
+	end
+	for i = 1, layers do
+		if number % layers == (i % layers) then
+			api.parameters.droneDefaultStartHeight = baseHeight + (i - 1) * distribute_scale
+		end
+	end
+
+	api.debug.show_all = true
 end
 
 function reset()
 	vns.reset(vns)
-	if vns.idS == robot.params.stabilizer_preference_brain then vns.idN = 1 end
-	vns.setGene(vns, gene)
-	vns.setMorphology(vns, structure)
+	if vns.idS == "drone1" then vns.idN = 1 end
+	vns.setGene(vns, structure)
 
-	bt = BT.create(vns.create_vns_node(vns, {
-		connector_recruit_only_necessary = gene.children,
-		navigation_node_post_core = create_navigation_node(vns),
-	}))
+	bt = BT.create(vns.create_vns_node(vns,
+			{navigation_node_post_core = {type = "sequence", children = {
+				create_failsafe_node(vns),
+			}}}
+
+	))
 end
 
 function step()
-	logger(robot.id, api.stepCount, robot.system.time, "----------------------------")
+	--logger(robot.id, api.stepCount, "----------------------------")
 	api.preStep()
 	vns.preStep(vns)
 
@@ -59,73 +99,45 @@ function step()
 
 	vns.postStep(vns)
 	api.postStep()
-	api.debug.showVirtualFrame()
+	--api.debug.showVirtualFrame(true)
 	api.debug.showChildren(vns, {drawOrientation = false})
+
+
+	-- show morphology lines
+	local LED_zone = vns.Parameters.driver_arrive_zone * 2
+	if vns.goal.positionV3:length() < LED_zone then
+		api.debug.showMorphologyLines(vns, true)
+	end
 
 	vns.logLoopFunctionInfo(vns)
 end
-
-local log_file
 
 function destroy()
 	vns.destroy()
 	api.destroy()
 end
 
-function create_navigation_node(vns)
+function create_failsafe_node(vns)
 return function()
-	if vns.parentR == nil then
-		-- create a file log
-		if vns.api.stepCount == @CMAKE_DATA_START_STEP@ then
-			logger("creating log_file")
-			log_file = io.open("joystick.log", "w")
-			logger("log_file = ", log_file)
-			log_file:close()
-		end
-
-		-- connect to server
-		if client_connected == nil then
-			client_connected = client:connect("localhost", 8080)
-			print("trying to connect, client_connected = ", client_connected)
-		end
-
-		-- send velocity request to server
-		if client_connected ~= nil then
-			client:send("request_velocity " .. robot.id .. "\n")
-			local response, err = client:receive()
-			if not err then
-				print("receive from server: ", response)
-				local axis0_str, axis1_str = response:match("([^,]+),([^,]+)")
-				local axis0_raw = tonumber(axis0_str)
-				local axis1_raw = tonumber(axis1_str)
-
-				logger("log_file = ", log_file)
-				if log_file ~= nil then
-					local write_str = tostring(-axis1_raw) .. "," .. tostring(-axis0_raw)-- .. "\n"
-					os.execute("echo \"" .. write_str .. "\" >> joystick.log")
-				end
-
-				local range = 32767
-				x_input = - axis1_raw / range;
-				y_input = - axis0_raw / range;
-
-				local speed = 0.05
-
-				vns.Spreader.emergency_after_core(vns, vector3(x_input * speed, y_input * speed, 0), vector3())
-			else
-				print("receive from error: ", err)
-				if err == "closed" then
-					client:close()
-					client_connected = nil
-				end
+	-- fail safe
+	if vns.scalemanager.scale["drone"] == 1 and
+	   vns.api.actuator.flight_preparation.state == "navigation" then
+		if robot.params.structure == "donut_48" or
+		   robot.params.structure == "donut_64" then
+			if vns.brainkeeper ~= nil and vns.brainkeeper.parent ~= nil then
+				local target = vns.brainkeeper.parent.positionV3 + vector3(0,0,5)
+				vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
+			--else
+				--vns.Spreader.emergency_after_core(vns, vector3(0,0,0.1), vector3())
+			end
+		else
+			if vns.brainkeeper ~= nil and vns.brainkeeper.parent ~= nil then
+				local target = vns.brainkeeper.parent.positionV3 + vector3(0,0,5)
+				vns.Spreader.emergency_after_core(vns, target:normalize() * 0.5, vector3())
 			end
 		end
-
-		-- if obstacle in sight, align with it
-		if vns.avoider.obstacles[1] ~= nil then
-			vns.setGoal(vns, vns.goal.positionV3, vns.avoider.obstacles[1].orientationQ)
-		end
+		--end
+		return false, true
 	end
-
-	return false, true   -- do not go to forward node
+	
 end end

@@ -15,6 +15,8 @@
   <controllers>
     PIPUCK_CONTROLLER
     DRONE_CONTROLLER
+    BUILDERBOT_CONTROLLER
+    BLOCK_CONTROLLER
   </controllers>
 
   <!-- *********************** -->
@@ -24,17 +26,20 @@
     <floor id="floor" source="image" path="@CMAKE_BINARY_DIR@/floor_texture/grey_floor.png" />
     <!-- real scenario -->
     REAL_SCENARIO
-
     <!-- drones -->
     DRONES
     <!-- pipucks -->
     PIPUCKS
+    <!-- builderbots -->
+    BUILDERBOTS
     <!-- walls -->
     WALL 
     <!-- target -->
     TARGET
     <!-- random obstacles-->
     OBSTACLES
+    <!-- random blocks -->
+    BLOCKS
   </arena>
 
   <!-- Physics engines, Media, Loop functions and visualization -->

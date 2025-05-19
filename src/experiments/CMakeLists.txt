@@ -8,6 +8,7 @@ add_subdirectory(exp_06_formation_transfer)
 add_subdirectory(exp_11_builderbot_scenario_1)
 add_subdirectory(exp_12_builderbot_scenario_2)
 add_subdirectory(exp_13_builderbot_scenario_3)
+add_subdirectory(exp_14_builderbot_scenario_4)
 
 add_subdirectory(exp_21_builderbot_scenario_1_large_simulation)
 add_subdirectory(exp_22_builderbot_scenario_2_large_simulation)

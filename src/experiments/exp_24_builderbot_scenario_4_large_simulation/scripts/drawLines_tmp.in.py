@@ -28,7 +28,7 @@ if Experiment_type == None :
 ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
 DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
 
-# check experiment type existence
+# check experiment type
 #--------------------------------------
 if not os.path.isdir(DATADIR) :
     print("Data folder doesn't exist : ", DATADIR)
@@ -37,25 +37,22 @@ if not os.path.isdir(DATADIR) :
         print("    " + subfolder)
     exit()
 
-# create figure and ax
+# start to draw
 #--------------------------------------
-fig = plt.figure()
-ax_main = fig.add_subplot(1,1,1)
-ax_main.set_ylim([-1,23])
-
-# read data sets
-#--------------------------------------
-dataSet = []
-
+legend = []
 for subfolder in getSubfolders(DATADIR) :
-    dataSet.append(readDataFrom(subfolder + "result_data.txt"))
+    legend.append(subfolder)
+    data = readDataFrom(subfolder + "result_data.txt")
+    drawData(data)
 
-step_time_scalar = 5
-#----- data1 -----
-stepsData, X = transferTimeDataToRunSetData(dataSet)
-mean, mini, maxi, upper, lower = calcMeanFromStepsData(stepsData)
-X = [i / step_time_scalar for i in X]
-drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, ax_main, {'color':'blue'})
+    if data[1500] > 4 :
+        print(subfolder)
+#plt.legend(legend)
+'''
 
-#plt.show()
-plt.savefig("exp01_plot_" + Experiment_type + ".pdf")
+drawData(readDataFrom("result_data.txt"))
+drawData(readDataFrom("result_minimum_distances.txt"))
+'''
+
+plt.show()
+#plt.savefig("test.pdf")

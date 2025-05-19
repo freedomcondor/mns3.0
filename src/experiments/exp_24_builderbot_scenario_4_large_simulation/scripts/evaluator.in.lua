@@ -3,30 +3,50 @@ package.path = package.path .. ";@CMAKE_SOURCE_DIR@/core/utils/?.lua"
 package.path = package.path .. ";@CMAKE_CURRENT_BINARY_DIR@/../simu_code/?.lua"
 
 logger = require("Logger")
-local logReader = require("logReader")
+logReader = require("logReader")
 logger.enable()
 
--- Read logs
-local robotsData = logReader.loadData("./logs", {"drone", "pipuck"})
+local type = logReader.getFirstLineFromFile("type.txt")
+print("experiment type : ", type)
 
--- calculate average velocity
-local averageVelocity = {}
--- calculate swarm size
-local swarmSize = 0
-for robotName, robotData in pairs(robotsData) do
-	swarmSize = swarmSize + 1
+require("morphologyGenerateCube")
+require("screenGenerator")
+require("trussGenerator")
+local structure
+if type == "polyhedron_12" then
+	structure = require("morphology_polyhedron_12")
+elseif type == "polyhedron_20" then
+	structure = require("morphology_polyhedron_20")
+elseif type == "cube_27" then
+	structure = generate_cube_morphology(27)
+elseif type == "cube_64" then
+	structure = generate_cube_morphology(64)
+elseif type == "cube_125" then
+	structure = generate_cube_morphology(125)
+elseif type == "screen_64" then
+	structure = generate_screen_square(8)
+elseif type == "donut_48" then
+	nodes = 48 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif type == "donut_64" then
+	nodes = 64 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
+elseif type == "donut_80" then
+	nodes = 80 / 4
+	structure = create_horizontal_truss_chain(nodes, 5, vector3(5, 0,0), quaternion(2*math.pi/nodes, vector3(0,0,1)), vector3(), quaternion(), true)
 end
 
-local startStep = @CMAKE_DATA_START_STEP@
+local geneIndex = logReader.calcMorphID(structure)
 
-for i = startStep, logReader.getEndStep(robotsData) do
-	local sumVelocity = vector3()
-	for idS, robotData in pairs(robotsData) do
-		local deltaPosition = robotData[i].positionV3 - robotData[i-1].positionV3
-		sumVelocity = sumVelocity + deltaPosition
-	end
-	averageVelocity[i] = sumVelocity * (1 / swarmSize)
-	averageVelocity[i] = averageVelocity[i] / 0.2
-end
+local robotsData = logReader.loadData("./logs")
 
-logReader.savePlainData(averageVelocity, "average_velocity.log", startStep, endStep)
+local firstRecruitStep = logReader.calcFirstRecruitStep(robotsData)
+local saveStartStep = firstRecruitStep + 10
+print("firstRecruit happens", firstRecruitStep, "data start at", saveStartStep)
+
+logReader.calcSegmentData(robotsData, geneIndex)
+minimum_distances = logReader.calcMinimumDistances(robotsData)
+logReader.savePlainData(minimum_distances, "result_minimum_distances.txt", saveStartStep)
+
+logReader.saveData(robotsData, "result_data.txt", "error", saveStartStep)
+logReader.saveEachRobotData(robotsData, "result_each_robot_error", "error", saveStartStep)
