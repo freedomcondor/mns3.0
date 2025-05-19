@@ -151,7 +151,7 @@ return function()
 		elseif state == "forward" then
 			-- check obstacle existence
 			for id, block in ipairs(vns.avoider.blocks) do if block.type == obstacle_block_type then
-				if block.positionV3:length() < 0.5 then
+				if block.positionV3:length() < 1.0 then
 					switchAndSendNewState(vns, "meet_obstacle")
 				end
 			end end
@@ -181,9 +181,9 @@ return function()
 			end
 			if nearest_pipuck ~= nil then
 				local dir = vector3(nearest_pipuck.positionV3):normalize()
-				vns.Spreader.emergency_after_core(vns, dir * 0.01, vector3())
+				vns.Spreader.emergency_after_core(vns, dir * 0.03, vector3())
 			else
-				vns.Spreader.emergency_after_core(vns, vector3(0.02, 0, 0), vector3())
+				vns.Spreader.emergency_after_core(vns, vector3(0.03, 0, 0), vector3())
 			end
 		end
 	end
@@ -194,14 +194,27 @@ end end
 function setup_move_node(vns)
 	vns.learner.knowledges["move_forward"] = {hash = 1, rank = 1, node = [[
 	function()
-		-- align with reference
+		-- find the nearest block
+		local nearest_block = nil
+		local nearest_dis = math.huge
 		for id, block in ipairs(vns.avoider.blocks) do
-			vns.setGoal(vns, vector3(), block.orientationQ)
-			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
-			break
+			local dis = block.positionV3:length()
+			if dis < nearest_dis then
+				nearest_dis = dis
+				nearest_block = block
+			end
 		end
 
-		vns.Spreader.emergency_after_core(vns, vector3(0.03, 0, 0), vector3())
+		-- align with reference
+		if nearest_block ~= nil then
+			vns.setGoal(vns, vector3(), nearest_block.orientationQ)
+			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(nearest_block.positionV3), true)
+		end
+
+		if nearest_block == nil or
+		   nearest_block ~= nil and nearest_block.positionV3:length() > 1.0 then
+			vns.Spreader.emergency_after_core(vns, vector3(0.03, 0, 0), vector3())
+		end
 
 		return false, true
 	end
@@ -212,36 +225,44 @@ function setup_special_move_node(vns)
 	vns.learner.knowledges["move_forward"] = {hash = 2, rank = 2, node = [[
 	function()
 		print("special move node", robot.id)
-		-- align with reference
+
+		-- find the nearest block
+		local nearest_block = nil
+		local nearest_dis = math.huge
 		for id, block in ipairs(vns.avoider.blocks) do
-			vns.setGoal(vns, vector3(), block.orientationQ)
-			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
-			break
+			local dis = block.positionV3:length()
+			if dis < nearest_dis then
+				nearest_dis = dis
+				nearest_block = block
+			end
 		end
 
-		-- check block
-		local front_existence = false
-		for id, block in ipairs(vns.avoider.blocks) do if block.type == obstacle_block_type then
-			if block.positionV3.x > 0 and block.positionV3.y < 1.4 then
-				front_existence = true
-				break
-			end
-		end end
+		print("test1")
+		-- align with reference
+		if nearest_block ~= nil then
+			vns.setGoal(vns, vector3(), nearest_block.orientationQ)
+			vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(nearest_block.positionV3), true)
+		end
 
+		print("test2")
+		local front_existence = false
+		if nearest_block ~= nil then
+			if nearest_block.positionV3.x > 0 and nearest_block.positionV3.y > -1 and nearest_block.positionV3.y < 1 then
+				front_existence = true
+			end
+		end
+
+		print("test3")
 		if front_existence == true then
-			switchAndSendNewState(vns, "move_right")
-			vns.Spreader.emergency_after_core(vns, vector3(0, -0.020, 0), vector3())
+			switchAndSendNewState(vns, "move_left")
+			local veritcal_speed = (nearest_block.positionV3.x - 1) * 0.1
+			vns.Spreader.emergency_after_core(vns, vector3(veritcal_speed, 0.030, 0), vector3())
 		else
 			switchAndSendNewState(vns, "forward_2")
+		end
 
-			-- align with reference
-			for id, block in ipairs(vns.avoider.blocks) do
-				vns.setGoal(vns, vector3(), block.orientationQ)
-				vns.api.debug.drawArrow("red", vector3(0,0,0), vns.api.virtualFrame.V3_VtoR(block.positionV3), true)
-				break
-			end
-
-			vns.Spreader.emergency_after_core(vns, vector3(0.03, 0, 0), vector3())
+		if state == "forward_2" then
+			vns.Spreader.emergency_after_core(vns, vector3(0.02, 0, 0), vector3())
 		end
 
 		return false, true

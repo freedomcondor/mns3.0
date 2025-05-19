@@ -18,7 +18,7 @@ logReader.saveStateSize(robotsData, "meet_obstacle", "result_meet_obstacle_size.
 logReader.saveStateSize(robotsData, "send_help",     "result_send_help_size.dat")
 logReader.saveStateSize(robotsData, "wait_to_help",  "result_wait_to_help_size.dat")
 logReader.saveStateSize(robotsData, "helping",       "result_helping_size.dat")
-logReader.saveStateSize(robotsData, "move_right",    "result_move_right_size.dat")
+logReader.saveStateSize(robotsData, "move_left",     "result_move_left_size.dat")
 logReader.saveStateSize(robotsData, "forward_2",     "result_forward_2_size.dat")
 
 logReader.saveLearnerLength(robotsData, "learner_length.dat")

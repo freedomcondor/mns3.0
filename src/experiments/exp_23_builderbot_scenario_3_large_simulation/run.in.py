@@ -10,39 +10,32 @@ import math   # for pi sin cos
 arena_size = 50
 arena_z_center = 10
 
-n_drone = 3
+n_drone = 4
 drone_locations = generate_random_locations(
     n_drone,
     -2.5, 0,     # origin location
-    -5, -2,      # random x range
-    -2, 2,       # random y range
+    -5, -1,      # random x range
+    -1,  5,       # random y range
     0.7, 1.0,    # near limit and far limit
     10000        # attempt count
 )
 drone_xml = generate_drones(drone_locations, 1, 10)  # from label 1 generate drone xml tags, communication range 10
 
-n_pipuck = 5
+n_pipuck = 24
 pipuck_locations = generate_random_locations(
     n_pipuck,
     -2, 0,       # origin location
-    -5, -2,      # random x range
-    -2, 2,       # random y range
+    -5, -1,      # random x range
+    -1, 5,       # random y range
     0.3, 1.0,    # near limit and far limit
     10000        # attempt count
 )
 pipuck_xml = generate_pipucks(pipuck_locations, 1, 10)    # from label 1 generate drone xml tags, communication range 10
 
-pipuck_xml += generate_pipuck_xml(10, 0, -4.0, 90)
+pipuck_xml += generate_pipuck_xml(100, 0, -3.0, 90)
 
-block_xml = ""
-number = 20
-start = math.pi / 180 * 30
-end = math.pi / 180 * 150
-th = (end - start) / number
-L = 3
-for i in range(0, number) :
-    alpha = start + th * i
-    block_xml += generate_block_xml(i, 0 + L * math.sin(alpha), 0 + L * math.cos(alpha), 0, 34, False)
+border  = generate_line_locations(25, 3, -3, 3, 5)
+block_xml = generate_blocks(border, 101, 234)
 
 #line_length = 8
 #for i in range(0, line_length) :
@@ -53,24 +46,24 @@ parameters = {
     "drone_tag_detection_rate"  : 0.90,
     "drone_report_sight_rate"   : 0.9,
     "drone_default_height" : 2.5,
+    "dangerzone_drone"   :   1.0,
 
     "mode_2D"            :  "true",
     "mode_builderbot"    :  "true",
 
-    "pipuck_label"       :  "1, 10",
-    "builderbot_label"   :  "11, 15",
-    "block_label"        :  "30, 34",
+    "pipuck_label"       :  "1, 100",
+    "block_label"        :  "230, 234",
 
     "avoid_block_vortex"   :  "nil",
 #    "avoid_speed_scalar"   :  0.20,
 
-    "obstacle_block_type" :  34,
-    "reference_block_type" :  32,
+    "obstacle_block_type" :  234,
+    "reference_block_type" : 232,
 
     "obstacle_unseen_count" : 0,
 
     "stabilizer_preference_brain"  : "pipuck1",
-    "special_pipuck"               :  "pipuck10",
+    "special_pipuck"               :  "pipuck100",
 }
 
 parameters_txt = generateParametersText(parameters)
@@ -91,7 +84,7 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
         ["BLOCKS",            block_xml], 
         ["DRONE_CONTROLLER", generate_drone_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/drone.lua"
-        ''' + parameters_txt, {"show_frustum":False, "show_tag_rays":True})],
+        ''' + parameters_txt, {"show_frustum":False, "show_tag_rays":False})],
         ["PIPUCK_CONTROLLER", generate_pipuck_controller('''
               script="@CMAKE_CURRENT_BINARY_DIR@/simu_code/pipuck.lua"
         ''' + parameters_txt)],
