@@ -9,6 +9,11 @@ local api = require("droneAPI")
 local VNS = require("VNS")
 local BT = require("BehaviorTree")
 
+local socket = require("socket")
+local client = socket.tcp()
+client:settimeout(0.2)
+client_connected = nil
+
 -- datas ----------------
 local bt
 --local vns  -- global vns to make vns appear in lua_editor
@@ -85,6 +90,7 @@ function reset()
 	bt = BT.create(vns.create_vns_node(vns,
 			{navigation_node_post_core = {type = "sequence", children = {
 				create_failsafe_node(vns),
+				create_navigation_node(vns),
 			}}}
 
 	))
@@ -115,6 +121,9 @@ end
 function destroy()
 	vns.destroy()
 	api.destroy()
+	if robot.id == "drone1" then
+		os.execute("killall joystick_exp24")
+	end
 end
 
 function create_failsafe_node(vns)
@@ -140,4 +149,63 @@ return function()
 		return false, true
 	end
 	
+end end
+
+function create_navigation_node(vns)
+return function()
+	if vns.parentR == nil then
+		-- create a file log
+		if vns.api.stepCount == @CMAKE_DATA_START_STEP@ then
+			logger("creating log_file")
+			log_file = io.open("joystick.log", "w")
+			logger("log_file = ", log_file)
+			log_file:close()
+		end
+
+		-- connect to server
+		if client_connected == nil then
+			client_connected = client:connect("localhost", 8080)
+			print("trying to connect, client_connected = ", client_connected)
+		end
+
+		-- send velocity request to server
+		if client_connected ~= nil and vns.api.stepCount >= @CMAKE_DATA_START_STEP@ then
+			client:send(tostring(vns.api.stepCount) .. "\n")
+			local response, err = client:receive()
+			if not err then
+				print("receive from server: ", response)
+				local axis0_str, axis1_str, axis2_str = response:match("([^,]+),([^,]+),([^,]+)")
+				local axis0_raw = tonumber(axis0_str)
+				local axis1_raw = tonumber(axis1_str)
+				local axis2_raw = tonumber(axis2_str)
+
+				if log_file ~= nil then
+					local write_str = tostring(-axis1_raw) .. "," .. tostring(-axis0_raw) .. "," .. tostring(axis2_raw) -- .. "\n"
+					os.execute("echo \"" .. write_str .. "\" >> joystick.log")
+				end
+
+				local range = 32767
+				x_input = - axis1_raw / range;
+				y_input = - axis0_raw / range;
+				z_input =   axis2_raw / range;
+
+				local speed = 1
+
+				vns.Spreader.emergency_after_core(vns, vector3(x_input * speed, y_input * speed, z_input * speed), vector3())
+			else
+				print("receive from error: ", err)
+				if err == "closed" then
+					client:close()
+					client_connected = nil
+				end
+			end
+		end
+
+		-- if obstacle in sight, align with it
+		if vns.avoider.obstacles[1] ~= nil then
+			vns.setGoal(vns, vns.goal.positionV3, vns.avoider.obstacles[1].orientationQ)
+		end
+	end
+
+	return false, true   -- do not go to forward node
 end end

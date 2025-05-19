@@ -9,7 +9,7 @@ for opt, value in optlist:
         Experiment_type = value
         print("Experiment_type provided: ", Experiment_type)
 if Experiment_type == None :
-    Experiment_type = "polyhedron_12"
+    Experiment_type = "joystick_record_1.dat"
     print("Experiment_type not provided: using default", Experiment_type)
 
 import os
@@ -31,7 +31,7 @@ n_drone_index = {
     "cube_1000"     :  1000,
 }
 
-structure = Experiment_type
+structure = "cube_64" 
 if structure not in n_drone_index :
     print("wrong experiment type provided, please choose among : ")
     for key in n_drone_index :
@@ -97,5 +97,4 @@ generate_argos_file("@CMAKE_CURRENT_BINARY_DIR@/simu_code/vns_template.argos",
 )
 
 os.system("echo " + structure + "> type.txt")
-os.system("argos3 -c vns.argos" + VisualizationArgosFlag)
-
+os.system("@CMAKE_CURRENT_BINARY_DIR@/scripts/joystick_exp24 @CMAKE_BINARY_DIR@/" + Experiment_type + " & argos3 -c vns.argos" + VisualizationArgosFlag)

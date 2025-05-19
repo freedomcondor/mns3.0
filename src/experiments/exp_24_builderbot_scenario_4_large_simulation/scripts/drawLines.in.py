@@ -6,56 +6,34 @@ import sys
 import getopt
 import os
 
-# Get experiment type
-#--------------------------------------
-usage="[usage] example: python3 xxx.py -t polyhedron_12"
-try:
-    optlist, args = getopt.getopt(sys.argv[1:], "t:h")
-except:
-    print("[error] unexpected opts")
-    print(usage)
-    sys.exit(0)
-
-Experiment_type = None
-for opt, value in optlist:
-    if opt == "-t":
-        Experiment_type = value
-        print("Experiment_type provided: ", Experiment_type)
-if Experiment_type == None :
-    Experiment_type = "polyhedron_12"
-    print("Experiment_type not provided: using default", Experiment_type)
-
-ExperimentsDIR = "@CMAKE_MNS_DATA_PATH@/exp_01_formation"
-DATADIR = ExperimentsDIR + "/" + Experiment_type + "/run_data"
-
-# check experiment type existence
-#--------------------------------------
-if not os.path.isdir(DATADIR) :
-    print("Data folder doesn't exist : ", DATADIR)
-    print("Existing Datafolder are : ")
-    for subfolder in getSubfolders(ExperimentsDIR) :
-        print("    " + subfolder)
-    exit()
-
-# create figure and ax
+# start to draw
 #--------------------------------------
 fig = plt.figure()
-ax_main = fig.add_subplot(1,1,1)
-ax_main.set_ylim([-1,23])
 
-# read data sets
+# joystick data
 #--------------------------------------
-dataSet = []
+ax_joystick = fig.add_subplot(2,1,1)
+ax_joystick.set_xlabel("time(step)")
+ax_joystick.set_ylabel("Joystick input")
 
-for subfolder in getSubfolders(DATADIR) :
-    dataSet.append(readDataFrom(subfolder + "result_data.txt"))
+#ax_joystick.set_ylim([-0.7, 13])
+joystick_data = transposeData(readMatrixDataFrom("joystick.log"))
+drawDataInSubplot(joystick_data[0], ax_joystick)
+drawDataInSubplot(joystick_data[1], ax_joystick)
+drawDataInSubplot(joystick_data[2], ax_joystick)
 
-step_time_scalar = 5
-#----- data1 -----
-stepsData, X = transferTimeDataToRunSetData(dataSet)
-mean, mini, maxi, upper, lower = calcMeanFromStepsData(stepsData)
-X = [i / step_time_scalar for i in X]
-drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, ax_main, {'color':'blue'})
+# average velocity data
+#--------------------------------------
+ax_joystick = fig.add_subplot(2,1,2)
+ax_joystick.set_xlabel("time(step)")
+ax_joystick.set_ylabel("Average Velocity")
 
-#plt.show()
-plt.savefig("exp01_plot_" + Experiment_type + ".pdf")
+#ax_joystick.set_ylim([-0.7, 13])
+average_velocity_data = transposeData(readVecFrom("average_velocity.log"))
+drawDataInSubplot(average_velocity_data[0], ax_joystick)
+drawDataInSubplot(average_velocity_data[1], ax_joystick)
+drawDataInSubplot(average_velocity_data[2], ax_joystick)
+
+#--------------------------------------------
+plt.show()
+#plt.savefig("exp_11_plot_" + Experiment_type + ".pdf")

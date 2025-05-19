@@ -1,3 +1,5 @@
+set(CMAKE_DATA_START_STEP 600)
+
 configure_file( vns_template.in.argos   simu_code/vns_template.argos)
 configure_file( drone.in.lua            simu_code/drone.lua)
 configure_file( run.in.py               simu_code/run.py)
