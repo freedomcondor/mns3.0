@@ -54,14 +54,16 @@ for subfolder in getSubfolders(DATADIR) :
 
 # start to draw
 #--------------------------------------
-fig = plt.figure()
+fig = plt.figure(figsize=(7, 4))
+gs = plt.GridSpec(1, 2, width_ratios=[6, 1])
 
-ax_main = fig.add_subplot(1,1,1)
+ax_main = fig.add_subplot(gs[0])
 ax_main.set_xlabel("time(s)")
 ax_main.set_ylabel("error(m)")
 ax_main.set_ylim([-0.7, 16.7])
-
-ax_3D = fig.add_subplot(3,4,4, projection='3d')
+ax_violin = fig.add_subplot(gs[1])
+ax_violin.set_ylim([-0.7, 16.7])
+ax_3D = fig.add_subplot(3,4,3, projection='3d')
 ax_3D.set_box_aspect((1,5,2))  # set block ratio
 ax_3D.set_facecolor('none')
 
@@ -105,5 +107,18 @@ data3Mean, mini, maxi, upper, lower = calcMeanFromStepsData(data3StepsData)
 drawRibbonDataInSubplot(data3Mean,     ax_3D, {'color':'blue',      'width'    :width,           'dataStart':len(data1StepsData) + len(data2LeftStepsData),     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
 X = [i / step_time_scalar for i in X]
 drawShadedLinesInSubplot(X, data3Mean, maxi, mini, upper, lower, ax_main, {'color':'blue', 'startPosition':(len(data1StepsData) + len(data2LeftStepsData))/step_time_scalar,     'leading':min(data2RightMean[-1],data2LeftMean[-1])})
+
+# Add violin plot after all data is processed
+all_data = []
+all_data.extend([item for sublist in data1Set for item in sublist])
+all_data.extend([item for sublist in data2lSet for item in sublist])
+all_data.extend([item for sublist in data2rSet for item in sublist])
+all_data.extend([item for sublist in data3Set for item in sublist])
+
+violin_parts = ax_violin.violinplot(all_data, positions=[0], showmeans=True)
+ax_violin.set_xticks([])
+violin_parts['bodies'][0].set_facecolor('blue')
+violin_parts['bodies'][0].set_alpha(0.3)
+violin_parts['cmeans'].set_color('blue')
 
 plt.savefig("exp03_plot_" + Experiment_type + ".pdf")

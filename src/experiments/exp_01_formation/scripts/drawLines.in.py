@@ -39,8 +39,10 @@ if not os.path.isdir(DATADIR) :
 
 # create figure and ax
 #--------------------------------------
-fig = plt.figure()
-ax_main = fig.add_subplot(1,1,1)
+fig = plt.figure(figsize=(10, 4))
+gs = plt.GridSpec(1, 2, width_ratios=[6, 1])
+ax_main = fig.add_subplot(gs[0])
+ax_violin = fig.add_subplot(gs[1])
 ax_main.set_ylim([-1,23])
 
 # read data sets
@@ -57,5 +59,20 @@ mean, mini, maxi, upper, lower = calcMeanFromStepsData(stepsData)
 X = [i / step_time_scalar for i in X]
 drawShadedLinesInSubplot(X, mean, maxi, mini, upper, lower, ax_main, {'color':'blue'})
 
-#plt.show()
+# Add violin plot
+#--------------------------------------
+all_data = []
+for run_data in dataSet:
+    all_data.extend(run_data)
+
+violin_parts = ax_violin.violinplot(all_data, positions=[0], showmeans=True)
+ax_violin.set_ylim([-1,23])  # match main plot y-axis
+ax_violin.set_xticks([])     # remove x ticks
+
+# Set violin plot colors
+violin_parts['bodies'][0].set_facecolor('blue')
+violin_parts['bodies'][0].set_alpha(0.3)
+violin_parts['cmeans'].set_color('blue')
+
+plt.tight_layout()
 plt.savefig("exp01_plot_" + Experiment_type + ".pdf")
